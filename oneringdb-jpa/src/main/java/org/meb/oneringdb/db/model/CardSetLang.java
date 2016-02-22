@@ -20,7 +20,6 @@ import lombok.ToString;
 @Table(name = "tb_card_set_l")
 public class CardSetLang implements ILang<CardSetBase> {
 
-	private String symbol;
 	private String name;
 	private String description;
 	private String recordState;

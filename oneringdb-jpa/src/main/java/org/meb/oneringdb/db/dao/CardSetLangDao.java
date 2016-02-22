@@ -40,11 +40,6 @@ public class CardSetLangDao {
 			predicates.add(cb.equal(cb.lower(root.get(CardSetLang_.name)), name.toLowerCase()));
 		}
 
-		String symbol = example.getSymbol();
-		if (StringUtils.isNotBlank(symbol)) {
-			predicates.add(cb.equal(cb.lower(root.get(CardSetLang_.symbol)), symbol.toLowerCase()));
-		}
-
 		String description = example.getDescription();
 		if (StringUtils.isNotBlank(description)) {
 			predicates.add(cb.equal(cb.lower(root.get(CardSetLang_.description)),
