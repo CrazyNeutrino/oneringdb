@@ -1,0 +1,9 @@
+<Context>
+	<ResourceLink global="ds/oneringdb_ds" name="ds/oneringdb_ds" type="javax.sql.DataSource" />
+
+	<Resource name="mail/Session" auth="Container" type="javax.mail.Session" />
+
+	<Resource name="BeanManager" auth="Container" type="javax.enterprise.inject.spi.BeanManager"
+		factory="org.jboss.weld.resources.ManagerObjectFactory" />
+
+</Context>

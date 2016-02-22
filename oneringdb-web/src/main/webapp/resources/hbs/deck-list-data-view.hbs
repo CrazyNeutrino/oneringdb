@@ -1,0 +1,179 @@
+{{#if pagination ~}}
+<div class="pagination-container text-center">
+	<nav>
+		<ul class="pagination">					
+			<li {{#unless pagination.prevPage}}class="disabled"{{/unless}}>
+				<a href="#" aria-label="Previous" {{#if pagination.prevPage}}data-page-number="{{pagination.prevPage.number}}"{{/if}}>
+					<span aria-hidden="true">&laquo;</span>
+				</a>
+			</li>
+			{{#each pagination.pages ~}}
+			<li {{#if active}}class="active"{{/if}}><a href="#" data-page-number="{{number}}">{{number}}</a></li>
+			{{/each ~}}
+			<li {{#unless pagination.nextPage}}class="disabled"{{/unless}}>
+				<a href="#" aria-label="Next" {{#if pagination.nextPage}}data-page-number="{{pagination.nextPage.number}}"{{/if}}>
+					<span aria-hidden="true">&raquo;</span>
+				</a>
+			</li>
+		</ul>
+	</nav>
+</div>
+{{/if ~}}
+<div class="deck-list">
+	<div class="row">
+		{{#each deckWrappers}}
+		<div class="col-sm-6 col-xs-12">
+			<div class="deck">
+				
+				{{#with deck}}
+				<div class="header bg-{{warlord.faction}}">					
+					<div class="box-left">
+						<div class="db-icon db-icon-{{warlord.faction}}"></div>
+					</div>
+					<div class="box-center">
+						<h4 class="primary-text">
+							{{#if ../published}}
+							<a href="{{rootUrl}}{{id}}-{{techName}}">{{name}}</a>
+							{{else}}
+							<a href="{{rootUrl}}edit/{{id}}-{{techName}}">{{name}}</a>
+							{{/if}}
+						</h4>
+						<div class="secondary-text" style="position: relative;">{{warlord.name}}
+							<div class="deck-icons">
+								{{#if tournamentPlace}}
+								{{#if tournamentType}}
+								<i class="{{translate tournamentType 'tournamentTypeIconClass'}}" data-toggle="tooltip"
+									data-placement="bottom" title="{{loc (translate tournamentType 'tournamentTypeDisplay')}}"
+									style="font-size: 0.9em;"></i>
+								{{/if}}
+								<i class="{{translate tournamentPlace 'tournamentPlaceIconClass'}}" data-toggle="tooltip"
+									data-placement="bottom" title="{{loc (translate tournamentPlace 'tournamentPlaceDisplay')}}"></i>
+								{{/if}}
+								{{#if totalDeckInterest}}
+								{{#if userDeckInterest}}
+								<i class="{{translate userDeckInterest 'interestIconClass' kind='superb'}}" style="margin-left: 10px;"></i>
+								{{totalDeckInterest.superb}}
+								<i class="{{translate userDeckInterest 'interestIconClass' kind='favourite'}}"></i>
+								{{totalDeckInterest.favourite}}
+								{{/if}}
+								{{/if}}
+							</div>
+						</div>
+					</div>
+				</div>
+				{{/with}}
+				
+				<div class="box-center">
+					{{!--
+					<div class="deck-stats-container pull-left">
+						<table class="deck-stats-table">
+							<thead>
+								<tr>
+									<th></th>
+									<th><span data-toggle="tooltip" title="{{loc 'core.cardsQuantity'}}">{{loc 'core.cardsQuantity.sh'}}</span></th>
+									<th><span data-toggle="tooltip" title="{{loc 'core.sum'}}">{{loc 'core.sum.sh'}}</span></th>
+									<th><span data-toggle="tooltip" title="{{loc 'core.average'}}">{{loc 'core.average.sh'}}</span></th>
+								</tr>
+							</thead>
+							<tbody>
+								{{#each stats}}
+								<tr>
+									<th>{{loc name}}</span></th>
+									<td>{{quantity}}{{#if quantityX}}+{{quantityX}}X{{/if}}</span></td>
+									<td>{{sum}}</span></td>
+									<td>{{average}}</span></td>
+								</tr>
+								{{/each}}
+							</tbody>
+						</table>
+					</div>
+					--}}
+					
+					{{!--
+					<div class="charts-container pull-left">
+						<div class="chart-container factions" data-deck-id="{{deck.id}}">
+							<div class="legend"></div>
+							<canvas class="chart" width="80" height="80"></canvas>
+						</div>
+						<div class="chart-container types" data-deck-id="{{deck.id}}">
+							<div class="legend"></div>
+							<canvas class="chart" width="80" height="80"></canvas>
+						</div>
+					</div>
+					--}}
+					
+					<div class="chart-container cost pull-left" data-deck-id="{{deck.id}}" style="width:200px; height:150px;"></div>
+					<div class="chart-container faction pull-left" data-deck-id="{{deck.id}}" style="width:140px; height:150px;"></div>
+					<div class="chart-container type pull-left" data-deck-id="{{deck.id}}" style="width:140px; height:150px;"></div>
+					
+					<div class="row hidden members">
+						<div class="col-xs-12">
+							{{#each membersGroups}}
+							<div class="col-xs-4">
+								<div class="mg">
+									<span class="mg-title">{{title}}&nbsp;({{quantity}})</span>
+									<ul>
+										{{#each members}}
+										<li>{{quantity}}x&nbsp;{{card.name}}</li>
+										{{/each}}
+									</ul>
+								</div>
+							</div>
+							{{/each}}
+						</div>
+					</div>
+				</div>
+				
+				<div class="footer clearfix">
+					<span class="secondary-text pull-right">
+						{{#if published}}
+						<span class="value">{{deck.username}}
+							{{#smartIf deck.userContributor}} 
+							<span data-toggle="tooltip" data-placement="bottom" title="ConquestDB contributor">
+								<i class="glyphicon glyphicon-gift"></i>
+							</span>
+							{{/smartIf}}
+						</span>
+						<span class="separator"> &#8226; </span>
+						<span class="value" data-toggle="tooltip" data-placement="bottom" title="{{loc 'core.published'}}: {{moment deck.createDate}}">
+							{{momentFromNow deck.createDate}}
+						</span>
+						{{else}}
+						<span class="value" data-toggle="tooltip" data-placement="bottom" title="{{loc 'core.created'}}: {{moment deck.createDate}}">
+							{{momentFromNow deck.createDate}}
+						</span>
+						{{/if}}
+						{{#unlessEqual deck.createDate deck.modifyDate}}
+						<span class="separator"> &#8226; </span>
+						<span class="value" data-toggle="tooltip" data-placement="bottom" title="{{loc 'core.modified'}}: {{moment deck.modifyDate}}">
+							{{momentFromNow deck.modifyDate}}
+						</span>
+						{{/unlessEqual}}
+					</span>
+				</div>
+			</div>
+		</div>
+		{{/each}}
+	</div>
+</div>
+{{#if pagination ~}}
+<div class="pagination-container text-center">
+	<nav>
+		<ul class="pagination">					
+			<li {{#unless pagination.prevPage}}class="disabled"{{/unless}}>
+				<a href="#" aria-label="Previous" {{#if pagination.prevPage}}data-page-number="{{pagination.prevPage.number}}"{{/if}}>
+					<span aria-hidden="true">&laquo;</span>
+				</a>
+			</li>
+			{{#each pagination.pages ~}}
+			<li {{#if active}}class="active"{{/if}}><a href="#" data-page-number="{{number}}">{{number}}</a></li>
+			{{/each ~}}
+			<li {{#unless pagination.nextPage}}class="disabled"{{/unless}}>
+				<a href="#" aria-label="Next" {{#if pagination.nextPage}}data-page-number="{{pagination.nextPage.number}}"{{/if}}>
+					<span aria-hidden="true">&raquo;</span>
+				</a>
+			</li>
+		</ul>
+	</nav>
+</div>
+{{/if ~}}

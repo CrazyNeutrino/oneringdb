@@ -1,0 +1,200 @@
+{{#smartUnless advanced ~}}
+<div class="btn-group btn-group-filter filter-group filter-faction select-many primary">
+	{{#each factions ~}}
+	<label class="btn btn-default" data-faction="{{techName}}" data-toggle="tooltip" title="{{name}}">
+		<i class="db-icon db-icon-{{techName}}"></i>
+	</label>
+	{{/each ~}}
+</div>
+
+{{#if config.showTournamentFilter ~}}
+<div class="btn-group btn-group-filter filter-group filter-tournament-type select-many">
+	<label class="btn btn-default" data-tournament-type="worlds" data-toggle="tooltip"
+			title="{{loc 'core.tournament.type.worlds'}}">
+		<i class="glyphicon glyphicon-king"></i>
+	</label>
+	<label class="btn btn-default" data-tournament-type="nationals" data-toggle="tooltip"
+			title="{{loc 'core.tournament.type.nationals'}}">
+		<i class="glyphicon glyphicon-queen"></i>
+	</label>
+	<label class="btn btn-default" data-tournament-type="regionals" data-toggle="tooltip"
+			title="{{loc 'core.tournament.type.regionals'}}">
+		<i class="glyphicon glyphicon-tower"></i>
+	</label>
+	<label class="btn btn-default" data-tournament-type="local" data-toggle="tooltip"
+			title="{{loc 'core.tournament.type.local'}}">
+		<i class="glyphicon glyphicon-knight"></i>
+	</label>
+</div>
+
+<div class="btn-group btn-group-filter filter-group filter-tournament-place select-many">
+	<label class="btn btn-default" data-tournament-place="first" data-toggle="tooltip"
+			title="{{loc 'core.tournament.place.first'}}">
+		<i class="db-icon db-icon-first"></i>
+	</label>
+	<label class="btn btn-default" data-tournament-place="second" data-toggle="tooltip"
+			title="{{loc 'core.tournament.place.second'}}">
+		<i class="db-icon db-icon-second"></i>
+	</label>
+</div>
+{{/if}}
+
+<label id="searchButton" class="btn btn-primary filter-group btn-raised"><span class="glyphicon glyphicon-search"></span>&nbsp;{{loc 'core.search'}}</label>
+<label id="moreButton" class="btn btn-default filter-group"><span class="glyphicon glyphicon-menu-right"></span>&nbsp;{{loc 'core.more'}}</label>
+{{else}}
+<div class="row">
+	<div class="col-md-4">
+		
+		<div class="form-group">
+			<label>{{loc 'core.primaryFaction'}}</label>
+			<div clas="input-group">
+				<div class="btn-group btn-group-filter filter-faction select-many primary">
+						{{#each factions ~}}
+						<label class="btn btn-default" data-faction="{{techName}}" data-toggle="tooltip" title="{{name}}">
+							<i class="db-icon db-icon-{{techName}}"></i>
+						</label>
+						{{/each ~}}
+					</div>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label>{{loc 'core.secondaryFaction'}}</label>
+			<div clas="input-group">
+				<div class="btn-group btn-group-filter filter-faction select-many secondary">
+						{{#each factions ~}}
+						<label class="btn btn-default" data-faction="{{techName}}" data-toggle="tooltip" title="{{name}}">
+							<div class="db-icon db-icon-{{techName}}"></div>
+						</label>
+						{{/each ~}}
+					</div>
+			</div>
+		</div>
+		
+		{{#if config.showTournamentFilter ~}}
+		<div class="form-group">
+			<label>{{loc 'core.tournament.info'}}</label>
+			<div class="input-group">
+				
+				<div class="btn-group btn-group-filter filter-tournament-type select-many" style="margin-right: 5px;">
+					<label class="btn btn-default" data-tournament-type="worlds" data-toggle="tooltip"
+							title="{{loc 'core.tournament.type.worlds'}}">
+						<i class="glyphicon glyphicon-king"></i>
+					</label>
+					<label class="btn btn-default" data-tournament-type="nationals" data-toggle="tooltip"
+							title="{{loc 'core.tournament.type.nationals'}}">
+						<i class="glyphicon glyphicon-queen"></i>
+					</label>
+					<label class="btn btn-default" data-tournament-type="regionals" data-toggle="tooltip"
+							title="{{loc 'core.tournament.type.regionals'}}">
+						<i class="glyphicon glyphicon-tower"></i>
+					</label>
+					<label class="btn btn-default" data-tournament-type="local" data-toggle="tooltip"
+							title="{{loc 'core.tournament.type.local'}}">
+						<i class="glyphicon glyphicon-knight"></i>
+					</label>
+				</div>
+				
+				<div class="btn-group btn-group-filter filter-tournament-place select-many">
+					<label class="btn btn-default" data-tournament-place="first" data-toggle="tooltip"
+							title="{{loc 'core.tournament.place.first'}}">
+						<i class="db-icon db-icon-first"></i>
+					</label>
+					<label class="btn btn-default" data-tournament-place="second" data-toggle="tooltip"
+							title="{{loc 'core.tournament.place.second'}}">
+						<i class="db-icon db-icon-second"></i>
+					</label>
+				</div>
+			
+			</div>
+		</div>
+		{{/if}}
+
+		{{#if config.showCreateDate ~}}
+		<div id="createDateFilter" class="form-group date-range-filter complex">
+			<label>{{loc 'core.createDate'}}</label>			
+			<div class="input-daterange input-group">
+				<input type="text" class="form-control" name="start" />
+				<span class="input-group-addon">-</span>
+				<input type="text" class="form-control" name="end" />
+			</div>
+		</div>
+		{{/if ~}}
+
+		{{#if config.showModifyDate ~}}
+		<div id="modifyDateFilter" class="form-group date-range-filter complex">
+			<label>{{loc 'core.modifyDate'}}</label>		
+			<div class="input-daterange input-group">
+				<input type="text" class="form-control" name="start" />
+				<span class="input-group-addon">-</span>
+				<input type="text" class="form-control" name="end" />
+			</div>			
+		</div>
+		{{/if ~}}
+
+		{{#if config.showPublishDate ~}}
+		<div id="publishDateFilter" class="form-group date-range-filter complex">
+			<label>{{loc 'core.publishDate'}}</label>
+			{{!--
+			<div class="btn-group btn-group-date-range">
+				<label class="btn btn-default" data-date-range="0,0">{{loc 'core.today'}}</label>
+				<label class="btn btn-default" data-date-range="-1,0">{{loc 'core.yesterday'}}</label>
+				<label class="btn btn-default" data-date-range="-7,0">{{loc 'core.last07days'}}</label>
+				<label class="btn btn-default" data-date-range="-30,0">{{loc 'core.last30days'}}</label>				
+			</div>
+			--}}
+			<div class="input-daterange input-group">
+				<input type="text" class="form-control" name="start" />
+				<span class="input-group-addon">-</span>
+				<input type="text" class="form-control" name="end" />
+			</div>			
+		</div>
+		{{/if}}
+
+		{{#if config.showUsername ~}}
+		<div id="usernameFilter" class="form-group">
+			<label>{{loc 'core.username'}}</label>
+			<input type="text" class="form-control" />	
+		</div>
+		{{/if}}
+	</div>
+	<div class="col-md-3">
+		<div class="form-group">
+			<label>{{loc 'card.set'}}</label>
+			<div id="setMatchMode" style="margin-bottom: 10px;">
+				<div class="radio">
+					<label>
+						<input type="radio" name="matchMode" id="matchModeSubset" value="subset" checked="checked">{{loc 'core.matchModeSubset'}}
+						<div class="checkbox" style="margin-bottom: 0px; margin-top: 0px;">
+							<label>
+								<input type="checkbox">{{loc 'core.skipCoreSetOnlyDecks'}}
+							</label>
+						</div>
+					</label>
+					
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="matchMode" id="matchModeExact" value="exact">{{loc 'core.matchModeExact'}}
+					</label>
+				</div>
+			</div>
+		</div>
+		<div id="cardSetFilter" class="input-group"></div>
+	</div>
+	<div class="col-md-3">
+		<div class="form-group">
+			<label>{{loc 'core.warlord'}}</label>
+			<div id="warlordFilter" class="input-group"></div>
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="deck-sort-container form-group">
+			<label>{{loc 'core.sorting'}}</label>			
+		</div>
+		<label id="searchButton" class="btn btn-primary form-control btn-raised" style="margin-bottom: 10px;"><span class="glyphicon glyphicon-search"></span>&nbsp;{{loc 'core.search'}}</label>
+		<label id="clearButton" class="btn btn-default form-control" style="margin-bottom: 10px;"><span class="glyphicon glyphicon-remove"></span>&nbsp;{{loc 'core.clear'}}</label>
+		<label id="lessButton" class="btn btn-default form-control" style="margin-bottom: 10px;"><span class="glyphicon glyphicon-menu-left"></span>&nbsp;{{loc 'core.less'}}</label>		
+	</div>
+</div>
+{{/smartUnless ~}}

@@ -1,0 +1,84 @@
+<div class="block folding-block">
+	<div class="block-header">
+		<div class="block-header-text bg-{{deck.warlord.faction}}">
+			<span class="glyphicon glyphicon-pencil"></span>
+			&nbsp;{{loc 'core.edit2'}}
+		</div>
+	</div>
+	<div class="block-content">
+		<div class="form-group">
+			<label for="deckName">{{loc 'core.name'}}</label>
+			<input class="form-control" id="deckName" type="text" placeholder="{{loc 'core.deckName'}}" value="{{deck.name}}" />
+		</div>
+		<div class="form-group">
+			<label for="deckDescription">{{loc 'core.description'}}</label>
+			<textarea class="form-control" id="deckDescription" placeholder="{{loc 'core.deckDescription'}}" rows="7">{{deck.description}}</textarea>
+		</div>
+		<a href="http://en.wikipedia.org/wiki/Markdown#Example" target="_blank">{{loc 'core.markdownSyntaxExamples'}}</a>					
+	</div>
+</div>
+
+<div class="block folding-block">
+	<div class="block-header">
+		<div class="block-header-text bg-{{deck.warlord.faction}}">
+			<span class="glyphicon glyphicon-eye-open"></span>
+			&nbsp;{{loc 'core.preview'}}
+		</div>
+	</div>
+	<div class="block-content">
+		<h2 id="deckNamePreview">{{{markdown deck.name}}}</h2>
+		<h5 style="color: gray;">{{deck.username}}</h5>
+		<div id="deckDescriptionPreview">{{{markdown deck.description}}}</div>
+	</div>
+</div>
+
+{{#if publish}}
+<div class="block folding-block">
+	<div class="block-header" style="margin-bottom: 0px;">
+		<div class="block-header-text bg-{{deck.warlord.faction}}">
+			<span class="db-icon db-icon-first"></span>
+			&nbsp;{{loc 'core.tournament.info'}}
+		</div>
+	</div>
+	<div class="block-content">
+		<div>
+			<div class="tournament-group">
+				<span>{{loc 'core.tournament.type'}}</span>
+				<div class="btn-group tournament-type">
+					<label class="btn btn-default" data-tournament-type="worlds" data-toggle="tooltip"
+							title="{{loc 'core.tournament.type.worlds'}}">
+						<i class="glyphicon glyphicon-king"></i>
+					</label>
+					<label class="btn btn-default" data-tournament-type="nationals" data-toggle="tooltip"
+							title="{{loc 'core.tournament.type.nationals'}}">
+						<i class="glyphicon glyphicon-queen"></i>
+					</label>
+					<label class="btn btn-default" data-tournament-type="regionals" data-toggle="tooltip"
+							title="{{loc 'core.tournament.type.regionals'}}">
+						<i class="glyphicon glyphicon-tower"></i>
+					</label>
+					<label class="btn btn-default" data-tournament-type="local" data-toggle="tooltip"
+							title="{{loc 'core.tournament.type.local'}}">
+						<i class="glyphicon glyphicon-knight"></i>
+					</label>
+				</div>
+			</div>
+			
+			<div class="tournament-group">
+				<span>{{loc 'core.tournament.place'}}</span>
+				<div class="btn-group tournament-place">
+					<label class="btn btn-default" data-tournament-place="first" data-toggle="tooltip"
+							title="{{loc 'core.tournament.place.first'}}">
+						<i class="db-icon db-icon-first"></i>
+					</label>
+					<label class="btn btn-default" data-tournament-place="second" data-toggle="tooltip"
+							title="{{loc 'core.tournament.place.second'}}">
+						<i class="db-icon db-icon-second"></i>
+					</label>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+</div>		
+{{/if}}

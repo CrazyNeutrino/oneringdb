@@ -1,0 +1,947 @@
+@CHARSET "UTF-8";
+
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url(#{resource['fonts/glyphicons-halflings-regular.eot']});
+  src: url(#{resource['fonts/glyphicons-halflings-regular.eot']}?#iefix) format('embedded-opentype'), 
+  	   url(#{resource['fonts/glyphicons-halflings-regular.woff']}) format('woff'),
+  	   url(#{resource['fonts/glyphicons-halflings-regular.woff2']}) format('woff2'), 
+  	   url(#{resource['fonts/glyphicons-halflings-regular.ttf']}) format('truetype'), 
+  	   url(#{resource['fonts/glyphicons-halflings-regular.svg']}.svg#glyphicons_halflingsregular) format('svg');
+}
+
+html,body {	height: 100%; }
+body {overflow-y: scroll; }
+
+table { font-size: 14px; }
+table.faction-image-container-md>tbody>tr {	line-height: 30px; }
+table.faction-image-container-md>tbody>tr>td {vertical-align: middle; /* line-height: inherit; */ }
+
+#wrapper {
+	min-height: 100%;
+	padding-bottom: 110px;
+	background-color: #fff;
+}
+
+footer.footer {
+	color: #777;
+	background-color: #f8f8f8;
+	border-top: 1px solid #e7e7e7;
+	font-size: 0.8em;
+	margin-top: -110px;
+}
+footer.footer > .container > p:first-child {
+	margin-top: 10px;
+}
+
+.card-search-view,
+.card-view,
+.user-deck-list-view,
+.user-deck-import-view,
+.user-deck-create-view,
+#publicDeckListView {
+	margin-top: 20px;
+}
+
+/**
+ * deck list view
+ */
+ 
+.box-left,
+.box-right {
+	display: table-cell;
+	vertical-align: top;
+}
+
+.box-center {
+	display: table-cell;
+	vertical-align: top;
+	width: 100%;
+}
+
+.deck-list .deck > .header a,
+.deck-list .deck > .header a:hover {
+	color: inherit;
+}
+ 
+.deck-list .deck {
+	border: none;
+	background-color: #fff;
+	margin: 10px 0px;
+	/* box-shadow: 0 0 2px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.24); */
+	border-radius: 2px;	
+}
+
+.deck-list .deck > .header {
+	padding: 10px 10px 5px 10px;
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+}
+
+.deck-list .deck > .header > .box-left > .db-icon {
+	font-size: 30px; 
+	margin-right: 10px;
+}
+
+.deck-list .deck > .header > .box-center > .primary-text {
+	margin-top: 0px;
+	margin-bottom: 5px;
+}
+
+.deck-list .deck > .box-center {
+	padding: 10px;
+}
+
+.deck-list .deck > .footer {
+	padding: 5px 10px;
+}
+
+.deck-list .deck-icons {
+	position: absolute;
+	right: 0px;
+	bottom: -4px;
+	font-size: 1.2em;
+}
+
+.deck-list .deck-icons > i:not(:last-child) {
+	/* margin-right: 5px; */
+}
+
+.deck-list .deck-icons > i.db-icon-first,
+.deck-list .deck-icons > i.db-icon-second {
+	position: relative;
+    top: -1px;
+}
+
+/**
+ * deck full view
+ */
+
+.pub-deck-view .deck,
+.user-deck-edit-view .deck {
+	/* background-color: #fff; */
+	/* box-shadow: 0 -1px 0 #e5e5e5, 0 0 2px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.24); */
+	border-radius: 2px;
+}
+
+.pub-deck-view .deck .header,
+.user-deck-edit-view .deck .header {
+	padding: 15px 0px 10px 0px;
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+}
+
+.pub-deck-view .deck .header > .box-left > .db-icon,
+.user-deck-edit-view .deck .header > .box-left > .db-icon {
+	font-size: 40px; 
+	margin-right: 15px;
+}
+
+.pub-deck-view .deck .header > .box-center > h2:first-child,
+.user-deck-edit-view .deck .header > .box-center > h2:first-child {
+	margin-top: 0px;
+	margin-bottom: 5px;
+}
+
+.pub-deck-view .deck .content,
+.user-deck-edit-view .deck .content {
+	padding: 15px 0px;
+}
+
+.pub-deck-view .deck-icons,
+.user-deck-edit-view .deck-icons {
+	position: absolute;
+	right: 0px;
+	bottom: -4px;
+	font-size: 1.2em;
+}
+
+.pub-deck-view .deck-icons > i:not(:last-child),
+.user-deck-edit-view .deck-icons > i:not(:last-child) {
+	/* margin-right: 5px; */
+}
+
+.pub-deck-view .deck-icons > i:db-icon-first,
+.pub-deck-view .deck-icons > i:db-icon-second {
+	position: relative;
+    top: -1px;
+}
+
+.tournament-group {
+	display: inline-block;
+	margin-top: 10px;
+	margin-right: 10px;
+}
+
+/**
+ * card search
+ */
+.card-search-list .card > .header a,
+.card-search-list .card > .header a:hover {
+	color: inherit;
+}
+
+.card-search-list .card > .content a,
+.card-search-list .card > .content a:hover {
+	color: black;
+}
+ 
+.card-search-list .card {
+	border: none;
+	background-color: #fff;
+	margin: 10px 0px;
+	border-radius: 2px;	
+}
+
+.card-search-list .card > .header {
+	padding: 8px 10px 6px 10px;
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+}
+
+.card-search-list .card > .header > .box-left > .db-icon {
+	font-size: 20px; 
+	margin-right: 5px;
+}
+
+.card-search-list .card > .header > .box-left > .db-icon.db-icon-unique {
+	font-size: 14px; 
+	margin-top: 1px;
+	margin-right: 5px;
+}
+
+.card-search-list .card > .header > .box-center > .primary-text {
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+
+.card-search-list .card > .content {
+	padding: 5px 10px 5px 10px;
+}
+
+.card-search-list .card > .footer {
+	padding: 5px 10px;
+}
+
+/**
+ *
+ */
+
+.mg-container .mg ul {
+	list-style: none;
+	margin: 5px 0px;
+	padding: 0px;
+}
+
+.mg-container .mg .db-icon {
+	margin: 0px 2px;	
+}
+
+.mg-container .mg .mg-title {
+	font-weight: bold;
+}
+
+.mg-control-group,.mg-control-sort { margin-bottom: 5px; }
+.mg-control-group div:first-child, .mg-control-sort div:first-child { padding-right: 0px; }
+.mg .cq-icon:before { margin: 0em .2em }
+
+.deck-container .mg {
+	margin-bottom: 15px;
+}
+
+.deck-container .mg ul {
+	list-style: none;
+	margin: 5px 0px;
+	padding: 0px;
+	font-size: 0.8em;
+}
+
+.deck-container .mg .mg-title {
+	font-weight: bold;
+	font-size: 0.8em;
+}
+
+.deck-container .deck-stats-table {
+	margin-right: 15px;
+}
+
+/* .deck-stats-table { font-size: 12px; } */
+.deck-stats-table thead th { text-align: center; }
+.deck-stats-table td { text-align: right; }
+.deck-stats-table td, .deck-stats-table thead th { padding: 0px 8px; }
+.deck-stats-table tbody th { padding: 0px 4px; }
+
+.actions-container,.members-list-filter-container,.deck-info-container {
+	margin-bottom: 10px;
+}
+
+.members-grid-item .btn-group.btn-group-qty .btn,
+.members-list-item .btn-group.btn-group-qty .btn {
+	padding: 0px 4px;
+}
+
+.btn-group.btn-group-qty .btn.active:first-child { color: white; background-color: #d9534f;	border-color: #d43f3a; }
+.btn-group.btn-group-qty .btn.active:not(:first-child) { color: white; background-color: #5cb85c; border-color: #4cae4c; }
+.btn-group.filter-faction .btn { padding: 0px; font-size: 22px; min-width: 2em; }
+.btn-group.btn-group-layout>.btn { padding: 5px 10px 4px; }
+.btn-group.btn-group-layout>.btn>.glyphicon { font-size: 18px; }
+
+.icon-faction {
+	height: 32px;
+	width: 42px;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+/* .icon-astra-militarum { background-image: url('/image/faction/astra-militarum-b-md.png'); }
+.icon-space-marines { background-image: url('/image/faction/space-marines-b-md.png'); }
+.icon-dark-eldar { background-image: url('/image/faction/dark-eldar-b-md.png'); }
+.icon-neutral { background-image: url('/image/faction/neutral-b-md.png'); }
+.icon-eldar { background-image: url('/image/faction/eldar-b-md.png'); }
+.icon-chaos { background-image: url('/image/faction/chaos-b-md.png'); }
+.icon-ork {	background-image: url('/image/faction/ork-b-md.png'); }
+.icon-tau {	background-image: url('/image/faction/tau-b-md.png'); }
+.icon-tyranid {	background-image: url('/image/faction/tyranid-b-md.png'); } */
+
+.card-md {
+	width: 255px;
+	height: 356px;
+}
+
+.card-md.token {
+	width: 255px;
+	height: 356px;
+}
+
+.card-md.planet {
+	width: 360px;
+	height: 254px;
+}
+
+.card-sm {
+	width: 160px;
+	height: 223px;
+}
+
+.card-xs {
+	width: 100px;
+	height: 138px;
+}
+
+tr.highlight td {
+	background-color: #eee !important;
+}
+
+.members-grid.row { margin: 0 -5px; }
+.members-grid.members-grid-md .members-grid-item:not(.text) { height: 300px; }
+.members-grid.members-grid-md .members-grid-item.text { height: 240px; }
+.members-grid.members-grid-sm .members-grid-item:not(.text) { height: 220px; }
+.members-grid.members-grid-sm .members-grid-item.text { height: 150px; }
+.members-grid .members-grid-item { padding: 0 5px; }
+.members-grid .members-grid-item .btn-group-qty { margin-bottom: 5px; }
+.members-grid .members-grid-item > * { display: table; }
+.members-grid .members-grid-item > table > tbody > tr > td { vertical-align: top; }
+.members-grid .members-grid-item > table > tbody > tr > td:nth-child(2) { padding-left: 5px; }
+
+label.required:after {
+	content: " *";
+	color: #D60707;
+}
+
+.plain-form .control-label {
+	text-align: right;
+	padding-top: 5px;
+}
+
+.plain-form-wrapper {
+	border-top: 1px solid #ececec;
+	border-bottom: 1px solid #ececec;
+	padding: 30px 0px;
+}
+
+.plain-form-wrapper>div {
+	padding: 0px 30px;
+}
+
+.plain-form-wrapper>div:not (:last-child ) {
+	border-right: 1px solid #ececec;
+}
+
+.message-error {
+	color: #D60707;
+}
+
+.form-group .message-error {
+	color: #D60707;
+	display: inline-block;
+	margin: 2px 4px;
+}
+
+.messages-group {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+}
+
+.messages-group>li:not (:last-child ) {
+	margin-bottom: 10px;
+}
+
+.no-wrap {
+	white-space: nowrap;
+}
+
+.radio-group {
+	list-style: none;
+	padding: 0px;
+}
+
+.radio-group input[type="radio"] {
+	margin-right: 4px;
+}
+
+.btn-standard {
+	padding: 7px 10px !important;
+}
+
+.tree-node {
+	list-style: none;
+	padding-left: 0px;
+}
+
+.tree-node .tree-node {
+	padding-left: 20px;
+}
+
+.tree-node li input[type='checkbox'] {
+	margin-right: 5px;
+}
+
+.card-view .panel-body {
+	font-size: 0.9em;
+}
+
+.card-view .panel-body .key {
+	font-weight: bold;
+}
+
+.row-dense>div,.col-dense {
+	margin: 0px -15px;
+}
+
+.marker.off:before {
+	content: "";
+	display: inline-block;
+	width: 0.6em;
+	height: 1.2em;
+	border: none;
+	margin-right: 5px;
+	vertical-align: sub;
+	border-radius: 3px;
+}
+
+.type-army.marker.off:before { background-color: #D11010; }
+.type-event.marker.off:before {	background-color: purple; }
+.type-attachment.marker.off:before { background-color: #0F700F; }
+.type-support.marker.off:before { background-color: #4F4FDD; }
+
+.missing {
+	color: #D60707;
+}
+
+.deck-container .deck-info {
+	margin-right: 30px;
+	margin-bottom: 10px;
+}
+
+/* .deck-container .footer .value:not(:last-child) {
+	margin-right: 10px;
+}
+
+.deck-container .footer .key {
+	font-weight: bold;
+} */
+
+/*
+ * decks list charts
+ */
+
+.charts-container {
+	display: table;
+}
+
+.chart-container {
+	position: relative;
+	width: 150px;
+	height: 100px;
+	margin-right: 15px;
+	margin-bottom: 10px;
+	display: table-cell;
+	top: 5px;
+	left: 15px;
+}
+
+.chart-container:last-child {
+	margin-right: 0px;
+}
+
+.chart-container .legend {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+.chart-container .chart {
+	position: absolute;
+	left: 50px;
+	width: 100px;
+	height: 100px;
+}
+
+.pie-legend, .doughnut-legend {
+	list-style: none;
+	position: relative;
+	padding: 0px;
+	font-size: 12px; 	
+}
+
+.pie-legend li, .doughnut-legend li {
+	position: relative;
+	padding: 0px 5px 0px 15px;
+}
+
+.pie-legend li span, .doughnut-legend li span {
+	display: block;
+	position: absolute;
+	left: 0px;
+	top: 2px;
+	width: 10px;
+	height: 10px;
+	border-radius: 2px;
+}
+
+/*
+ * sliders
+ */
+
+/* .sliders > li {
+	position: relative;
+	height: 20px;
+} */
+
+/* .sliders > li > span {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+} */
+
+/* .sliders > li > div.slider {
+	position: absolute;
+	left: 100px;	
+	top: 5px;
+	width: 160px;
+} */
+
+.slider.ui-slider {
+	height: 0.4em;
+	background: #fff;
+	border: 1px solid #adadad;
+}
+
+.slider.ui-slider .ui-slider-handle {
+	width: 0.8em;
+	height: 0.8em;	
+	border-radius: 4px;
+	background: #e6e6e6;
+	border: 1px solid #adadad;
+}
+
+.slider.ui-slider .ui-slider-range {
+	background: #e6e6e6;
+}
+
+/*
+ * side filter
+ */
+
+.side-filter-group { margin-bottom: 20px; }
+.stats-filter-group { width: 200px; }
+.stats-filter-group td:nth-child(1) { width: 30px; }
+.stats-filter-group td:nth-child(2) { padding: 0em 0.6em 0.6em 0.6em; }
+.stats-filter-group td:nth-child(2).disabled { opacity: 0.65; cursor: not-allowed; pointer-events: none; }
+.stats-filter-group .header { margin: 0em -0.6em 0.3em -0.6em; }
+
+.tab-pane {
+	padding-top: 10px;
+}
+
+.members-container .secondary-text {
+	font-size: 0.8em;
+	color: #777;
+}
+
+.block {
+	margin: 10px 0px;
+}
+
+.block.folding-block {
+	
+}
+
+.block > .block-header {	
+	background: url('../image/block_spacer.png.jsf') scroll 0 11px repeat-x;
+	margin: 10px 0px;
+}
+
+.block > .block-header > .block-header-text {
+	background-color: #fff;
+	display: inline-block;
+	margin: 0px 20px;
+	padding: 2px 8px;	
+	font-size: 14px;
+	/* font-weight: bold; */
+	border-radius: 2px;
+	color: #888;
+}
+
+/* .block > .block-content {
+	padding: 0px 10px;
+} */
+
+.draw-container > a > img {
+	margin: 0px 5px 5px 0px;
+}
+
+/* .dropdown.sorting-dropdown {
+	margin-bottom: 10px;
+}
+
+.dropdown.sorting-dropdown > button.dropdown-toggle {
+	width: 100%;
+	position: relative;
+	text-align: left;
+}
+
+.dropdown.sorting-dropdown > button.dropdown-toggle > .caret {
+	position: absolute;
+	top: 1em;
+	right: 1em;
+}
+
+.dropdown.sorting-dropdown > ul.dropdown-menu {
+	min-width: 240px;
+}
+
+.dropdown.sorting-dropdown > ul.dropdown-menu > li > div {
+	padding: 2px 6px;
+}
+
+.dropdown.sorting-dropdown > ul.dropdown-menu > li > div > div {
+	background-color: #eee;
+}
+
+.dropdown.sorting-dropdown label.btn.btn-sm {
+	padding: 2px 6px;
+} */
+
+.deck-sort-container .sort-control {
+	margin-bottom: 10px;
+}
+
+.datepicker {
+	z-index: 1000 !important;
+}
+
+table.table-with-btn > tbody > tr > td {
+	vertical-align: middle;
+}
+
+.table-with-btn > tbody > tr > td > .btn {
+	margin: 2px 0px;
+}
+
+.date-range-filter.complex .btn-group-date-range {
+	margin-bottom: 10px;
+}
+
+.comment {
+	margin: 15px 0px;
+}
+
+/* .comment:not(:last-child) {
+	border-bottom: 1px solid #ddd;
+} */
+
+.comment .comment-avatar {
+	float: left;
+	font-size: 24px;
+	color: #bbb;
+	margin-right: 10px;
+}
+
+.comment .comment-content {
+	overflow: hidden;
+}
+
+.comment .user {
+	font-weight: bold;	
+}
+
+.comment .comment-body {
+	word-wrap: break-word;
+}
+
+.comment .comment-body p:last-child {
+	margin-bottom: 0px;
+}
+
+.pub-deck .deck-header,
+.user-deck .deck-header {
+	font-size: 30px;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #ddd;
+}
+
+.pub-deck .deck-header .secondary-text,
+.user-deck .deck-header .secondary-text {
+	font-size: 0.5em;
+}
+
+.pub-deck .deck-header .secondary,
+.user-deck .deck-header .secondary {
+	font-size: 0.5em;
+	color: #bbb;
+}
+
+.social {
+	margin: 5px;
+	cursor: pointer;
+}
+
+.members-list-header { border-bottom: 2px solid #ddd; font-weight: bold; }
+.members-list-item { padding: 2px 0px; }
+.members-list-item:nth-child(even) { background-color: #f9f9f9; }
+.members-list-item:not(:last-child) { border-bottom: 1px solid #ddd; }
+.members-list-header > div > div > div,
+.members-list-item > div > div > div { display: table; }
+.members-list-header > div > div > div > div,
+.members-list-item > div > div > div > div { display: table-cell; }
+.members-list-header .type-col,
+.members-list-item .type-col { width: 6em; }
+.members-list-header .faction-col,
+.members-list-item .faction-col { width: 3em; }
+.members-list-header .stat-col,
+.members-list-item .stat-col { width: 2em; }
+
+.deck-list-filter-container .filter-group, 
+.card-search-filter-container .filter-group,
+.members-list-filter-container .filter-group,
+.actions-container > div,
+.actions-container > a {
+	margin-bottom: 5px;
+}
+
+.members-list-filter-container .tt-input { margin-top: 0px; }
+.members-list-filter-container .sort-control { min-width: 180px; }
+
+.popover-buttons {
+	margin: 5px 0px;
+}
+
+@font-face {
+  font-family: 'conquest';
+  src: url(#{resource['fonts/conquest.eot']});
+  src: url(#{resource['fonts/conquest.eot']}?#iefix) format('embedded-opentype'),
+       url(#{resource['fonts/conquest.woff']}) format('woff'),
+       url(#{resource['fonts/conquest.ttf']}) format('truetype'),
+       url(#{resource['fonts/conquest.svg']}?#conquest) format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */
+/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */
+/*
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: 'conquest';
+    src: url(#{resource['fonts/conquest.svg']}#conquest) format('svg');
+  }
+}
+*/
+ 
+.db-icon:before {
+  font-family: "conquest";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+ 
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  text-align: center;
+  /* opacity: .8; */
+ 
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+ 
+  /* fix buttons height, for twitter bootstrap */
+  line-height: 1em;
+ 
+  /* Animation center compensation - margins should be symmetric */
+  /* remove if not needed */
+  /* margin-left: .1em; 
+     margin-right: .1em; */
+ 
+  /* you can be more comfortable with increased icons size */
+  /* font-size: 1.1em; */
+ 
+  /* Font smoothing. That was taken from TWBS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+ 
+  /* Uncomment for 3D effect */
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+}
+
+/* i.cq-icon:before {
+	margin: .1em;
+} */
+
+.db-icon-astra-militarum:before { content: '\e800'; } 
+.db-icon-chaos:before { content: '\e801'; } 
+.db-icon-dark-eldar:before { content: '\e802'; } 
+.db-icon-eldar:before { content: '\e803'; } 
+.db-icon-neutral:before { content: '\e804'; } 
+.db-icon-ork:before { content: '\e805'; } 
+.db-icon-space-marines:before { content: '\e806'; width: 1.5em; } 
+.db-icon-tau:before { content: '\e807'; } 
+.db-icon-tyranid:before { content: '\e808'; width: 1.5em; }
+.db-icon-necron:before { content: '\e819'; } 
+.db-icon-link:before { content: '\e809'; } 
+.db-icon-flash:before { content: '\e80a'; } 
+.db-icon-attach:before { content: '\e80b'; } 
+.db-icon-database:before { content: '\e80c'; } 
+.db-icon-rocket:before { content: '\e80d'; } 
+.db-icon-globe:before { content: '\e80e'; }
+.db-icon-asterisk:before { content: '\e80f'; }
+.db-icon-king:before { content: '\e810'; }
+.db-icon-first:before { content: '\e811'; }
+.db-icon-second:before { content: '\e812'; }
+.db-icon-heart:before { content: '\e813'; }
+.db-icon-heart-empty:before { content: '\e814'; }
+.db-icon-star:before { content: '\e815'; }
+.db-icon-star-empty:before { content: '\e816'; }
+.db-icon-comment:before { content: '\e817'; }
+.db-icon-comment-empty:before { content: '\e818'; }
+.db-icon-unique:before { content: '\e81a'; }
+
+.fg-astra-militarum { color: #3C3C3C; }
+.fg-chaos { color: #EA5400; }
+.fg-dark-eldar { color: #AF4D9D; }
+.fg-eldar { color: #EADA67; }
+.fg-ork { color: #407424; }
+.fg-space-marines { color: #095DAD; }
+.fg-tau { color: #4CD0DC; }
+.fg-tyranid { color: #A32618; }
+.fg-neutral { color: #BBB; }
+.fg-necron { color: #57D8A9; }
+
+.bg-astra-militarum { background-color: #3C3C3C !important; color: #fff !important; }
+.bg-chaos { background-color: #EA5400 !important; color: #fff !important; }
+.bg-dark-eldar { background-color: #AF4D9D !important; color: #fff !important; }
+.bg-eldar { background-color: #EADA67 !important; color: #000 !important; }
+.bg-ork { background-color: #407424 !important; color: #fff !important; }
+.bg-space-marines { background-color: #095DAD !important; color: #fff !important; }
+.bg-tau { background-color: #4CD0DC !important; color: #000 !important; }
+.bg-tyranid { background-color: #A32618 !important; color: #fff !important; }
+.bg-necron { background-color: #57D8A9 !important; color: #000 !important; }
+.bg-neutral { background-color: #BBB !important; color: #000 !important; }
+
+.bor-astra-militarum { border-color: #3C3C3C !important; }
+.bor-chaos { border-color: #EA5400 !important; }
+.bor-dark-eldar { border-color: #AF4D9D !important; }
+.bor-eldar { border-color: #EADA67 !important; }
+.bor-ork { border-color: #407424 !important; }
+.bor-space-marines { border-color: #095DAD !important; }
+.bor-tau { border-color: #4CD0DC !important; }
+.bor-tyranid { border-color: #A32618 !important; }
+.bor-necron { border-color: #57D8A9 !important; }
+
+.btn-astra-militarum { background-color: #3C3C3C !important; color: #fff !important; }
+.btn-chaos { background-color: #EA5400 !important; color: #fff !important; }
+.btn-dark-eldar { background-color: #AF4D9D !important; color: #fff !important; }
+.btn-eldar { background-color: #EADA67 !important; color: #000 !important; }
+.btn-ork { background-color: #407424 !important; color: #fff !important; }
+.btn-space-marines { background-color: #095DAD !important; color: #fff !important; }
+.btn-tau { background-color: #4CD0DC !important; color: #000 !important; }
+.btn-tyranid { background-color: #A32618 !important; color: #fff !important; }
+.btn-necron { background-color: #57D8A9 !important; color: #000 !important; }
+
+.btn-astra-militarum:hover { background-color: #242424 !important; }
+.btn-chaos:hover { background-color: #E05400 !important; }
+.btn-dark-eldar:hover { background-color: #9C448C !important; }
+.btn-eldar:hover { background-color: #E7D550 !important; }
+.btn-ork:hover { background-color: #36621E !important; }
+.btn-space-marines:hover { background-color: #085196 !important; }
+.btn-tau:hover { background-color: #37CAD7 !important; }
+.btn-tyranid:hover { background-color: #8E2115 !important; }
+.btn-necron:hover { background-color: #41D29D !important; color: #000 !important; }
+
+/*
+ * bootstrap overrides
+ */
+ 
+.btn.btn-raised {
+    border-radius: 2px;
+    box-shadow: 0 0 2px rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.24);
+    border: 1px solid transparent;
+}
+.btn.btn-raised:hover {
+	box-shadow: 0 0 4px rgba(0,0,0,.14),0 4px 8px rgba(0,0,0,.28);
+}
+
+.btn.btn-default.btn-lite {
+	color: #616161;
+	border: 1px solid transparent;
+	background-color: transparent;
+}
+
+.btn.btn-default.btn-lite:hover,
+.btn.btn-default.btn-lite.active {
+	color: #000;
+	border: 1px solid transparent;
+	background-color: transparent;
+	box-shadow: none;
+}
+
+.nav-tabs.lite > li {
+	margin-bottom: 0px;
+}
+
+.nav-tabs.lite > li > a {
+	border: none;
+}
+
+.nav-tabs.lite > li > a {
+	color: #000;
+}
+
+.nav-tabs.lite > li > a:hover {
+	border: none;
+	color: #000;
+	background-color: #fff;	
+}
+
+.nav-tabs.lite > li.active > a:focus,
+.nav-tabs.lite > li.active > a:hover,
+.nav-tabs.lite > li.active > a {
+	border: none;
+	border-bottom: 4px solid;
+	color: #000;
+	background-color: #fff;
+}
+
+.jumbotron.db {
+	background-color: #f8f8f8;
+	border: 1px solid #e7e7e7;
+}
