@@ -1,5 +1,7 @@
 package org.meb.oneringdb.db.util;
 
+import org.meb.oneringdb.db.model.CardBase;
+import org.meb.oneringdb.db.model.CardSetBase;
 import org.meb.oneringdb.db.model.CardType;
 import org.meb.oneringdb.db.model.Deck;
 import org.meb.oneringdb.db.model.DeckComment;
@@ -8,6 +10,7 @@ import org.meb.oneringdb.db.model.DeckLink;
 import org.meb.oneringdb.db.model.DeckMember;
 import org.meb.oneringdb.db.model.Faction;
 import org.meb.oneringdb.db.model.loc.Card;
+import org.meb.oneringdb.db.model.loc.CardSet;
 import org.meb.oneringdb.db.model.loc.Domain;
 
 import com.google.common.base.Function;
@@ -15,10 +18,42 @@ import com.google.common.base.Function;
 public class Functions {
 
 	public static final Function<Card, Long> CardId = new Function<Card, Long>() {
-	
+
 		@Override
 		public Long apply(Card input) {
 			return input.getId();
+		}
+	};
+
+	public static final Function<Card, String> CardTechName = new Function<Card, String>() {
+
+		@Override
+		public String apply(Card input) {
+			return input.getTechName();
+		}
+	};
+
+	public static final Function<CardSet, String> CardSetTechName = new Function<CardSet, String>() {
+
+		@Override
+		public String apply(CardSet input) {
+			return input.getTechName();
+		}
+	};
+
+	public static final Function<CardBase, String> CardBaseTechName = new Function<CardBase, String>() {
+
+		@Override
+		public String apply(CardBase input) {
+			return input.getTechName();
+		}
+	};
+
+	public static final Function<CardSetBase, String> CardSetBaseTechName = new Function<CardSetBase, String>() {
+
+		@Override
+		public String apply(CardSetBase input) {
+			return input.getTechName();
 		}
 	};
 
@@ -42,7 +77,7 @@ public class Functions {
 			}
 		}
 	};
-	
+
 	public static final Function<Deck, Faction> DeckPrimaryFaction = new Function<Deck, Faction>() {
 
 		@Override
@@ -60,7 +95,7 @@ public class Functions {
 	};
 
 	public static final Function<DeckMember, Card> DeckMemberCard = new Function<DeckMember, Card>() {
-	
+
 		@Override
 		public Card apply(DeckMember input) {
 			return input.getCard();
@@ -68,7 +103,7 @@ public class Functions {
 	};
 
 	public static final Function<DeckMember, Long> DeckMemberCardId = new Function<DeckMember, Long>() {
-	
+
 		@Override
 		public Long apply(DeckMember input) {
 			return input.getCard().getId();
@@ -76,7 +111,7 @@ public class Functions {
 	};
 
 	public static final Function<DeckMember, CardType> DeckMemberCardType = new Function<DeckMember, CardType>() {
-	
+
 		@Override
 		public CardType apply(DeckMember input) {
 			return input.getCard().getType();
@@ -84,7 +119,7 @@ public class Functions {
 	};
 
 	public static final Function<DeckMember, String> DeckMemberCardTechName = new Function<DeckMember, String>() {
-	
+
 		@Override
 		public String apply(DeckMember input) {
 			return input.getCard().getTechName();
@@ -92,7 +127,7 @@ public class Functions {
 	};
 
 	public static final Function<DeckMember, String> DeckMemberCrstTechName = new Function<DeckMember, String>() {
-	
+
 		@Override
 		public String apply(DeckMember input) {
 			return input.getCard().getCrstTechName();
@@ -122,9 +157,9 @@ public class Functions {
 			return input.getDeck().getId();
 		}
 	};
-	
+
 	public static final Function<DeckInterest, Long> DeckInterestDeckId = new Function<DeckInterest, Long>() {
-		
+
 		@Override
 		public Long apply(DeckInterest input) {
 			return input.getDeckId();
@@ -132,7 +167,7 @@ public class Functions {
 	};
 
 	public static final Function<DeckInterest, String> DeckInterestKey = new Function<DeckInterest, String>() {
-	
+
 		@Override
 		public String apply(DeckInterest input) {
 			return input.getDeckId() + "#" + input.getUserId();

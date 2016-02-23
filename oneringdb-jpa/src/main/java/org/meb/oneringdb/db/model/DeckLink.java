@@ -23,7 +23,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "tb_deck_link")
+@Table(name = "ort_deck_link")
 public class DeckLink {
 
 	@ManyToOne

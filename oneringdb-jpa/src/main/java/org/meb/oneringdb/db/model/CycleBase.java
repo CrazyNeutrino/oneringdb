@@ -24,11 +24,12 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "langItems", "cardSetBaseItems" })
 @Entity
-@Table(name = "tb_cycle")
+@Table(name = "ort_cycle")
 public class CycleBase implements IBase<CycleLang> {
 
 	private String recordState;
 	private String techName;
+	private Integer sequence;
 
 	@OneToMany(mappedBy = "base", cascade = CascadeType.ALL)
 	@MapKey(name = "langCode")
@@ -47,6 +48,11 @@ public class CycleBase implements IBase<CycleLang> {
 	private Long id;
 
 	public CycleBase() {
+		this(null);
+	}
+	
+	public CycleBase(String techName) {
+		this.techName = techName;
 		langItems = new HashMap<String, CycleLang>();
 		cardSetBaseItems = new HashSet<CardSetBase>();
 	}

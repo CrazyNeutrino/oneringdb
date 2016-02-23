@@ -26,7 +26,7 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "langItems", "scenEnstLinkItems" })
 @Entity
-@Table(name = "tb_scenario")
+@Table(name = "ort_scenario")
 public class ScenarioBase implements IBase<ScenarioLang> {
 
 	private Integer difficulty;
@@ -62,5 +62,9 @@ public class ScenarioBase implements IBase<ScenarioLang> {
 		this.techName = techName;
 		langItems = new HashMap<String, ScenarioLang>();
 		scenEnstLinkItems = new HashSet<ScenEnstLink>();
+	}
+	
+	public ScenarioBase cloneWithIdentity() {
+		return new ScenarioBase(techName);
 	}
 }

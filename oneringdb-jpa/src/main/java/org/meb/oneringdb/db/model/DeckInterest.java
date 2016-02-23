@@ -19,7 +19,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "tb_deck_interest")
+@Table(name = "ort_deck_interest")
 public class DeckInterest {
 
 	private Long deckId;

@@ -21,7 +21,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "tb_deck_comment")
+@Table(name = "ort_deck_comment")
 public class DeckComment {
 
 	@ManyToOne

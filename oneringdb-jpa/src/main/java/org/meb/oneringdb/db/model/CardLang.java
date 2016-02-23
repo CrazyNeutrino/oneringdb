@@ -20,7 +20,7 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "base" })
 @Entity
-@Table(name = "tb_card_l")
+@Table(name = "ort_card_l")
 @NoArgsConstructor
 public class CardLang implements ILang<CardBase> {
 

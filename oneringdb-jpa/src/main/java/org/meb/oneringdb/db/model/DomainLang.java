@@ -17,7 +17,7 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "base" })
 @Entity
-@Table(name = "tb_domain_l")
+@Table(name = "ort_domain_l")
 public class DomainLang implements ILang<DomainBase> {
 
 	private String description;

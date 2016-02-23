@@ -26,7 +26,7 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "langItems", "scenEnstLinkItems" })
 @Entity
-@Table(name = "tb_encounter_set")
+@Table(name = "ort_encounter_set")
 public class EncounterSetBase implements IBase<EncounterSetLang> {
 
 	private String techName;
@@ -60,5 +60,9 @@ public class EncounterSetBase implements IBase<EncounterSetLang> {
 		this.techName = techName;
 		langItems = new HashMap<String, EncounterSetLang>();
 		scenEnstLinkItems = new HashSet<ScenEnstLink>();
+	}
+	
+	public EncounterSetBase cloneWithIdentity() {
+		return new EncounterSetBase(techName);
 	}
 }

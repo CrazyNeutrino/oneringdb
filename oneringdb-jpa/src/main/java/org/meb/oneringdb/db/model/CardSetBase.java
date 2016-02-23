@@ -29,7 +29,7 @@ import org.meb.oneringdb.db.converter.CardSetTypeConverter;
 @Setter
 @ToString(exclude = { "langItems" })
 @Entity
-@Table(name = "tb_card_set")
+@Table(name = "ort_card_set")
 public class CardSetBase implements IBase<CardSetLang>{
 
 	@Convert(converter = CardSetTypeConverter.class)

@@ -26,7 +26,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString(includeFieldNames = true)
 @Entity
-@Table(name = "tb_user")
+@Table(name = "ort_user")
 @Access(AccessType.FIELD)
 public class User {
 

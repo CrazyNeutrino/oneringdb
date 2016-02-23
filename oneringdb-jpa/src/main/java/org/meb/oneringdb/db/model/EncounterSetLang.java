@@ -17,7 +17,7 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "base" })
 @Entity
-@Table(name = "tb_encounter_set_l")
+@Table(name = "ort_encounter_set_l")
 public class EncounterSetLang implements ILang<EncounterSetBase> {
 
 	private String name;

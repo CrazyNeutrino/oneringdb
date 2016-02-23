@@ -18,7 +18,7 @@ import org.hibernate.annotations.SQLUpdate;
 @Setter
 @ToString
 @Entity
-@Table(name = "vw_domain")
+@Table(name = "orv_domain")
 @SQLInsert(callable = true, check = ResultCheckStyle.NONE, sql = "call cqp_ins_domain_loc(?,?,?,?,?)")
 @SQLUpdate(callable = false, check = ResultCheckStyle.NONE, sql = "call cqp_upd_domain_loc(?,?,?,?,?,?)")
 public class Domain {

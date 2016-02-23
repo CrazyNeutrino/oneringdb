@@ -21,7 +21,7 @@ import org.meb.oneringdb.db.model.CardSetType;
 @Getter
 @Setter
 @Entity
-@Table(name = "vw_card_set")
+@Table(name = "orv_card_set")
 @NoArgsConstructor
 public class CardSet {
 

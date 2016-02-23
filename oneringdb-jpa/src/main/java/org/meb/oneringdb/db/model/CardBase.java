@@ -34,7 +34,7 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @ToString(exclude = { "langItems" })
 @Entity
-@Table(name = "tb_card")
+@Table(name = "ort_card")
 public class CardBase implements IBase<CardLang> {
 
 	private String techName;

@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "vw_cycle_loc")
+@Table(name = "orv_cycle_loc")
 public class Cycle {
 
 	private String name;

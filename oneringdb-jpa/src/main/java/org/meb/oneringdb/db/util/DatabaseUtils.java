@@ -21,7 +21,7 @@ public class DatabaseUtils {
 		session.doWork(new Work() {
 
 			public void execute(Connection conn) throws SQLException {
-				PreparedStatement stmt = conn.prepareStatement("call cqp_set_user_lang(?)");
+				PreparedStatement stmt = conn.prepareStatement("call orp_set_user_lang(?)");
 				stmt.setString(1, lang);
 				stmt.execute();
 				stmt.close();

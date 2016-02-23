@@ -17,7 +17,7 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "base" })
 @Entity
-@Table(name = "tb_scenario_l")
+@Table(name = "ort_scenario_l")
 public class ScenarioLang implements ILang<ScenarioBase> {
 
 	private String name;

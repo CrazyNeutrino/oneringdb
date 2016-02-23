@@ -17,7 +17,7 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "base" })
 @Entity
-@Table(name = "tb_card_set_l")
+@Table(name = "ort_card_set_l")
 public class CardSetLang implements ILang<CardSetBase> {
 
 	private String name;

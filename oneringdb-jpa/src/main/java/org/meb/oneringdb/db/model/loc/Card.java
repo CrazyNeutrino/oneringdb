@@ -26,7 +26,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "vw_card")
+@Table(name = "orv_card")
 @Access(AccessType.FIELD)
 public class Card {
 

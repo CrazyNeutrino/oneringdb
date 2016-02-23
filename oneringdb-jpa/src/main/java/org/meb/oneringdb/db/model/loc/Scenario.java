@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "vw_scenario")
+@Table(name = "orv_scenario")
 public class Scenario {
 
 	private Long crstId;

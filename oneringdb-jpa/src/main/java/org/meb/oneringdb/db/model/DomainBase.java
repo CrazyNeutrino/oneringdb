@@ -22,7 +22,7 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "langItems" })
 @Entity
-@Table(name = "tb_domain")
+@Table(name = "ort_domain")
 public class DomainBase implements IBase<DomainLang> {
 
 	private String domain;

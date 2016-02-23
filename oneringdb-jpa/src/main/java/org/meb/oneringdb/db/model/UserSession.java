@@ -14,7 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "tb_user_session")
+@Table(name = "ort_user_session")
 public class UserSession {
 
 	@NonNull

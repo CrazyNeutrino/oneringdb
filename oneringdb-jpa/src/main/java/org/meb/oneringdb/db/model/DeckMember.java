@@ -20,7 +20,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "tb_deck_member")
+@Table(name = "ort_deck_member")
 public class DeckMember {
 
 	@ManyToOne

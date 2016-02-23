@@ -17,7 +17,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "tb_scen_enst_link")
+@Table(name = "ort_scen_enst_link")
 public class ScenEnstLink {
 
 	@ManyToOne
@@ -36,4 +36,15 @@ public class ScenEnstLink {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	public ScenEnstLink cloneWithIdentity() {
+		ScenEnstLink clone = new ScenEnstLink();
+		if (scenarioBase != null) {
+			clone.setScenarioBase(new ScenarioBase(scenarioBase.getTechName()));
+		}
+		if (encounterSetBase != null) {
+			clone.setEncounterSetBase(new EncounterSetBase(encounterSetBase.getTechName()));
+		}
+		return clone;
+	}
 }

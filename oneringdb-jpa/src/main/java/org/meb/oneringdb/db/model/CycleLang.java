@@ -17,7 +17,7 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = { "base" })
 @Entity
-@Table(name = "tb_cycle_l")
+@Table(name = "ort_cycle_l")
 public class CycleLang implements ILang<CycleBase> {
 
 	private String recordState;

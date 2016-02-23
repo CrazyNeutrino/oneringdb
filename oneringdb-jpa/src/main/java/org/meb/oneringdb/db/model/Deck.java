@@ -41,7 +41,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "tb_deck")
+@Table(name = "ort_deck")
 @Access(AccessType.FIELD)
 public class Deck {
 
