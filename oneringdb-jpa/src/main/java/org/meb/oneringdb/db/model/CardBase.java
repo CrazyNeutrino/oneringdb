@@ -1,5 +1,6 @@
 package org.meb.oneringdb.db.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -22,16 +23,11 @@ import org.meb.oneringdb.db.converter.CardTypeConverter;
 import org.meb.oneringdb.db.converter.SphereConverter;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@RequiredArgsConstructor
 @ToString(exclude = { "langItems" })
 @Entity
 @Table(name = "ort_card")
@@ -39,24 +35,22 @@ public class CardBase implements IBase<CardLang> {
 
 	private String techName;
 
-	@NonNull
 	@Convert(converter = CardTypeConverter.class)
 	@Column(name = "type_code")
 	private CardType type;
 
-	@NonNull
 	@Convert(converter = SphereConverter.class)
 	@Column(name = "sphere_code")
 	private Sphere sphere;
 
-	private Integer cost;
+	private Integer threatCost;
+	private Integer resourceCost;
+	private Integer engagementCost;
 	private Integer willpower;
+	private Integer threat;
 	private Integer attack;
 	private Integer defense;
 	private Integer hitPoints;
-	private Integer threat;
-	private Integer startingThreat;
-	private Integer engageThreat;
 	private Integer questPoints;
 	private Integer victoryPoints;
 
@@ -78,7 +72,7 @@ public class CardBase implements IBase<CardLang> {
 	@ManyToOne
 	@JoinColumn(name = "crst_id")
 	private CardSetBase cardSetBase;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "enst_id")
 	private EncounterSetBase encounterSetBase;
@@ -89,4 +83,13 @@ public class CardBase implements IBase<CardLang> {
 
 	@Version
 	private Long version;
+
+	public CardBase() {
+		this(null);
+	}
+
+	public CardBase(String techName) {
+		this.techName = techName;
+		langItems = new HashMap<String, CardLang>();
+	}
 }

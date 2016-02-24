@@ -41,7 +41,7 @@ public class CardSetBaseDao {
 			cq.where(predicates.toArray(new Predicate[predicates.size()]));
 		}
 
-		cq.orderBy(cb.asc(root.get(CardSetBase_.sequence)));
+		cq.orderBy(cb.asc(root.get(CardSetBase_.sequence)), cb.asc(root.get(CardSetBase_.techName)));
 
 		return em.createQuery(cq);
 	}

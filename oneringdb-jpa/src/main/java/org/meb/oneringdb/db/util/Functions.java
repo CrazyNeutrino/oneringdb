@@ -49,6 +49,14 @@ public class Functions {
 		}
 	};
 
+	public static final Function<CardBase, String> CardBaseComposite = new Function<CardBase, String>() {
+
+		@Override
+		public String apply(CardBase input) {
+			return input.getCardSetBase().getTechName() + "#" + input.getTechName() + "#" + input.getNumber();
+		}
+	};
+
 	public static final Function<CardSetBase, String> CardSetBaseTechName = new Function<CardSetBase, String>() {
 
 		@Override

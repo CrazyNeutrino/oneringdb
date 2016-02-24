@@ -42,23 +42,23 @@ public class Card {
 	private Sphere sphere;
 	private String sphereDisplay;
 
-	private Integer cost;
+	private Integer threatCost;
+	private Integer resourceCost;
+	private Integer engagementCost;
 	private Integer willpower;
+	private Integer threat;
 	private Integer attack;
 	private Integer defense;
 	private Integer hitPoints;
-	private Integer threat;
-	private Integer startingThreat;
-	private Integer engageThreat;
 	private Integer questPoints;
 	private Integer victoryPoints;
 	
 	private String name;
 	private String nameEn;
 	private String text;
-	private String trait;
-	private String traitEn;
-	private String keyword;
+	private String traits;
+	private String traitsEn;
+	private String keywords;
 	private Date faqDate;
 	private String faqText;
 	private String faqVersion;

@@ -31,8 +31,8 @@ public class CardLang implements ILang<CardBase> {
 	private String name;
 	private String recordState;
 	private String text;
-	private String trait;
-	private String keyword;
+	private String traits;
+	private String keywords;
 
 	@ManyToOne
 	@JoinColumn(name = "card_id")

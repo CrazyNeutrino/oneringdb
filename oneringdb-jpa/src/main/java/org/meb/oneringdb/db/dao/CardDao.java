@@ -58,7 +58,7 @@ public class CardDao extends JpaDaoAbstract<Card, CardQuery> {
 				textPredicates.add(cb.like(cb.lower(root.get(Card_.name)), text));
 			}
 			if (query.isSearchInTrait()) {
-				textPredicates.add(cb.like(cb.lower(root.get(Card_.trait)), text));
+				textPredicates.add(cb.like(cb.lower(root.get(Card_.traits)), text));
 			}
 			if (query.isSearchInText()) {
 				textPredicates.add(cb.like(cb.lower(root.get(Card_.text)), text));
