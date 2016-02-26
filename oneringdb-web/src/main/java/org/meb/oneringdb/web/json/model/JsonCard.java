@@ -51,7 +51,7 @@ public class JsonCard {
 		name = card.getName();
 		nameEn = card.getNameEn();
 		text = card.getText();
-		imageBase = Utils.imageBase(card, true);
+		imageBase = Utils.toImageBase(card, true);
 		sphere = new SphereConverter().convertToDatabaseColumn(card.getSphere());
 		sphereDisplay = card.getSphereDisplay();
 		type = new CardTypeConverter().convertToDatabaseColumn(card.getType());

@@ -62,7 +62,7 @@ public class Card {
 	private Date faqDate;
 	private String faqText;
 	private String faqVersion;
-	private String flavourText;
+	private String flavorText;
 	
 	private Long crstId;
 	private String crstDescription;

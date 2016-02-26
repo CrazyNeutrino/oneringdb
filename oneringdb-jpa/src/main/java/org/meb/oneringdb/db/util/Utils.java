@@ -4,8 +4,6 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 
 import org.apache.commons.lang3.StringUtils;
-import org.meb.oneringdb.db.converter.FactionConverter;
-import org.meb.oneringdb.db.model.Faction;
 import org.meb.oneringdb.db.model.loc.Card;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,13 +13,31 @@ public class Utils {
 	private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
 	public static String toTechName(String name) {
-		String techName = Normalizer.normalize(name, Form.NFD).replaceAll("[^\\p{ASCII}\\p{Digit}]", "");
-		techName = techName.replaceAll("[^\\p{Alnum} \\-]", "").replace(' ', '-').replaceAll("\\-+", "-");
+		String techName = Normalizer.normalize(name, Form.NFD).replaceAll("[^\\p{ASCII}\\p{Digit}]",
+				"");
+		techName = techName.replaceAll("[^\\p{Alnum} \\-]", "").replace(' ', '-').replaceAll("\\-+",
+				"-");
 		techName = StringUtils.removeStart(techName, "-");
 		techName = StringUtils.removeEnd(techName, "-");
 		techName = techName.toLowerCase().trim();
 		log.debug("toTechName(): name: {}, techName: {}", name, techName);
 		return techName;
+	}
+
+	public static String toCardIdentity(Card card) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(StringUtils.leftPad(card.getNumber().toString(), 3, '0'));
+		builder.append("-");
+		builder.append(card.getTechName());
+		return builder.toString();
+	}
+
+	public static String toCrstIdentity(Card card) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(StringUtils.leftPad(card.getCrstSequence().toString(), 3, '0'));
+		builder.append("-");
+		builder.append(card.getCrstTechName());
+		return builder.toString();
 	}
 
 	public static String techNameToAcronym(String techName) {
@@ -33,33 +49,22 @@ public class Utils {
 		return builder.toString();
 	}
 
-	public static String imageName(Card card, boolean includeSetPath) {
-		return imageBase(card, includeSetPath) + ".jpg";
+	public static String toImageName(Card card, boolean includeSetPath) {
+		return toImageBase(card, includeSetPath) + ".jpg";
 	}
 
-	public static String imageBase(Card card, boolean includeSetPath) {
+	public static String toImageBase(Card card, boolean includeSetPath) {
 		StringBuilder builder = new StringBuilder();
 
 		if (card.getImageLangCode() == null) {
 			builder.append("no-card-image.png");
 		} else {
-			builder.append(card.getImageLangCode());
-			builder.append("/");
+			builder.append(card.getImageLangCode()).append("/");
 			if (includeSetPath) {
-				builder.append(StringUtils.leftPad(card.getCrstSequence().toString(), 2, '0'));
-				builder.append("-");
-				builder.append(techNameToAcronym(card.getCrstTechName()));
-				builder.append("/");
+				builder.append(toCrstIdentity(card)).append("/");
 			}
-
-			builder.append(StringUtils.leftPad(card.getNumber().toString(), 3, '0'));
-			builder.append("-");
-			builder.append(card.getTechName());
+			builder.append(toCardIdentity(card));
 		}
 		return builder.toString();
-	}
-
-	public static String imageBase(Faction faction) {
-		return new FactionConverter().convertToDatabaseColumn(faction);
 	}
 }

@@ -27,7 +27,7 @@ public class CardLang implements ILang<CardBase> {
 	private Date faqDate;
 	private String faqText;
 	private String faqVersion;
-	private String flavourText;
+	private String flavorText;
 	private String name;
 	private String recordState;
 	private String text;
