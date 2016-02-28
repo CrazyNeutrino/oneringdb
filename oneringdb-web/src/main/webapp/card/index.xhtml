@@ -26,13 +26,14 @@
 			conquest.static.contextPath = '#{facesContext.externalContext.request.contextPath}';
 			conquest.static.restPath = '#{facesContext.externalContext.request.contextPath}/rest';
 			conquest.static.imagePath = '/image';
+			conquest.static.user = #{bootstrapCtrl.user};
 			conquest.dict.messages = #{bootstrapCtrl.messagesData};
 			conquest.dict.cards = #{bootstrapCtrl.cardsData};
 			conquest.dict.sets = #{bootstrapCtrl.cardSetsData};
-			conquest.dict.factions = #{bootstrapCtrl.factionsData};
-			conquest.dict.cardTypes = #{bootstrapCtrl.cardTypesData};
-			conquest.dict.traits = #{bootstrapCtrl.domainTraitData};
-			conquest.dict.keywords = #{bootstrapCtrl.domainKeywordData};
+			conquest.dict.spheres = #{bootstrapCtrl.domainSpheresData};
+			conquest.dict.cardTypes = #{bootstrapCtrl.domainCardTypesData};
+			conquest.dict.traits = #{bootstrapCtrl.domainTraitsData};
+			conquest.dict.keywords = #{bootstrapCtrl.domainKeywordsData};
 			conquest.dict.initialize();
 		</h:outputScript>
 	</ui:define>

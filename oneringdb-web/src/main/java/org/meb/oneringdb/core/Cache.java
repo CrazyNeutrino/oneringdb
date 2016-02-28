@@ -1,6 +1,7 @@
 package org.meb.oneringdb.core;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -73,10 +74,10 @@ public class Cache implements Serializable {
 			synchronized (key) {
 				domains = (List<Domain>) cache.get(key);
 				if (domains == null) {
-					log.debug("cache miss: {}", key);
+					log.info("cache miss: {}", key);
 					domains = service.find(query);
 					cache.put(key, domains);
-					log.debug("cache put: {}, size: {}", key, domains.size());
+					log.info("cache put: {}, size: {}", key, domains.size());
 
 					MultiValueMap<String, Domain> map = new MultiValueMap<String, Domain>();
 					MapUtils.populateMap(map, domains, Transformers.DOMA_NAME);
@@ -84,13 +85,17 @@ public class Cache implements Serializable {
 						Collection<Domain> subDomains = map.getCollection(domainName);
 						String subKey = createDomainKey(domainName);
 						cache.put(subKey, subDomains);
-						log.debug("cache put: {}, size: {}", subKey, subDomains.size());
+						log.info("cache put: {}, size: {}", subKey, subDomains.size());
 					}
 				}
 			}
 		}
 
-		return (List<Domain>) cache.get(createDomainKey(name));
+		List<Domain> list = (List<Domain>) cache.get(createDomainKey(name));
+		if (list == null) {
+			list = new ArrayList<>();
+		}
+		return list;
 	}
 
 	private String createDomainKey(String name) {
@@ -120,14 +125,12 @@ public class Cache implements Serializable {
 			synchronized (key) {
 				result = (List<T>) cache.get(key);
 				if (result == null) {
-					log.debug("cache miss: {}", key);
+					log.info("cache miss: {}", key);
 					result = service.find(query);
 					cache.put(key, result);
-					log.debug("cache put: {}, size: {}", key, result.size());
+					log.info("cache put: {}, size: {}", key, result.size());
 				}
 			}
-		} else {
-			log.debug("cache hit: {}", key);
 		}
 
 		return result;

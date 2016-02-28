@@ -13,6 +13,7 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Type;
 import org.meb.oneringdb.db.converter.CardTypeConverter;
+import org.meb.oneringdb.db.converter.SphereConverter;
 import org.meb.oneringdb.db.model.CardType;
 import org.meb.oneringdb.db.model.Sphere;
 
@@ -37,7 +38,7 @@ public class Card {
 	private CardType type;
 	private String typeDisplay;
 
-	@Convert(converter = CardTypeConverter.class)
+	@Convert(converter = SphereConverter.class)
 	@Column(name = "sphere_code")
 	private Sphere sphere;
 	private String sphereDisplay;

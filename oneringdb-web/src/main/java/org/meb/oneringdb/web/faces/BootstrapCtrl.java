@@ -11,20 +11,21 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonProcessingException;
 import org.meb.oneringdb.core.Cache;
 import org.meb.oneringdb.db.model.UserContribSummary;
 import org.meb.oneringdb.db.model.loc.Domain;
-import org.meb.oneringdb.db.util.Transformers;
+import org.meb.oneringdb.db.util.Functions;
 import org.meb.oneringdb.service.RequestContext;
 import org.meb.oneringdb.service.api.UserService;
 import org.meb.oneringdb.web.auth.AuthToken;
 import org.meb.oneringdb.web.json.JsonModelUtils;
 import org.meb.oneringdb.web.json.JsonUtils;
 import org.meb.oneringdb.web.json.model.JsonDomain;
-import org.meb.oneringdb.web.json.model.JsonFaction;
+import org.meb.oneringdb.web.json.model.JsonDomainExt;
+
+import com.google.common.collect.Maps;
 
 @Named
 @RequestScoped
@@ -57,62 +58,45 @@ public class BootstrapCtrl {
 		return JsonModelUtils.cardSetsAsJson(cache.loadCardSets());
 	}
 
-	public String getFactionsData() throws JsonProcessingException, IOException {
-		List<Domain> factions = getDomainDataRaw("faction");
-		List<Domain> factionsShort = getDomainDataRaw("faction-short");
-		Map<String, Domain> map = new HashMap<>();
-		MapUtils.populateMap(map, factionsShort, Transformers.DOMA_VALUE);
+	public String getDomainSpheresData() throws JsonProcessingException, IOException {
+		List<Domain> sphereList = getDomainDataRaw("sphere");
+		List<Domain> sphereShortList = getDomainDataRaw("sphere-short");
+		Map<String, Domain> sphereShortIndex = Maps.uniqueIndex(sphereShortList,
+				Functions.DomainValue);
 
-		List<JsonFaction> jsonFactions = new ArrayList<>();
-		for (Domain faction : factions) {
-			String techName = faction.getValue();
-			String name = faction.getDescription();
+		List<JsonDomainExt> spheresData = new ArrayList<>();
+		for (Domain sphere : sphereList) {
+			String techName = sphere.getValue();
+			String name = sphere.getDescription();
 			String shortName = null;
-			if (map.containsKey(techName)) {
-				shortName = map.get(techName).getDescription();
+			if (sphereShortIndex.containsKey(techName)) {
+				shortName = sphereShortIndex.get(techName).getDescription();
 			}
-			jsonFactions.add(new JsonFaction(techName, name, shortName));
+			spheresData.add(new JsonDomainExt(techName, name, shortName));
 		}
-		return JsonUtils.write(jsonFactions);
+		return JsonUtils.write(spheresData);
 	}
 
-	public String getCardTypesData() throws JsonProcessingException, IOException {
-		List<Domain> factions = getDomainDataRaw("card-type");
+	public String getDomainCardTypesData() throws JsonProcessingException, IOException {
+		List<Domain> cardTypeList = getDomainDataRaw("card-type");
 
-		List<JsonFaction> jsonFactions = new ArrayList<>();
-		for (Domain faction : factions) {
-			String techName = faction.getValue();
-			String name = faction.getDescription();
-			String nameEn = faction.getDescriptionEn();
-			String shortName = name.substring(0, 2);
-			jsonFactions.add(new JsonFaction(techName, name, nameEn, shortName));
+		List<JsonDomainExt> cardTypeData = new ArrayList<>();
+		for (Domain cardType : cardTypeList) {
+			String techName = cardType.getValue();
+			String name = cardType.getDescription();
+			String nameEn = cardType.getDescriptionEn();
+			String shortName = name.substring(0, 3);
+			cardTypeData.add(new JsonDomainExt(techName, name, nameEn, shortName));
 		}
-		return JsonUtils.write(jsonFactions);
+		return JsonUtils.write(cardTypeData);
 	}
 
-	public String getDomainCardTypeData() throws JsonProcessingException, IOException {
-		return getDomainData("card-type");
-	}
 
-	public String getDomainCardTypeShortData() throws JsonProcessingException, IOException {
-		return getDomainData("card-type", new Processor<Domain, JsonDomain>() {
-
-			@Override
-			public JsonDomain process(Domain domain) {
-				JsonDomain jsonDomain = new JsonDomain();
-				jsonDomain.setValue(domain.getValue());
-				jsonDomain.setDescription(domain.getDescription().substring(0, 2));
-				return jsonDomain;
-			}
-
-		});
-	}
-
-	public String getDomainTraitData() throws JsonProcessingException, IOException {
+	public String getDomainTraitsData() throws JsonProcessingException, IOException {
 		return getDomainData("trait");
 	}
 
-	public String getDomainKeywordData() throws JsonProcessingException, IOException {
+	public String getDomainKeywordsData() throws JsonProcessingException, IOException {
 		return getDomainData("keyword");
 	}
 

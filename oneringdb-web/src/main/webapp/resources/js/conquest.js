@@ -596,8 +596,8 @@ conquest.filter = conquest.filter || {};
 		queryStringKey : 'type',
 		type : _filter.FD_TYPE_SET
 	}, {
-		key : 'faction',
-		queryStringKey : 'faction',
+		key : 'sphere',
+		queryStringKey : 'sphere',
 		type : _filter.FD_TYPE_SET
 	}, {
 		key : 'primaryFaction',

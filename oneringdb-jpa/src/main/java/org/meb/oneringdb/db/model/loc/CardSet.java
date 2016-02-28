@@ -35,7 +35,6 @@ public class CardSet {
 	@Type(type = "org.hibernate.type.YesNoType")
 	private Boolean released;
 	private Integer sequence;
-	private String symbol;
 	private String techName;
 	
 	@Convert(converter = CardSetTypeConverter.class)

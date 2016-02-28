@@ -116,7 +116,7 @@ $(function() {
 
 			var template = Handlebars.templates['card-search-view']({
 				filter: {
-					factions: conquest.dict.factions,
+					spheres: conquest.dict.spheres,
 					cardTypes: conquest.dict.cardTypes
 				},
 				sortItems: sortItems
@@ -164,18 +164,18 @@ $(function() {
 			//
 			// filter: factions
 			//
-			var factions = view.cardsFilter.get('faction');
-			var $factions = view.$el.find('#factionFilter > .btn');
+			var spheres = view.cardsFilter.get('sphere');
+			var $spheres = view.$el.find('#sphereFilter > .btn');
 
-			$factions.each(function() {
+			$spheres.each(function() {
 				var $this = $(this);
-				if (factions && factions.indexOf($this.data('faction')) > -1) {
+				if (spheres && spheres.indexOf($this.data('sphere')) > -1) {
 					$this.addClass('active');
 				}
 				$this.click(function(event) {
 					view.cardsFilter.set({
-						faction: $factions.filter('.active').map(function() {
-							return $(this).data('faction');
+						sphere: $spheres.filter('.active').map(function() {
+							return $(this).data('sphere');
 						}).get()
 					});
 				});
