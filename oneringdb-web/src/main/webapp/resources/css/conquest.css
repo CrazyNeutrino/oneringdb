@@ -807,33 +807,35 @@ table.table-with-btn > tbody > tr > td {
 	margin: .1em;
 } */
 
-.db-icon-astra-militarum:before { content: '\e800'; } 
-.db-icon-chaos:before { content: '\e801'; } 
-.db-icon-dark-eldar:before { content: '\e802'; } 
-.db-icon-eldar:before { content: '\e803'; } 
-.db-icon-neutral:before { content: '\e804'; } 
-.db-icon-ork:before { content: '\e805'; } 
-.db-icon-space-marines:before { content: '\e806'; width: 1.5em; } 
-.db-icon-tau:before { content: '\e807'; } 
-.db-icon-tyranid:before { content: '\e808'; width: 1.5em; }
-.db-icon-necron:before { content: '\e819'; } 
-.db-icon-link:before { content: '\e809'; } 
-.db-icon-flash:before { content: '\e80a'; } 
-.db-icon-attach:before { content: '\e80b'; } 
-.db-icon-database:before { content: '\e80c'; } 
-.db-icon-rocket:before { content: '\e80d'; } 
-.db-icon-globe:before { content: '\e80e'; }
-.db-icon-asterisk:before { content: '\e80f'; }
-.db-icon-king:before { content: '\e810'; }
-.db-icon-first:before { content: '\e811'; }
-.db-icon-second:before { content: '\e812'; }
-.db-icon-heart:before { content: '\e813'; }
-.db-icon-heart-empty:before { content: '\e814'; }
-.db-icon-star:before { content: '\e815'; }
-.db-icon-star-empty:before { content: '\e816'; }
-.db-icon-comment:before { content: '\e817'; }
-.db-icon-comment-empty:before { content: '\e818'; }
-.db-icon-unique:before { content: '\e81a'; }
+.db-icon-baggins:before { content: '\e800'; } /* '' */
+.db-icon-fellowship:before { content: '\e801'; } /* '' */
+.db-icon-tactics:before { content: '\e802'; } /* '' */
+.db-icon-lore:before { content: '\e803'; } /* '' */
+.db-icon-spirit:before { content: '\e804'; } /* '' */
+.db-icon-leadership:before { content: '\e805'; } /* '' */
+.db-icon-link:before { content: '\e809'; } /* '' */
+.db-icon-flash:before { content: '\e80a'; } /* '' */
+.db-icon-attach:before { content: '\e80b'; } /* '' */
+.db-icon-database:before { content: '\e80c'; } /* '' */
+.db-icon-rocket:before { content: '\e80d'; } /* '' */
+.db-icon-globe:before { content: '\e80e'; } /* '' */
+.db-icon-asterisk:before { content: '\e80f'; } /* '' */
+.db-icon-king:before { content: '\e810'; } /* '' */
+.db-icon-1st:before { content: '\e811'; } /* '' */
+.db-icon-2nd:before { content: '\e812'; } /* '' */
+.db-icon-heart:before { content: '\e813'; } /* '' */
+.db-icon-heart-empty:before { content: '\e814'; } /* '' */
+.db-icon-star:before { content: '\e815'; } /* '' */
+.db-icon-star-empty:before { content: '\e816'; } /* '' */
+.db-icon-comment:before { content: '\e817'; } /* '' */
+.db-icon-comment-empty:before { content: '\e818'; } /* '' */
+
+.filter-sphere .db-icon {
+	font-size: 1.65em;
+}
+.filter-sphere .btn {
+	padding: 1px 8px;
+} 
 
 .fg-astra-militarum { color: #3C3C3C; }
 .fg-chaos { color: #EA5400; }

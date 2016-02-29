@@ -71,13 +71,37 @@ $(function() {
 				// list layout is the default
 				templateName = 'card-search-results-list';
 			}
-
-			var template = Handlebars.templates[templateName]({
-				results: {
-					cards: cards.toJSON()
-				}
-			});
-			view.$el.html(template);
+			
+			var renderPage = function(cards, options) {
+				
+				options = options || {};
+				
+				var pagination = conquest.util.buildPagination({
+					total: cards.size(),
+					pageNumber: options.pageNumber,
+					pageSize: 60
+				});
+				
+				Handlebars.registerPartial('pagination', Handlebars.templates['pagination']({
+					pagination: pagination
+				}));
+				
+				var template = Handlebars.templates[templateName]({				
+					results: {
+						cards: cards.toJSON().slice(pagination.pageStartIndex, pagination.pageEndIndex + 1)
+					}
+				});
+				view.$el.html(template);
+				
+				view.$el.find('.pagination-container a[data-page-number]').click(function(event) {
+					renderPage(cards, {
+						pageNumber: parseInt($(this).data("page-number"))
+					});
+					event.preventDefault();
+				});
+			};
+			
+			renderPage(cards, 0);
 		}
 	});
 

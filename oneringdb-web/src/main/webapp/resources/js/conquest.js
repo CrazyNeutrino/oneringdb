@@ -1052,6 +1052,40 @@ conquest.util = conquest.util || {};
 		// '').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\ +/g, '-');
 		return s(input).toLowerCase().slugify().value();
 	};
+	
+	_util.buildPagination = function(options) {
+		options = options || {};
+		
+		var p = {
+			total: options.total,
+			pageNumber: _.isNumber(options.pageNumber) ? options.pageNumber : 0,
+			pageSize: _.isNumber(options.pageSize) ? options.pageSize : 40,
+		};
+		
+		p.pages = new Array(Math.ceil(p.total / p.pageSize));				
+		p.firstPage = p.pages[0];
+		p.lastPage = p.pages[p.pages.length - 1];		
+		p.singlePage = p.pages.length == 1;
+		
+		_.each(_.range(0, p.pages.length), function(number) {
+			p.pages[number] = {
+				number: number,
+				label: "" + (number + 1),
+				active: number == p.pageNumber
+			};
+		});
+		p.prevPage = p.pageNumber > 0 ? {
+			number : p.pageNumber - 1
+		} : undefined;
+		p.nextPage = p.pageNumber < p.pages.length - 1 ? {
+			number : p.pageNumber + 1
+		} : undefined;
+				
+		p.pageStartIndex = p.pageNumber * p.pageSize;
+		p.pageEndIndex = Math.min(p.pageStartIndex + p.pageSize, p.total) - 1;		
+		
+		return p;
+	}
 
 })(conquest.util);
 
