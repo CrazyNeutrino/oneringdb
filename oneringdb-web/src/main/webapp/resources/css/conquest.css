@@ -176,9 +176,8 @@ footer.footer > .container > p:first-child {
 /**
  * card search
  */
- 
 .attrs {
-	font-size: 1.3em;
+	font-size: 1.4em;
 	font-weight: bold;
 	margin-left: 1em;
 }
@@ -194,7 +193,7 @@ footer.footer > .container > p:first-child {
 	margin-right: 0.5em;
 }
 .attrs .attr-hit-points {
-	color: #FF0000;
+	color: #E30000;
 	margin-left: 0.5em;
 }
 .card-search-list .card > .header a,
@@ -871,7 +870,12 @@ table.table-with-btn > tbody > tr > td {
 .fg-baggins { color: #FBE821; }
 .fg-tau { color: #4CD0DC; }
 .fg-tyranid { color: #A32618; }
-.fg-neutral { color: #BBB; }
+.fg-neutral { color: #DDD; }
+
+.fg-enemy { color: #622F0A !important; }
+.fg-location { color: #A6875F !important; }
+.fg-treachery { color: #33415C !important; }
+.fg-quest { color: #BBB !important; }
 
 .bg-leadership { background-color: #A22FA0 !important; color: #fff !important; }
 .bg-tactics { background-color: #C71313 !important; color: #fff !important; }
@@ -879,7 +883,15 @@ table.table-with-btn > tbody > tr > td {
 .bg-spirit { background-color: #4EBBF7  !important; color: #000 !important; }
 .bg-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
 .bg-baggins { background-color: #FBE821 !important; color: #000 !important; }
-.bg-neutral { background-color: #BBB !important; color: #000 !important; }
+.bg-neutral { background-color: #DDD !important; color: #000 !important; }
+
+.bg-enemy { background-color: #622F0A !important; color: #fff !important; }
+.bg-location { background-color: #A6875F !important; color: #000 !important; }
+.bg-treachery { background-color: #33415C !important; color: #fff !important; }
+.bg-quest { background-color: #BBB !important; color: #000 !important; }
+.bg-objective { background-color: #DDD !important; color: #000 !important; }
+.bg-objective-ally { background-color: #DDD !important; color: #000 !important; }
+.bg-objective-location { background-color: #DDD !important; color: #000 !important; }
 
 .bor-astra-militarum { border-color: #3C3C3C !important; }
 .bor-chaos { border-color: #EA5400 !important; }

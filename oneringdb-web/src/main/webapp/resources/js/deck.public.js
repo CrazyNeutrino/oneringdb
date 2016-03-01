@@ -182,7 +182,7 @@ $(function() {
 				};
 
 				view.config.get('filter').set({
-					sets: _.pluck(_.where(conquest.dict.sets, {
+					sets: _.pluck(_.where(conquest.dict.cardSets, {
 						released: true
 					}), 'techName')
 				});

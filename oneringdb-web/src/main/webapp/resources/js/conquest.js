@@ -19,18 +19,6 @@ conquest.static.format = {
 //
 conquest.dict = conquest.dict || {};
 (function(_dict) {
-
-	var IDX_CARD_BY_ID = "card#id";
-	var IDX_CARD_BY_TECH_NAME = "card#techName";
-	var IDX_CARD_BY_NAME = "card#name";
-	var IDX_CARD_BY_SET_NO_CARD_NO = "card#setNumber#cardNumber";
-	var IDX_SET_BY_ID = "set#id";
-	var IDX_FACTION_BY_TECH_NAME = "faction#techName";
-	var IDX_CARD_TYPE_BY_TECH_NAME = "cardType#techName";
-	var indexes = {};
-
-	var GRP_CARD_BY_WARLORD_ID = "ss#warlordId";
-	var groups = {};
 	
 	_dict.reservedWords = {
 			de: ['Aktion', 'Erzwungen', 'Reaktion', 'Schatten', 'Wenn aufgedeckt'],
@@ -38,10 +26,17 @@ conquest.dict = conquest.dict || {};
 			pl: ['Akcja', 'Cień', 'Po odkryciu', 'Odpowiedź', 'Wymuszony', ]
 	};
 
+	var IDX_CARD_BY_ID = "card#id";
+	var IDX_CARD_BY_TECH_NAME = "card#techName";
+	var IDX_CARD_BY_NAME = "card#name";
+	var IDX_CARD_BY_SET_NO_CARD_NO = "card#setNumber#cardNumber";
+	var IDX_CARD_SET_BY_ID = "cardSet#id";
+	var IDX_CARD_TYPE_BY_TECH_NAME = "cardType#techName";
+	var IDX_ENCOUNTER_SET_BY_ID = "encounterSet#id";
+	var IDX_SPHERE_BY_TECH_NAME = "sphere#techName";
+	var indexes = {};
+
 	_dict.initialize = function() {
-		indexes[IDX_SET_BY_ID] = _.indexBy(_dict.sets, function(set) {
-			return set.id;
-		});
 		indexes[IDX_CARD_BY_ID] = _.indexBy(_dict.cards, function(card) {
 			return card.id;
 		});
@@ -51,32 +46,54 @@ conquest.dict = conquest.dict || {};
 		indexes[IDX_CARD_BY_NAME] = _.indexBy(_dict.cards, function(card) {
 			return card.name;
 		});
-		indexes[IDX_FACTION_BY_TECH_NAME] = _.indexBy(_dict.factions, function(faction) {
-			return faction.techName;
+		indexes[IDX_CARD_SET_BY_ID] = _.indexBy(_dict.cardSets, function(cardSet) {
+			return cardSet.id;
 		});
 		indexes[IDX_CARD_TYPE_BY_TECH_NAME] = _.indexBy(_dict.cardTypes, function(cardType) {
 			return cardType.techName;
 		});
 		indexes[IDX_CARD_BY_SET_NO_CARD_NO] = _.indexBy(_dict.cards, function(card) {
-			return _dict.findSet(card.setId).number + '#' + card.number;
+			return _dict.findCardSet(card.crstId).number + '#' + card.number;
 		});
-
-		groups[GRP_CARD_BY_WARLORD_ID] = _.groupBy(_dict.cards, function(card) {
-			return card.warlordId;
+		indexes[IDX_ENCOUNTER_SET_BY_ID] = _.indexBy(_dict.encounterSets, function(encounterSet) {
+			return encounterSet.id;
 		});
-		delete groups[GRP_CARD_BY_WARLORD_ID][undefined];
-		_.each(Object.keys(groups[GRP_CARD_BY_WARLORD_ID]), function(key) {
-			groups[GRP_CARD_BY_WARLORD_ID][key] = _.sortBy(groups[GRP_CARD_BY_WARLORD_ID][key],
-					function(card) {
-						return card.number;
-					});
+		indexes[IDX_SPHERE_BY_TECH_NAME] = _.indexBy(_dict.spheres, function(sphere) {
+			return sphere.techName;
 		});
 
 		_.each(_dict.cards, function(card) {
-			var set = _dict.findSet(card.setId);
-			card.setName = set.name;
-			card.setTechName = set.techName;
-			card.setNumber = set.number;
+			var crst = _dict.findCardSet(card.crstId);
+			card.setName = crst.name;
+			card.setTechName = crst.techName;
+			card.setNumber = crst.number;
+			
+			if (card.enstId) {
+				var enst = _dict.findEncounterSet(card.enstId);
+				card.enstName = enst.name;
+				card.enstTechName = enst.techName;
+			}
+			
+			switch (card.type) {
+				case 'hero':
+				case 'ally':
+				case 'attachment':
+				case 'event':
+				case 'treasure':
+					card.playerDeck = true;
+					break;
+				case 'enemy':
+				case 'location':
+				case 'treachery':
+				case 'objective':
+				case 'objective-ally':
+				case 'objective-location':
+					card.encounterDeck = true;
+					break;
+				case 'quest':
+					card.questDeck = true;
+					break;
+			}
 		});
 		
 		_.each(_dict.cards, function(card) {
@@ -87,8 +104,12 @@ conquest.dict = conquest.dict || {};
 		});
 	};
 
-	_dict.findSet = function(id) {
-		return indexes[IDX_SET_BY_ID][id];
+	_dict.findCardSet = function(id) {
+		return indexes[IDX_CARD_SET_BY_ID][id];
+	};
+	
+	_dict.findEncounterSet = function(id) {
+		return indexes[IDX_ENCOUNTER_SET_BY_ID][id];
 	};
 
 	_dict.findCard = function(idOrTechName) {
@@ -133,14 +154,14 @@ conquest.dict = conquest.dict || {};
 		};
 		var cycleNode = undefined;
 
-		_.each(_.sortBy(_dict.sets, 'sequence'), function(set) {
+		_.each(_.sortBy(_dict.cardSets, 'sequence'), function(cardSet) {
 			var nodes;
-			if (set.cycleTechName) {
-				if (_.isUndefined(cycleNode) || cycleNode.techName !== set.cycleTechName) {
+			if (cardSet.cycleTechName) {
+				if (_.isUndefined(cycleNode) || cycleNode.techName !== cardSet.cycleTechName) {
 					cycleNode = {
 						type : 'cycle',
-						name : set.cycleName,
-						techName : set.cycleTechName,
+						name : cardSet.cycleName,
+						techName : cardSet.cycleTechName,
 						nodes : []
 					};
 					tree.nodes.push(cycleNode);
@@ -152,27 +173,8 @@ conquest.dict = conquest.dict || {};
 
 			nodes.push({
 				type : 'set',
-				name : set.name,
-				techName : set.techName
-			});
-		});
-		return tree;
-	};
-
-	_dict.buildWarlordTree = function() {
-		var tree = {
-			nodes : []
-		};
-
-		_.each(_.sortBy(_.where(_dict.cards, {
-			type : 'warlord'
-		}), function(warlord) {
-			return warlord.factionDisplay + '#' + warlord.name;
-		}), function(warlord) {
-			tree.nodes.push({
-				type : 'warlord',
-				name : warlord.name,
-				techName : warlord.techName
+				name : cardSet.name,
+				techName : cardSet.techName
 			});
 		});
 		return tree;
@@ -590,6 +592,10 @@ conquest.filter = conquest.filter || {};
 	_filter.fds = [ {
 		key : 'setTechName',
 		queryStringKey : 'set',
+		type : _filter.FD_TYPE_SET
+	}, {
+		key : 'enstTechName',
+		queryStringKey : 'encounterSet',
 		type : _filter.FD_TYPE_SET
 	}, {
 		key : 'type',
@@ -1161,6 +1167,11 @@ conquest.ui = conquest.ui || {};
 	_ui.toSearchLinkSetName = function(card, options) {
 		return '<a href="/' + conquest.static.language 
 				+ '/card/search?set='  + card.setTechName + '">' + card.setName + '</a>';
+	};
+	
+	_ui.toSearchLinkEncounterSetName = function(card, options) {
+		return '<a href="/' + conquest.static.language 
+				+ '/card/search?encounterSet='  + card.enstTechName + '">' + card.enstName + '</a>';
 	};
 
 	_ui.toSearchLinkTraits = function(card, options) {

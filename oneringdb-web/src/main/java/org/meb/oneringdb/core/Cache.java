@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.meb.oneringdb.db.model.loc.Card;
 import org.meb.oneringdb.db.model.loc.CardSet;
 import org.meb.oneringdb.db.model.loc.Domain;
+import org.meb.oneringdb.db.model.loc.EncounterSet;
 import org.meb.oneringdb.db.query.Query;
 import org.meb.oneringdb.db.util.Transformers;
 import org.meb.oneringdb.service.RequestContext;
@@ -33,6 +34,7 @@ public class Cache implements Serializable {
 	@SuppressWarnings("unused")
 	private static final String CARD_MAP_KEY = Card.class.getCanonicalName() + "#map";
 	private static final String CARD_SET_LIST_KEY = CardSet.class.getCanonicalName() + "#list";
+	private static final String ENCOUNTER_SET_LIST_KEY = EncounterSet.class.getCanonicalName() + "#list";
 	private static final String DOMAIN_KEY = Domain.class.getCanonicalName();
 
 	@Inject
@@ -58,6 +60,13 @@ public class Cache implements Serializable {
 		Query<CardSet> query = new Query<>(new CardSet());
 		query.getSorting().setSortingAsc("sequence");
 		return loadList(createLocalizedKey(CARD_SET_LIST_KEY), query);
+	}
+	
+	public List<EncounterSet> loadEncounterSets() {
+		Query<EncounterSet> query = new Query<>(new EncounterSet());
+		query.getSorting().setSortingAsc("crstSequence");
+		query.getSorting().setSortingAsc("techName");
+		return loadList(createLocalizedKey(ENCOUNTER_SET_LIST_KEY), query);
 	}
 
 	@SuppressWarnings("unchecked")

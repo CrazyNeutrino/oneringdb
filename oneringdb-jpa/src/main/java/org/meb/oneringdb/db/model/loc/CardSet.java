@@ -25,7 +25,6 @@ import org.meb.oneringdb.db.model.CardSetType;
 @NoArgsConstructor
 public class CardSet {
 
-	private String cycleDescription;
 	private String cycleName;
 	private String cycleTechName;
 	private String description;

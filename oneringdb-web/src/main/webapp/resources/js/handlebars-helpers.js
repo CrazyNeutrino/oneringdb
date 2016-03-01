@@ -81,7 +81,7 @@ Handlebars.registerHelper('findCardAttr', function(context, attr, options) {
 });
 
 Handlebars.registerHelper('findSet', function(context, options) {
-	return conquest.dict.findSet(context);
+	return conquest.dict.findCardSet(context);
 });
 
 Handlebars.registerHelper('rootUrl', function(options) {
@@ -201,6 +201,10 @@ Handlebars.registerHelper('searchLinkSetName', function(card, options) {
 	return new Handlebars.SafeString(conquest.ui.toSearchLinkSetName(card));
 });
 
+Handlebars.registerHelper('searchLinkEncounterSetName', function(card, options) {
+	return new Handlebars.SafeString(conquest.ui.toSearchLinkEncounterSetName(card));
+});
+
 Handlebars.registerHelper('searchLinkTraits', function(card, options) {
 	return new Handlebars.SafeString(conquest.ui.toSearchLinkTraits(card));
 });
@@ -264,16 +268,6 @@ Handlebars.registerHelper('cardText', function(text, options) {
 });
 
 Handlebars.registerHelper('cardTypeToIconClass', function(cardType, options) {
-	/*var map = {
-		warlord: 'db-icon db-icon-king',
-		synapse: 'db-icon db-icon-link',
-		army: 'db-icon db-icon-rocket',
-		event: 'db-icon db-icon-flash',
-		support: 'db-icon db-icon-database',
-		attachment: 'db-icon db-icon-attach',
-		planet: 'db-icon db-icon-globe',
-		token: 'db-icon db-icon-asterisk'
-	};*/
 	return translateMap['cardTypeIconClass'][cardType];
 });
 
@@ -313,8 +307,7 @@ var translateMap = {
 		'favourite-1': 'db-icon db-icon-heart',
 		'superb-0': 'db-icon db-icon-star-empty',
 		'superb-1': 'db-icon db-icon-star'
-	},
-	
+	}
 };
 
 Handlebars.registerHelper('translate', function(value, context, options) {
@@ -325,11 +318,27 @@ Handlebars.registerHelper('translate', function(value, context, options) {
 	}
 });
 
-Handlebars.registerHelper('factionColor', function(faction, options) {
-	if (faction) {
-		return conquest.ui.colors.factions[faction].bg;
+Handlebars.registerHelper('sphereColor', function(sphere, options) {
+	if (sphere) {
+		return conquest.ui.colors.spheres[sphere].bg;
 	} else {
-		return conquest.ui.colors.factions.neutral.bg;
+		return conquest.ui.colors.spheres.neutral.bg;
+	}
+});
+
+Handlebars.registerHelper('cardBgColorClass', function(card, options) {
+	if (_.isUndefined(card)) {
+		return '';
+	}
+	
+	if (card.playerDeck == true) {
+		return 'bg-' + card.sphere;
+	} else if (card.encounterDeck == true) {
+		return 'bg-' + card.type;
+	} else if (card.questDeck == true) {
+		return 'bg-' + card.type;
+	} else {
+		return '';
 	}
 });
 
@@ -361,4 +370,8 @@ Handlebars.registerHelper('ifRowEnd', function(index, rowMax, max, options) {
 	} else {
 		return options.inverse(this);
 	}
+});
+
+Handlebars.registerHelper('escapeAttrX', function(value, options) {
+	return value == -1 ? 'X' : value;
 });

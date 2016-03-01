@@ -15,12 +15,9 @@ import lombok.Setter;
 public class EncounterSet {
 
 	private Long crstId;
-	private String crstDescription;
 	private String crstName;
-	private String crstSymbol;
 	private String crstTechName;
-	private String cycleCode;
-	private String cycleDescription;
+	private Integer crstSequence;
 	private String cycleName;
 	private String cycleTechName;
 	private String name;

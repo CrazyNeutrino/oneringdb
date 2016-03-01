@@ -40,9 +40,10 @@ public class JsonCard {
 	private Integer hitPoints;
 	private Integer questPoints;
 	private Integer victoryPoints;
-
+	
 	private Boolean unique;
-	private Long setId;
+	private Long crstId;
+	private Long enstId;
 	private String illustrator;
 
 	public JsonCard(Card card) {
@@ -72,7 +73,8 @@ public class JsonCard {
 		questPoints = card.getQuestPoints();
 		victoryPoints = card.getVictoryPoints();
 		unique = card.getUnique();
-		setId = card.getCrstId();
+		crstId = card.getCrstId();
+		enstId = card.getEnstId();
 		illustrator = card.getIllustrator();
 	}
 }

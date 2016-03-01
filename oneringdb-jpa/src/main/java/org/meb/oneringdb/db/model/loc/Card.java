@@ -66,11 +66,14 @@ public class Card {
 	private String flavorText;
 	
 	private Long crstId;
-	private String crstDescription;
 	private String crstName;
 	private String crstReleaseDate;
 	private Integer crstSequence;
 	private String crstTechName;
+	
+	private Long enstId;
+	private String enstName;
+	private String enstTechName;
 
 	private String illustrator;
 	private Integer number;

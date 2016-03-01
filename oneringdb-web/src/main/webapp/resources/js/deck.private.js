@@ -864,7 +864,7 @@ $(function() {
 
 				if (!view.config.get('filter').get('setTechName')) {
 					var warlordSetId = view.deck.get('warlord').setId;
-					var sets = _.pluck(_.filter(conquest.dict.sets, function(set) {
+					var sets = _.pluck(_.filter(conquest.dict.cardSets, function(set) {
 						return set.released === true || set.id == warlordSetId;
 					}), 'techName');
 					view.config.get('filter').set({

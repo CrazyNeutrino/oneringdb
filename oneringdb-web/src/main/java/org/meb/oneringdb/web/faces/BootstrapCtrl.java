@@ -57,6 +57,12 @@ public class BootstrapCtrl {
 		queryContext.setUserLanguage(localeCtrl.getLanguage());
 		return JsonModelUtils.cardSetsAsJson(cache.loadCardSets());
 	}
+	
+	public String getEncounterSetsData() throws JsonProcessingException, IOException {
+		queryContext.setUserId(authToken.getUserId());
+		queryContext.setUserLanguage(localeCtrl.getLanguage());
+		return JsonModelUtils.encounterSetsAsJson(cache.loadEncounterSets());
+	}
 
 	public String getDomainSpheresData() throws JsonProcessingException, IOException {
 		List<Domain> sphereList = getDomainDataRaw("sphere");
