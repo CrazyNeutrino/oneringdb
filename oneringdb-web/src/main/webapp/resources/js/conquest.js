@@ -33,9 +33,9 @@ conquest.dict = conquest.dict || {};
 	var groups = {};
 	
 	_dict.reservedWords = {
-			de: [],
-			en: ['Combat Reaction', 'Combat Action', 'Deploy Action', 'Action', 'Forced Interrupt', 'Interrupt', 'Forced Reaction', 'Reaction', 'Battle'],
-			pl: ['Akcja Wystawiania', 'Akcja', 'Akcja Walki', 'Wymuszone Przerwanie', 'Przerwanie', 'Wymuszona Reakcja', 'Reakcja', 'Bitwa']
+			de: ['Aktion', 'Erzwungen', 'Reaktion', 'Schatten', 'Wenn aufgedeckt'],
+			en: ['Action', 'Forced', 'Response', 'Shadow', 'When Revealed'],
+			pl: ['Akcja', 'Cień', 'Po odkryciu', 'Odpowiedź', 'Wymuszony', ]
 	};
 
 	_dict.initialize = function() {
@@ -618,13 +618,13 @@ conquest.filter = conquest.filter || {};
 		type : _filter.FD_TYPE_SIMPLE,
 		oper : 'isnocase'
 	}, {
-		key : 'trait',
-		queryStringKey : 'trait',
+		key : 'traits',
+		queryStringKey : 'traits',
 		type : _filter.FD_TYPE_SIMPLE,
 		oper : 'likenocase'
 	}, {
-		key : 'keyword',
-		queryStringKey : 'keyword',
+		key : 'keywords',
+		queryStringKey : 'keywords',
 		type : _filter.FD_TYPE_SIMPLE,
 		oper : 'likenocase'
 	}, {
@@ -633,29 +633,37 @@ conquest.filter = conquest.filter || {};
 		type : _filter.FD_TYPE_SIMPLE,
 		oper : 'likenocase'
 	}, {
-		key : 'cost',
-		queryStringKey : 'cost',
+		key : 'threatCost',
+		queryStringKey : 'tc',
 		type : _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'shield',
-		queryStringKey : 'shield',
+		key : 'resourceCost',
+		queryStringKey : 'rc',
 		type : _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'command',
-		queryStringKey : 'command',
+		key : 'engagementCost',
+		queryStringKey : 'ec',
+		type : _filter.FD_TYPE_RANGE_STAT
+	}, {
+		key : 'wilpower',
+		queryStringKey : 'wilpower',
+		type : _filter.FD_TYPE_RANGE_STAT
+	}, {
+		key : 'threat',
+		queryStringKey : 'threat',
 		type : _filter.FD_TYPE_RANGE_STAT
 	}, {
 		key : 'attack',
 		queryStringKey : 'attack',
 		type : _filter.FD_TYPE_RANGE_STAT
 	}, {
+		key : 'defense',
+		queryStringKey : 'defense',
+		type : _filter.FD_TYPE_RANGE_STAT
+	}, {
 		key : 'hitPoints',
 		queryStringKey : 'hp',
 		type : _filter.FD_TYPE_RANGE_STAT
-	}, {
-		key : 'warlordTechName',
-		queryStringKey : 'warlord',
-		type : _filter.FD_TYPE_SET
 	}, {
 		key : 'createDateMin',
 		queryStringKey : 'createDateMin',
@@ -1140,9 +1148,9 @@ conquest.ui = conquest.ui || {};
 		return conquest.static.imagePath + '/card/' + imageBase + '.jpg';
 	};
 	
-	_ui.toSearchLinkFaction = function(card, options) {
+	_ui.toSearchLinkSphere = function(card, options) {
 		return '<a href="/' + conquest.static.language 
-				+ '/card/search?faction='  + card.faction + '">' + card.factionDisplay + '</a>';
+				+ '/card/search?sphere='  + card.sphere + '">' + card.sphereDisplay + '</a>';
 	};
 
 	_ui.toSearchLinkType = function(card, options) {
@@ -1157,10 +1165,10 @@ conquest.ui = conquest.ui || {};
 
 	_ui.toSearchLinkTraits = function(card, options) {
 		var result = '';
-		var traits = card.trait.split('. ');
+		var traits = card.traits.split('. ');
 		_.each(traits, function(trait, index) {
 			trait = s.trim(trait.replace('.', ''));
-			result += '<a href="/' + conquest.static.language + '/card/search?trait=' + trait + '">' + trait + '.</a>';
+			result += '<a href="/' + conquest.static.language + '/card/search?traits=' + trait + '">' + trait + '.</a>';
 			if (index < traits.length - 1) {
 				result += ' ';
 			}

@@ -189,8 +189,8 @@ Handlebars.registerHelper('na', function(context, options) {
 	}
 });
 
-Handlebars.registerHelper('searchLinkFaction', function(card, options) {
-	return new Handlebars.SafeString(conquest.ui.toSearchLinkFaction(card));
+Handlebars.registerHelper('searchLinkSphere', function(card, options) {
+	return new Handlebars.SafeString(conquest.ui.toSearchLinkSphere(card));
 });
 
 Handlebars.registerHelper('searchLinkType', function(card, options) {

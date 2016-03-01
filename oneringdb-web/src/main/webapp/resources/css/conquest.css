@@ -176,6 +176,27 @@ footer.footer > .container > p:first-child {
 /**
  * card search
  */
+ 
+.attrs {
+	font-size: 1.3em;
+	font-weight: bold;
+	margin-left: 1em;
+}
+.attrs .attr-resource-cost {
+	margin-right: 0.5em;
+}
+.attrs .attr-threat-cost {
+	color: #0E72DC;
+	margin-right: 0.5em;
+}
+.attrs .attr-engagement-cost {
+	color: #EC7002;
+	margin-right: 0.5em;
+}
+.attrs .attr-hit-points {
+	color: #FF0000;
+	margin-left: 0.5em;
+}
 .card-search-list .card > .header a,
 .card-search-list .card > .header a:hover {
 	color: inherit;
@@ -748,12 +769,12 @@ table.table-with-btn > tbody > tr > td {
 }
 
 @font-face {
-  font-family: 'conquest';
-  src: url(#{resource['fonts/conquest.eot']});
-  src: url(#{resource['fonts/conquest.eot']}?#iefix) format('embedded-opentype'),
-       url(#{resource['fonts/conquest.woff']}) format('woff'),
-       url(#{resource['fonts/conquest.ttf']}) format('truetype'),
-       url(#{resource['fonts/conquest.svg']}?#conquest) format('svg');
+  font-family: 'oneringdb';
+  src: url(#{resource['fonts/oneringdb.eot']});
+  src: url(#{resource['fonts/oneringdb.eot']}?#iefix) format('embedded-opentype'),
+       url(#{resource['fonts/oneringdb.woff']}) format('woff'),
+       url(#{resource['fonts/oneringdb.ttf']}) format('truetype'),
+       url(#{resource['fonts/oneringdb.svg']}?#oneringdb) format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -769,7 +790,7 @@ table.table-with-btn > tbody > tr > td {
 */
  
 .db-icon:before {
-  font-family: "conquest";
+  font-family: "oneringdb";
   font-style: normal;
   font-weight: normal;
   speak: none;
@@ -813,6 +834,9 @@ table.table-with-btn > tbody > tr > td {
 .db-icon-lore:before { content: '\e803'; } /* '' */
 .db-icon-spirit:before { content: '\e804'; } /* '' */
 .db-icon-leadership:before { content: '\e805'; } /* '' */
+.db-icon-attack:before { content: '\e806'; } /* '' */
+.db-icon-defense:before { content: '\e807'; } /* '' */
+.db-icon-threat:before { content: '\e808'; } /* '' */
 .db-icon-link:before { content: '\e809'; } /* '' */
 .db-icon-flash:before { content: '\e80a'; } /* '' */
 .db-icon-attach:before { content: '\e80b'; } /* '' */
@@ -829,6 +853,8 @@ table.table-with-btn > tbody > tr > td {
 .db-icon-star-empty:before { content: '\e816'; } /* '' */
 .db-icon-comment:before { content: '\e817'; } /* '' */
 .db-icon-comment-empty:before { content: '\e818'; } /* '' */
+.db-icon-willpower:before { content: '\e819'; } /* '' */
+.db-icon-unique:before { content: '\e81a'; } /* '' */
 
 .filter-sphere .db-icon {
 	font-size: 1.65em;
@@ -837,26 +863,22 @@ table.table-with-btn > tbody > tr > td {
 	padding: 1px 8px;
 } 
 
-.fg-astra-militarum { color: #3C3C3C; }
-.fg-chaos { color: #EA5400; }
-.fg-dark-eldar { color: #AF4D9D; }
-.fg-eldar { color: #EADA67; }
-.fg-ork { color: #407424; }
-.fg-space-marines { color: #095DAD; }
+.fg-leadership { color: #A22FA0; }
+.fg-tactics { color: #C71313; }
+.fg-lore { color: #108413; }
+.fg-spirit { color: #4EBBF7 ; }
+.fg-fellowship { color: #FD7E17; }
+.fg-baggins { color: #FBE821; }
 .fg-tau { color: #4CD0DC; }
 .fg-tyranid { color: #A32618; }
 .fg-neutral { color: #BBB; }
-.fg-necron { color: #57D8A9; }
 
-.bg-astra-militarum { background-color: #3C3C3C !important; color: #fff !important; }
-.bg-chaos { background-color: #EA5400 !important; color: #fff !important; }
-.bg-dark-eldar { background-color: #AF4D9D !important; color: #fff !important; }
-.bg-eldar { background-color: #EADA67 !important; color: #000 !important; }
-.bg-ork { background-color: #407424 !important; color: #fff !important; }
-.bg-space-marines { background-color: #095DAD !important; color: #fff !important; }
-.bg-tau { background-color: #4CD0DC !important; color: #000 !important; }
-.bg-tyranid { background-color: #A32618 !important; color: #fff !important; }
-.bg-necron { background-color: #57D8A9 !important; color: #000 !important; }
+.bg-leadership { background-color: #A22FA0 !important; color: #fff !important; }
+.bg-tactics { background-color: #C71313 !important; color: #fff !important; }
+.bg-lore { background-color: #108413 !important; color: #fff !important; }
+.bg-spirit { background-color: #4EBBF7  !important; color: #000 !important; }
+.bg-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
+.bg-baggins { background-color: #FBE821 !important; color: #000 !important; }
 .bg-neutral { background-color: #BBB !important; color: #000 !important; }
 
 .bor-astra-militarum { border-color: #3C3C3C !important; }
