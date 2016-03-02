@@ -20,11 +20,13 @@ conquest.static.format = {
 conquest.dict = conquest.dict || {};
 (function(_dict) {
 	
-	_dict.reservedWords = {
-			de: ['Aktion', 'Erzwungen', 'Reaktion', 'Schatten', 'Wenn aufgedeckt'],
-			en: ['Action', 'Forced', 'Response', 'Shadow', 'When Revealed'],
-			pl: ['Akcja', 'Cień', 'Po odkryciu', 'Odpowiedź', 'Wymuszony', ]
+	_dict.triggerWords = {
+			de: ['Reise Aktion', 'Aktion', 'Erzwungen', 'Reaktion', 'Reise', 'Schatten', 'Wenn aufgedeckt'],
+			en: ['Travel Action', 'Action', 'Forced', 'Response', 'Shadow', 'Travel', 'When Revealed'],
+			pl: ['Akcja wyprawy', 'Akcja', 'Cień', 'Odpowiedź', 'Podróż', 'Po odkryciu', 'Wymuszony', ]
 	};
+	_dict.iconWords = ['Willpower', 'Threat', 'Attack', 'Defense', 'Leadership',
+	                 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
 
 	var IDX_CARD_BY_ID = "card#id";
 	var IDX_CARD_BY_TECH_NAME = "card#techName";
@@ -62,7 +64,13 @@ conquest.dict = conquest.dict || {};
 			return sphere.techName;
 		});
 
+		var start = new Date().getTime();
 		_.each(_dict.cards, function(card) {
+			if (card.text) {
+				card.htmlText = conquest.ui.toHtmlText(card.text);
+				card.text = conquest.ui.toPlainText(card.text);
+			}
+			
 			var crst = _dict.findCardSet(card.crstId);
 			card.setName = crst.name;
 			card.setTechName = crst.techName;
@@ -72,7 +80,7 @@ conquest.dict = conquest.dict || {};
 				var enst = _dict.findEncounterSet(card.enstId);
 				card.enstName = enst.name;
 				card.enstTechName = enst.techName;
-			}
+			}		
 			
 			switch (card.type) {
 				case 'hero':
@@ -94,14 +102,13 @@ conquest.dict = conquest.dict || {};
 					card.questDeck = true;
 					break;
 			}
+			
+			card.hasAttrs = _.isNumber(card.threatCost || card.resourceCost || card.engagementCost 
+					|| card.willpower || card.threat || card.attack || card.defense || card.hitPoints);
+			
 		});
-		
-		_.each(_dict.cards, function(card) {
-			if (card.text) {
-				card.htmlText = conquest.ui.toHtmlText(card.text);
-				card.text = conquest.ui.toPlainText(card.text);
-			}
-		});
+		var end = new Date().getTime();
+		console.log(end - start);
 	};
 
 	_dict.findCardSet = function(id) {
@@ -595,7 +602,7 @@ conquest.filter = conquest.filter || {};
 		type : _filter.FD_TYPE_SET
 	}, {
 		key : 'enstTechName',
-		queryStringKey : 'encounterSet',
+		queryStringKey : 'eset',
 		type : _filter.FD_TYPE_SET
 	}, {
 		key : 'type',
@@ -1154,27 +1161,27 @@ conquest.ui = conquest.ui || {};
 		return conquest.static.imagePath + '/card/' + imageBase + '.jpg';
 	};
 	
-	_ui.toSearchLinkSphere = function(card, options) {
+	_ui.toSearchLinkSphere = function(card) {
 		return '<a href="/' + conquest.static.language 
 				+ '/card/search?sphere='  + card.sphere + '">' + card.sphereDisplay + '</a>';
 	};
 
-	_ui.toSearchLinkType = function(card, options) {
+	_ui.toSearchLinkType = function(card) {
 		return '<a href="/' + conquest.static.language 
 				+ '/card/search?type='  + card.type + '">' + card.typeDisplay + '</a>';
 	};
 
-	_ui.toSearchLinkSetName = function(card, options) {
+	_ui.toSearchLinkSetName = function(card) {
 		return '<a href="/' + conquest.static.language 
 				+ '/card/search?set='  + card.setTechName + '">' + card.setName + '</a>';
 	};
 	
-	_ui.toSearchLinkEncounterSetName = function(card, options) {
+	_ui.toSearchLinkEncounterSetName = function(card) {
 		return '<a href="/' + conquest.static.language 
-				+ '/card/search?encounterSet='  + card.enstTechName + '">' + card.enstName + '</a>';
+				+ '/card/search?eset='  + card.enstTechName + '">' + card.enstName + '</a>';
 	};
 
-	_ui.toSearchLinkTraits = function(card, options) {
+	_ui.toSearchLinkTraits = function(card) {
 		var result = '';
 		var traits = card.traits.split('. ');
 		_.each(traits, function(trait, index) {
@@ -1187,8 +1194,11 @@ conquest.ui = conquest.ui || {};
 		return result;
 	};
 	
-	_ui.toSearchLinkTrait = function(trait, options) {
-		return '<a href="/' + conquest.static.language + '/card/search?trait=' + trait + '">' + trait + '</a>';
+	_ui.toSearchLinkTrait = function(name, techName) {
+		if (_.isUndefined(techName)) {
+			techName = name;
+		}
+		return '<a href="/' + conquest.static.language + '/card/search?traits=' + techName + '">' + name + '</a>';
 	};
 	
 //	_ui.toSearchLinkKeyword = function(card, options) {
@@ -1196,31 +1206,77 @@ conquest.ui = conquest.ui || {};
 //				+ '/card/search?faction='  + card.faction + '">' + card.factionDisplay + '</a>';
 //	};
 	
+//	_ui.test1 = function() {
+//		var start = new Date().getTime();
+//		var input = 'Attach to a hero. Restricted.\nAttached hero gains +2 [Willpower].\nIf attached hero is Aragorn, he also gains a [Spirit] resource icon.';
+//		var iconWords = ['Willpower', 'Threat', 'Attack', 'Defense', 'Leadership',
+//		                 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
+//		var regexp = new RegExp('(' + iconWords.join('|') + ')', 'g');
+//		var output;
+//		_.each(_.range(1, 100000), function(i) {
+//			output = input.replace(regexp, '<icon class="$1">');
+//		});
+//		
+//		var end = new Date().getTime();		
+//		console.log(end - start + ' ' + out);
+//	};
+//	
+//	_ui.test2 = function() {
+//		var start = new Date().getTime();
+//		var input = 'Attach to a hero. Restricted.\nAttached hero gains +2 [Willpower].\nIf attached hero is Aragorn, he also gains a [Spirit] resource icon.';
+//		var iconWords = ['Willpower', 'Threat', 'Attack', 'Defense', 'Leadership',
+//		                 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
+//		var output;
+//		_.each(_.range(1, 100000), function(i) {
+//			_.each(iconWords, function(word) {
+//				oiutput = input.replace(word, '<icon class="$1">');
+//			});
+//		});
+//		
+//		var end = new Date().getTime();		
+//		console.log(end - start + ' ' + out);
+//	};
+	
 	_ui.toHtmlText = function(input) {
 		if (_.isUndefined(input)) {
 			return input;
 		}
-		// faction
-		var output = input.replace(/\[(?!Resource)(?!Card)([A-Z_\- ]{3,})\]/gi, function(g0, g1) {
-			return '<i class="db-icon db-icon-' + g1.toLowerCase().replace(/[_\- ]+/, '-') + '"></i>';
+		
+		var output = input;
+		
+		// icons
+		var iconWordsRegExp = new RegExp('\\[(' + conquest.dict.iconWords.join('|') + ')\\]', 'g');
+		output = output.replace(iconWordsRegExp, function(g0, g1) {
+			return '<i class="db-icon db-icon-' + g1.toLowerCase() + '"></i>'
 		});
-		// trait
-		output = output.replace(/\[t\]([A-Z0-9\-_]+)\[\/t\]/gi, function(g0, g1) {
-			return '<i><strong>' + _ui.toSearchLinkTrait(g1) + '</strong></i>';
+				
+		// traits
+		output = output.replace(/\[t(?: ([^\[\]]+))?\]([^\[]+)\[\/t\]/g, function(g0, g1, g2) {
+			return '<i><strong>' + _ui.toSearchLinkTrait(g2, g1) + '</strong></i>';
 		});
-		// special words
-		var words = conquest.dict.reservedWords[conquest.static.language];
+		
+		// trigger words
+		var triggerWords = conquest.dict.triggerWords[conquest.static.language];
 		if (conquest.static.language !== 'en') {
-			words = words.concat(conquest.dict.reservedWords['en']);
+			triggerWords = triggerWords.concat(conquest.dict.triggerWords['en']);
 		}
-		_.each(words, function(word) {
-			var regexp = new RegExp('(' + word + ': )', 'g');
-			output = output.replace(regexp, '<strong>$1</strong>');
-		});
-		// line breaks
-		output = output.replace(/\n/g, '<br/>');
+		var triggerWordsRegExp = new RegExp('(' + triggerWords.join('|') + ':)', 'g');
+		output = output.replace(triggerWordsRegExp, '<strong>$1</strong>');
+				
 		// italics
-		output = output.replace(/\[i\]([^\[]+)\[\/i\]/g, '<i>$1</i>')
+		output = output.replace(/\[i\]([^\[]+)\[\/i\]/g, '<i>$1</i>')		
+		// bold
+		output = output.replace(/\[b\]([^\[]+)\[\/b\]/g, '<strong>$1</strong>')
+		// paragraphs
+		var pStart = '<p class="card-text-block">';
+		var pStartVictory = '<p class="card-text-block victory">';
+		var pEnd = '</p>';
+		output = pStart + output.replace(/\n/g, pEnd + pStart) + pEnd;
+		
+		// victory
+		var victoryRegExp = new RegExp(pStart + '((?:Victory|Zwycięstwo|Sieg) [0-9]+\.)' + pEnd);
+		output = output.replace(victoryRegExp, pStartVictory + '$1' + pEnd);
+		
 		return output;
 	};
 	

@@ -176,10 +176,17 @@ footer.footer > .container > p:first-child {
 /**
  * card search
  */
+.icon-encset,
+.icon-sphere,
+.icon-quest {
+	float: right;
+	margin-left: 10px;
+	margin-bottom: 10px;
+}
+ 
 .attrs {
 	font-size: 1.4em;
 	font-weight: bold;
-	margin-left: 1em;
 }
 .attrs .attr-resource-cost {
 	margin-right: 0.5em;
@@ -196,6 +203,24 @@ footer.footer > .container > p:first-child {
 	color: #E30000;
 	margin-left: 0.5em;
 }
+
+.card-attrs-block {
+	padding-left: 1em;
+}
+
+.card-text-block {
+	margin: 0px 0px 5px;
+}
+
+.card-text-block.victory {
+	text-alignment: right;
+	font-weight: bold;
+}
+
+.card-text-block:last-child {
+	margin: 0px 0px 10px;
+}
+
 .card-search-list .card > .header a,
 .card-search-list .card > .header a:hover {
 	color: inherit;
