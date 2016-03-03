@@ -1,5 +1,7 @@
 var conquest = conquest || {};
 
+conquest.app = conquest.app || {};
+
 conquest.static = conquest.static || {};
 conquest.static.timezone = jstz.determine().name();
 conquest.static.format = {
@@ -151,10 +153,6 @@ conquest.dict = conquest.dict || {};
 		return indexes[IDX_CARD_BY_SET_NO_CARD_NO][setNumber + '#' + cardNumber];
 	};
 
-	_dict.findSignSquadCards = function(warlordId) {
-		return groups[GRP_CARD_BY_WARLORD_ID][warlordId];
-	};
-
 	_dict.buildCardSetTree = function() {
 		var tree = {
 			nodes : []
@@ -185,6 +183,30 @@ conquest.dict = conquest.dict || {};
 			});
 		});
 		return tree;
+	};
+	
+	_dict.buildCardSetTrees = function() {
+		var trees = [];
+
+		var tree;
+		_.each(_dict.buildCardSetTree().nodes, function(node) {
+			if (node.type == 'set') {
+				tree = {
+					nodes : []
+				};
+				trees.push(tree);
+				tree.nodes.push(node);
+			} else if (node.type == 'cycle') {
+				if (node.techName == 'the-hobbit' || node.techName == 'the-lord-of-the-rings') {
+					tree = {
+						nodes : []
+					};	
+					trees.push(tree);
+				}
+				tree.nodes.push(node);
+			}			
+		});
+		return trees;
 	};
 
 })(conquest.dict);

@@ -1,13 +1,22 @@
-$(function() {
+var conquest = conquest || {};
+conquest.card = conquest.card || {};
+
+(function(_card) {
 
 	$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
 		options.url = conquest.static.restPath + options.url + '?language=' + conquest.static.language;
 	});	
 
-	var ViewBase = Backbone.View.extend({
+	_card.ViewBase = Backbone.View.extend({
 		el: '.content',
-		events: {
-			'click a': 'linkClick'
+		events: function() {
+			return {
+				'click a': 'linkClick'
+			};
+		},
+		remove: function() {
+			this.undelegateEvents();
+			this.$el.empty();
 		},
 		linkClick: function(e) {
 			var root = conquest.static.root;
@@ -33,22 +42,18 @@ $(function() {
 		}
 	});
 
-	var CardView = ViewBase.extend({
+	_card.CardView = _card.ViewBase.extend({
 		render: function(setNumber, cardNumber) {
 			var card = conquest.dict.findCardByNumber(setNumber, cardNumber);			
-			var template = Handlebars.templates['card-view']({
-				card: card,
-				warlord: conquest.dict.findCard(card.warlordId),
-				signSquadCards: _.filter(conquest.dict.findSignSquadCards(card.warlordId || card.id), function(signSquadCard) {
-					return card.id !== signSquadCard.id;
-				})
+			Handlebars.registerPartial({
+				'card-text-content': Handlebars.templates['card-text-content']
 			});
-			this.$el.html(template);
+			this.$el.html(Handlebars.templates['card-view'](card));
 			conquest.router.navigate(conquest.ui.toCardRelativeUrl(card));
 		}
 	});
 
-	var CardSearchResultsView = ViewBase.extend({
+	_card.CardSearchResultsView = _card.ViewBase.extend({
 		el: '.card-search-results-container',
 		render: function(cards, options) {
 			var view = this;
@@ -82,14 +87,16 @@ $(function() {
 					pageSize: 60
 				});
 				
-				Handlebars.registerPartial('pagination', Handlebars.templates['pagination']({
-					pagination: pagination
-				}));
+				Handlebars.registerPartial({
+					'pagination': Handlebars.templates['pagination'],
+					'card-text-content': Handlebars.templates['card-text-content']
+				});
 				
 				var template = Handlebars.templates[templateName]({				
 					results: {
 						cards: cards.toJSON().slice(pagination.pageStartIndex, pagination.pageEndIndex + 1)
-					}
+					},
+					pagination: pagination
 				});
 				view.$el.html(template);
 				
@@ -105,12 +112,151 @@ $(function() {
 		}
 	});
 
-	var CardSearchView = ViewBase.extend({
+	_card.CardSearchView = _card.ViewBase.extend({
 		config: new Backbone.Model({
-			layout: 'grid-image-only'
+			layout: 'grid-text-only'
 		}),
+		
 		cardsFilter: new conquest.card.CardsFilter(),
 		filteredCards: new conquest.model.Cards(),
+		
+		events: function() {
+			return _.extend({
+				'click .btn-group.select-many > .btn':					'onSelectManyFilterClick',
+				'click .btn-group.select-many.filter-sphere > .btn':	'onSphereFilterClick',
+				'click .btn-group.select-many.filter-card-type > .btn':	'onCardTypeFilterClick',
+				'click .btn-group.select-many.filter-quantity > .btn':	'onQuantityFilterClick',
+				'click #cardSetFilterTrigger':							'openCardSetFilterModal'
+			}, _card.ViewBase.prototype.events.call(this));
+		},
+		
+		onSelectManyFilterClick: function(event) {
+			console.log('onSelectManyFilterClick');
+			
+			var $this = $(event.currentTarget);
+			if (event.ctrlKey) {
+				$this.addClass('active').siblings().removeClass('active');
+			} else {
+				$this.toggleClass('active');
+			}
+		},
+		
+		onSphereFilterClick: function(e) {
+			console.log('onSphereFilterClick');
+			
+			this.cardsFilter.set({
+				sphere: $(e.currentTarget).parent().children().filter('.active').map(function() {
+					return $(this).data('sphere');
+				}).get()
+			});
+		},
+		
+		onCardTypeFilterClick: function(e) {
+			console.log('onCardTypeFilterClick');
+			
+			this.cardsFilter.set({
+				type: $(e.currentTarget).parent().children().filter('.active').map(function() {
+					return $(this).data('card-type');
+				}).get()
+			});
+		},
+		
+		onQuantityFilterClick: function(e) {
+			console.log('onQuantityFilterClick');
+			
+			this.cardsFilter.set({
+				quantity: $(e.currentTarget).parent().children().filter('.active').map(function() {
+					return $(this).data('quantity');
+				}).get()
+			});
+		},
+		
+		openCardSetFilterModal: function(e) {
+			var $modal = $('#cardSetFilterModal');
+			if ($modal.length > 0) {
+				$modal.data('bs.modal', null);
+			}
+			
+			var trees = conquest.dict.buildCardSetTrees();
+			Handlebars.registerPartial({
+				'card-set-filter-view': Handlebars.templates['card-set-filter-view'],
+				'common-ul-tree': Handlebars.templates['common-ul-tree']
+			});
+			$modal = $(Handlebars.templates['card-set-filter-modal']({
+				trees: trees,
+				title: 'Hello title',
+				button: {
+					title: 'Hello'
+				}
+			}));
+
+//			if (options.button.clickHandler) {
+//				$modal.find('#' + options.button.id).click(function() {
+//					options.button.clickHandler($modal, $modal.find('#deckName').val().trim(), $modal.find('#deckDescription').val().trim());
+//				});
+//			}
+
+			$modal.modal();
+		},
+		
+		applyFilterToUI: function(filter) {
+//			this.$el.find('.btn-group-layout .btn').each(function() {
+//				var $this = $(this);
+//				if (_.contains(filter.layout, $this.data('layout'))) {
+//					$this.addClass('active');
+//				}
+//			});
+			this.$el.find('.btn-group.filter-sphere .btn').each(function() {
+				var $this = $(this);
+				if (_.contains(filter.sphere, $this.data('sphere'))) {
+					$this.addClass('active');
+				}
+			});
+			this.$el.find('.btn-group.filter-card-type .btn').each(function() {
+				var $this = $(this);
+				if (_.contains(filter.type, $this.data('card-type'))) {
+					$this.addClass('active');
+				}
+			});
+			this.$el.find('.btn-group.filter-quantity .btn').each(function() {
+				var $this = $(this);
+				if (_.contains(filter.quantity, $this.data('quantity'))) {
+					$this.addClass('active');
+				}
+			});
+//			this.$el.find('.sort-control').each(function(index) {
+//				if (filter.sorting && filter.sorting.length > index) {
+//					$(this).val(filter.sorting[index]);
+//				}
+//			});
+//		
+//			this.config.get('filter').set(_.pick(filter, 'cost', 'shield', 'command', 'attack', 'hitPoints', 'setTechName', 'name', 'trait', 'keyword'));
+		},
+		
+		showCardSetFilterModal: function(deck, options) {
+			var $modal = $('#cardSetFilterModal');
+			if ($modal.length > 0) {
+				$modal.data('bs.modal', null);
+			}
+			
+			var trees = conquest.dict.buildCardSetTrees();
+			options = options || {};
+			Handlebars.registerPartial('card-set-filter-content', Handlebars.templates['card-set-filter-content']);
+			$modal = $(Handlebars.templates['card-set-filter-modal']({
+				trees: trees,
+				title: options.title,
+				button: options.button
+			}));
+
+//			if (options.button.clickHandler) {
+//				$modal.find('#' + options.button.id).click(function() {
+//					options.button.clickHandler($modal, $modal.find('#deckName').val().trim(), $modal.find('#deckDescription').val().trim());
+//				});
+//			}
+
+			$modal.modal();
+		},
+		
 		render: function(queryString) {
 			var view = this;
 
@@ -122,12 +268,13 @@ $(function() {
 			_.each([
 				['name', 'card.name'],
 				['number', 'card.number'],
-				['factionDisplay', 'card.faction'],
+				['sphereDisplay', 'card.sphere'],
 				['typeDisplay', 'card.type'],
 				['cost', 'card.cost.sh'],
-				['shield', 'card.shieldIcons.sh'],
-				['command', 'card.commandIcons.sh'],
-				['attack', 'card.attack.sh'],
+				['willpower', 'card.willpower'],
+				['threat', 'card.threat'],
+				['attack', 'card.attack'],
+				['attack', 'card.defense'],
 				['hitPoints', 'card.hp.sh'],
 				['setName', 'core.setName'],
 				['setNumber', 'core.setNumber']
@@ -148,36 +295,15 @@ $(function() {
 
 			view.$el.html(template);
 			view.renderMessages();
-			view.cardSearchResultsView = new CardSearchResultsView();
+			view.cardSearchResultsView = new _card.CardSearchResultsView();
 			view.cardSearchResultsView.listenTo(view.filteredCards, 'reset', function(filteredCards) {
 				this.render(filteredCards, {
 					layout: view.config.get('layout')
 				});
 			});
 			
-//			conquest.ui.adjustWrapperStyle({
-//				backgroundColor: '#f2f2f2'
-//			});
-
-			//
-			// common click handler
-			//
-			view.$el.find('.btn-group.select-many > .btn').click(function(event) {
-				var $this = $(this);
-				if (event.ctrlKey) {
-					$this.addClass('active').siblings().removeClass('active');
-				} else {
-					$this.toggleClass('active');
-				}
-			});
-
-			//
-			// tooltips
-			//				
-			view.$el.find('[data-toggle="tooltip"]').tooltip({
-				container: 'body'
-			});
-
+			view.applyFilterToUI(view.cardsFilter.toJSON());
+			
 			// view.$el.find('.btn-group.btn-group-layout > .btn').click(function() {
 			// 	$(this).addClass('active').siblings().removeClass('active');
 			// 	view.config.set({
@@ -185,81 +311,22 @@ $(function() {
 			// 	});
 			// });
 
-			//
-			// filter: factions
-			//
-			var spheres = view.cardsFilter.get('sphere');
-			var $spheres = view.$el.find('#sphereFilter > .btn');
 
-			$spheres.each(function() {
-				var $this = $(this);
-				if (spheres && spheres.indexOf($this.data('sphere')) > -1) {
-					$this.addClass('active');
-				}
-				$this.click(function(event) {
-					view.cardsFilter.set({
-						sphere: $spheres.filter('.active').map(function() {
-							return $(this).data('sphere');
-						}).get()
-					});
-				});
-			});
-
-			//
-			// filter: types
-			//
-			var types = view.cardsFilter.get('type');
-			var $types = view.$el.find('#cardTypeFilter > .btn');
-
-			$types.each(function() {
-				var $this = $(this);
-				if (types && types.indexOf($this.data('type')) > -1) {
-					$this.addClass('active');
-				}
-				$this.click(function(event) {
-					view.cardsFilter.set({
-						type: $types.filter('.active').map(function() {
-							return $(this).data('type');
-						}).get()
-					});
-				});
-			});
-
-			//
-			// filter: quantities
-			//
-			var quantities = view.cardsFilter.get('quantity');
-			var $quantities = view.$el.find('#quantityFilter > .btn');
-
-			$quantities.each(function() {
-				var $this = $(this);
-				if (quantities && quantities.indexOf($this.data('quantity')) > -1) {
-					$this.addClass('active');
-				}
-				$this.click(function(event) {
-					view.cardsFilter.set({
-						quantity: $quantities.filter('.active').map(function() {
-							return $(this).data('quantity');
-						}).get()
-					});
-				});
-			});
-
-			//
-			// filter: sets
-			// 
-			new conquest.card.CardSetFilterPopoverView({
-				filter: view.cardsFilter,
-				$trigger: view.$el.find('#cardSetfilterTrigger')
-			}).render();
-
-			//
-			// filter: stats
-			// 
-			new conquest.card.CardStatFilterPopoverView({
-				filter: view.cardsFilter,
-				$trigger: view.$el.find('#cardStatfilterTrigger')
-			}).render();
+//			//
+//			// filter: sets
+//			// 
+//			new conquest.card.CardSetFilterPopoverView({
+//				filter: view.cardsFilter,
+//				$trigger: view.$el.find('#cardSetfilterTrigger')
+//			}).render();
+//
+//			//
+//			// filter: stats
+//			// 
+//			new conquest.card.CardStatFilterPopoverView({
+//				filter: view.cardsFilter,
+//				$trigger: view.$el.find('#cardStatfilterTrigger')
+//			}).render();
 
 			//
 			// filter: name/trait/keyword search bar
@@ -270,10 +337,10 @@ $(function() {
 			});
 			var $input = $(selector);
 			
-			if (view.cardsFilter.has('trait')) {
-				$input.val(view.cardsFilter.get('trait'))
-			} else if (view.cardsFilter.has('keyword')) {
-				$input.val(view.cardsFilter.get('keyword'))
+			if (view.cardsFilter.has('traits')) {
+				$input.val(view.cardsFilter.get('traits'))
+			} else if (view.cardsFilter.has('keywords')) {
+				$input.val(view.cardsFilter.get('keywords'))
 			} else if (view.cardsFilter.has('techName')) {
 				var card = conquest.dict.findCard(view.cardsFilter.get('techName'));
 				if (card) {
@@ -294,18 +361,18 @@ $(function() {
 						if (dataset == 'cards') {
 							obj['techName'] = suggestion.card.techName;
 						} else if (dataset == 'traits') {
-							obj['trait'] = suggestion.description;
+							obj['traits'] = suggestion.description;
 						} else if (dataset == 'keywords') {
-							obj['keyword'] = suggestion.description;
+							obj['keywords'] = suggestion.description;
 						}
 					} else if (text) {
-						if (!(view.cardsFilter.has('techName') || view.cardsFilter.has('trait') || view.cardsFilter.has('keyword') || view.cardsFilter.has('text'))) {
+						if (!(view.cardsFilter.has('techName') || view.cardsFilter.has('traits') || view.cardsFilter.has('keywords') || view.cardsFilter.has('text'))) {
 							obj['text'] = text;
 						}
 					} else {
 						obj['techName'] = undefined;
-						obj['trait'] = undefined;
-						obj['keyword'] = undefined;
+						obj['traits'] = undefined;
+						obj['keywords'] = undefined;
 						obj['text'] = undefined;
 					}
 
@@ -406,9 +473,61 @@ $(function() {
 					ga: false
 				});
 			}
+			
+			//
+			// tooltips
+			//				
+			view.$el.find('[data-toggle="tooltip"]').tooltip({
+				container: 'body'
+			});
 		}
 	});
 
+//	var Router = Backbone.Router.extend({
+//		routes: {
+//			':setNumber/:cardNumber': 'viewCard',
+//			'search(?:queryString)': 'searchCards'
+//		}
+//	});
+//
+//	conquest.router = new Router();
+//	conquest.router.on('route:viewCard', function(setNumber, cardNumber) {
+//		if (conquest.app.view) {
+//			conquest.app.view.remove();
+//		}
+//		conquest.app.view = new CardView();
+//		setNumber = parseInt(setNumber);
+//		cardNumber = parseInt(cardNumber);
+//		conquest.app.view.render(setNumber, cardNumber);
+//		$('html,body').scrollTop(0);
+//
+//		var card = conquest.dict.findCardByNumber(setNumber, cardNumber);
+//		var url = conquest.ui.toCardRelativeUrl(card);
+//		if (_.isUndefined(url)) {
+//			url = setNumber + '/' + cardNumber;
+//		}
+//		ga('set', 'page', conquest.static.root + url);
+//		ga('send', 'pageview');
+//	}).on('route:searchCards', function(queryString) {
+//		if (conquest.app.view) {
+//			conquest.app.view.remove();
+//		}
+//		conquest.app.view = new CardSearchView();
+//		conquest.app.view.render(queryString);
+//		$('html,body').scrollTop(0);
+//		ga('set', 'page', conquest.static.root + 'search');
+//		ga('send', 'pageview');
+//	});
+//
+//	conquest.static.root = '/' + conquest.static.language + '/card/';
+//
+//	Backbone.history.start({
+//		pushState: true,
+//		root: conquest.static.root
+//	});
+})(conquest.card);
+
+$(function() {
 	var Router = Backbone.Router.extend({
 		routes: {
 			':setNumber/:cardNumber': 'viewCard',
@@ -418,10 +537,13 @@ $(function() {
 
 	conquest.router = new Router();
 	conquest.router.on('route:viewCard', function(setNumber, cardNumber) {
-		var cardView = new CardView();
+		if (conquest.app.view) {
+			conquest.app.view.remove();
+		}
+		conquest.app.view = new conquest.card.CardView();
 		setNumber = parseInt(setNumber);
 		cardNumber = parseInt(cardNumber);
-		cardView.render(setNumber, cardNumber);
+		conquest.app.view.render(setNumber, cardNumber);
 		$('html,body').scrollTop(0);
 
 		var card = conquest.dict.findCardByNumber(setNumber, cardNumber);
@@ -432,8 +554,11 @@ $(function() {
 		ga('set', 'page', conquest.static.root + url);
 		ga('send', 'pageview');
 	}).on('route:searchCards', function(queryString) {
-		var cardSearchView = new CardSearchView();
-		cardSearchView.render(queryString);
+		if (conquest.app.view) {
+			conquest.app.view.remove();
+		}
+		conquest.app.view = new conquest.card.CardSearchView();
+		conquest.app.view.render(queryString);
 		$('html,body').scrollTop(0);
 		ga('set', 'page', conquest.static.root + 'search');
 		ga('send', 'pageview');

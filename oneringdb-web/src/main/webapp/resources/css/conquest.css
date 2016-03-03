@@ -221,16 +221,21 @@ footer.footer > .container > p:first-child {
 	margin: 0px 0px 10px;
 }
 
+.card-view .card > .header a,
+.card-view .card > .header a:hover, 
 .card-search-list .card > .header a,
 .card-search-list .card > .header a:hover {
 	color: inherit;
 }
 
+.card-view .card > .content a,
+.card-view .card > .content a:hover,
 .card-search-list .card > .content a,
 .card-search-list .card > .content a:hover {
 	color: black;
 }
- 
+
+.card-view .card, 
 .card-search-list .card {
 	border: none;
 	background-color: #fff;
@@ -238,28 +243,33 @@ footer.footer > .container > p:first-child {
 	border-radius: 2px;	
 }
 
+.card-view .card > .header,
 .card-search-list .card > .header {
 	padding: 8px 10px 6px 10px;
 	border-top-left-radius: 2px;
 	border-top-right-radius: 2px;
 }
 
+.card-view .card > .header > .box-left > .db-icon,
 .card-search-list .card > .header > .box-left > .db-icon {
 	font-size: 20px; 
 	margin-right: 5px;
 }
 
+.card-view .card > .header > .box-left > .db-icon.db-icon-unique,
 .card-search-list .card > .header > .box-left > .db-icon.db-icon-unique {
 	font-size: 14px; 
 	margin-top: 1px;
 	margin-right: 5px;
 }
 
+.card-view .card > .header > .box-center > .primary-text,
 .card-search-list .card > .header > .box-center > .primary-text {
 	margin-top: 3px;
 	margin-bottom: 3px;
 }
 
+.card-view .card > .content,
 .card-search-list .card > .content {
 	padding: 5px 10px 5px 10px;
 }
@@ -858,6 +868,7 @@ table.table-with-btn > tbody > tr > td {
 .db-icon-lore:before { content: '\e803'; } /* '' */
 .db-icon-spirit:before { content: '\e804'; } /* '' */
 .db-icon-leadership:before { content: '\e805'; } /* '' */
+.db-icon-neutral:before { content: '\e81b'; } /* '' */
 .db-icon-attack:before { content: '\e806'; } /* '' */
 .db-icon-defense:before { content: '\e807'; } /* '' */
 .db-icon-threat:before { content: '\e808'; } /* '' */
@@ -878,7 +889,7 @@ table.table-with-btn > tbody > tr > td {
 .db-icon-comment:before { content: '\e817'; } /* '' */
 .db-icon-comment-empty:before { content: '\e818'; } /* '' */
 .db-icon-willpower:before { content: '\e819'; } /* '' */
-.db-icon-unique:before { content: '\e81a'; } /* '' */
+.db-icon-unique:before { content: '\e81a'; font-size: 1.5em; } /* '' */
 
 .filter-sphere .db-icon {
 	font-size: 1.65em;

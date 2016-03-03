@@ -6,7 +6,7 @@
 			<div class="row">	
 				<div class="col-xs-12 card-search-filter-container">		
 					<div class="form-inline">
-						<div id="sphereFilter" class="btn-group select-many filter-sphere filter-group">
+						<div class="btn-group select-many filter-group filter-sphere">
 							{{#each filter.spheres}}							
 							<label class="btn btn-default" data-sphere="{{techName}}" data-toggle="tooltip" title="{{name}}">
 								<i class="db-icon db-icon-{{techName}}"></i>
@@ -14,25 +14,25 @@
 							</label>
 							{{/each}}
 						</div>
-						<div id="cardTypeFilter" class="btn-group select-many filter-group">
+						<div class="btn-group select-many filter-group filter-card-type">
 							{{#each filter.cardTypes}}
-							<label class="btn btn-default" data-type="{{techName}}" data-toggle="tooltip" title="{{name}}">
+							<label class="btn btn-default" data-card-type="{{techName}}" data-toggle="tooltip" title="{{name}}">
 								{{!-- <i class="{{cardTypeToIconClass techName}}"></i> --}}
 								{{shortName}}
 							</label>
 							{{/each}}
 						</div>
-						<div id="quantityFilter" class="btn-group select-many filter-group">
-							{{#for 1 4 1}}
+						<div class="btn-group select-many filter-group filter-quantity">
+							{{#for 1 5 1}}
 							<label class="btn btn-default" data-quantity="{{this}}" data-toggle="tooltip" title="{{loc 'card.quantity'}}: {{this}}">
 								<span>{{this}}</span>
 							</label>
 							{{/for}}
 						</div>
-						<label id="cardSetfilterTrigger" class="btn btn-default btn-standard filter-group">
+						<label id="cardSetFilterTrigger" class="btn btn-default btn-standard filter-group">
 							<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.sets'}}
 						</label>
-						<label id="cardStatfilterTrigger" class="btn btn-default btn-standard filter-group">
+						<label id="cardStatFilterTrigger" class="btn btn-default btn-standard filter-group">
 							<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.values'}}
 						</label>
 			

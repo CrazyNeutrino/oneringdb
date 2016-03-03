@@ -55,6 +55,67 @@ conquest.card = conquest.card || {};
 			}
 		}
 	});
+	
+	//
+	// card set filter view
+	//
+	_card.CardSetFilterView = Backbone.View.extend({
+		initialize: function(options) {
+			this.filter = options.filter;
+//			this.$trigger = options.$trigger;
+		},
+		render: function() {
+			var view = this;
+
+			var filterContent = Handlebars.templates['card-set-filter-view']({
+				trees: conquest.dict.buildCardSetTrees(),
+			});
+
+			view.$trigger.on('shown.bs.popover', function() {
+				var sets = view.filter.get('setTechName');
+				var cycles = view.filter.get('cycleTechName');
+				var $content = view.$trigger.parent().find('.filter-content');
+				var $sets = $content.find('li:not(:has(ul)) input[type="checkbox"]');
+				var $cycles = $content.find('li:has(ul) > input[type="checkbox"]');
+				$sets.each(function() {
+					var $this = $(this);
+					$this.prop('checked', sets && sets.indexOf($this.val()) > -1);
+				});
+				$cycles.each(function() {
+					var $this = $(this);
+					$this.prop('checked', cycles && cycles.indexOf($this.val()) > -1);
+					$this.click(function() {
+						$this.siblings().filter('ul').find('input[type="checkbox"]').prop('checked', $this.prop('checked'));
+					});
+				});
+
+				//
+				// filter apply
+				//
+				$content.find('.filter-apply').click(function() {
+					view.$trigger.popover('hide');
+					var sets = [];
+					$sets.filter(':checked').each(function() {
+						sets.push($(this).val());
+					});
+					var cycles = [];
+					$cycles.filter(':checked').each(function() {
+						cycles.push($(this).val());
+					});
+					view.filter.set({
+						setTechName: sets,
+						cycleTechName: cycles
+					});
+				});
+				//
+				// filter cancel
+				//
+				$content.find('.filter-cancel').click(function() {
+					view.$trigger.popover('hide');
+				});
+			});
+		}
+	});
 
 	//
 	// card set filter popover
@@ -202,6 +263,71 @@ conquest.card = conquest.card || {};
 						filter[$this.data('filter-key')] = values;	
 					});
 					view.filter.set(filter);
+				});
+				//
+				// filter cancel
+				//
+				$content.find('.filter-cancel').click(function() {
+					view.$trigger.popover('hide');
+				});
+			});
+		}
+	});
+	
+	_card.CardSetFilterModalView = Backbone.View.extend({
+		initialize: function(options) {
+			this.filter = options.filter;
+			this.$trigger = options.$trigger;
+		},
+		render: function() {
+			var view = this;
+
+			var filterContent = Handlebars.templates['card-set-filter-popover-view']({
+				tree: conquest.dict.buildCardSetTree(),
+			});
+			view.$trigger.popover({
+				html: true,
+				trigger: 'click focus',
+				placement: 'bottom',
+				animation: true,
+				content: filterContent
+			});
+
+			view.$trigger.on('shown.bs.popover', function() {
+				var sets = view.filter.get('setTechName');
+				var cycles = view.filter.get('cycleTechName');
+				var $content = view.$trigger.parent().find('.filter-content');
+				var $sets = $content.find('li:not(:has(ul)) input[type="checkbox"]');
+				var $cycles = $content.find('li:has(ul) > input[type="checkbox"]');
+				$sets.each(function() {
+					var $this = $(this);
+					$this.prop('checked', sets && sets.indexOf($this.val()) > -1);
+				});
+				$cycles.each(function() {
+					var $this = $(this);
+					$this.prop('checked', cycles && cycles.indexOf($this.val()) > -1);
+					$this.click(function() {
+						$this.siblings().filter('ul').find('input[type="checkbox"]').prop('checked', $this.prop('checked'));
+					});
+				});
+
+				//
+				// filter apply
+				//
+				$content.find('.filter-apply').click(function() {
+					view.$trigger.popover('hide');
+					var sets = [];
+					$sets.filter(':checked').each(function() {
+						sets.push($(this).val());
+					});
+					var cycles = [];
+					$cycles.filter(':checked').each(function() {
+						cycles.push($(this).val());
+					});
+					view.filter.set({
+						setTechName: sets,
+						cycleTechName: cycles
+					});
 				});
 				//
 				// filter cancel
