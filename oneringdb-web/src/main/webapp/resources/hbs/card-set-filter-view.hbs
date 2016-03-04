@@ -1,7 +1,14 @@
+{{#each trees}}
+
+{{#ifRowBegin @index 4 trees.length}}
 <div class="row">
-	{{#each trees}}
+{{/ifRowBegin}}
+
 	<div class="col-md-3">
 		{{> commons-ul-tree}}
 	</div>
-	{{/each}}
+
+{{#ifRowEnd @index 4 result.cards.length}}
 </div>
+{{/ifRowEnd}}
+{{/each}}

@@ -213,7 +213,7 @@ footer.footer > .container > p:first-child {
 }
 
 .card-text-block.victory {
-	text-alignment: right;
+	text-align: right;
 	font-weight: bold;
 }
 
@@ -868,7 +868,6 @@ table.table-with-btn > tbody > tr > td {
 .db-icon-lore:before { content: '\e803'; } /* '' */
 .db-icon-spirit:before { content: '\e804'; } /* '' */
 .db-icon-leadership:before { content: '\e805'; } /* '' */
-.db-icon-neutral:before { content: '\e81b'; } /* '' */
 .db-icon-attack:before { content: '\e806'; } /* '' */
 .db-icon-defense:before { content: '\e807'; } /* '' */
 .db-icon-threat:before { content: '\e808'; } /* '' */
@@ -889,13 +888,27 @@ table.table-with-btn > tbody > tr > td {
 .db-icon-comment:before { content: '\e817'; } /* '' */
 .db-icon-comment-empty:before { content: '\e818'; } /* '' */
 .db-icon-willpower:before { content: '\e819'; } /* '' */
-.db-icon-unique:before { content: '\e81a'; font-size: 1.5em; } /* '' */
+.db-icon-unique:before { content: '\e81a'; } /* '' */
+.db-icon-neutral:before { content: '\e81b'; } /* '' */
+.db-icon-hero:before { content: '\e81c'; } /* '' */
+.db-icon-ally:before { content: '\e81d'; } /* '' */
+.db-icon-enemy:before { content: '\e81e'; } /* '' */
+.db-icon-event:before { content: '\e81f'; } /* '' */
+.db-icon-attachment:before { content: '\e820'; } /* '' */
+.db-icon-treasure:before { content: '\e821'; } /* '' */
+.db-icon-quest:before { content: '\e822'; } /* '' */
+.db-icon-campaign:before { content: '\e823'; } /* '' */
+.db-icon-location:before { content: '\e824'; } /* '' */
+.db-icon-treachery:before { content: '\e825'; } /* '' */
+.db-icon-objective:before { content: '\e826'; } /* '' */
 
-.filter-sphere .db-icon {
+.filter-sphere .db-icon,
+.filter-card-type .db-icon {
 	font-size: 1.65em;
 }
-.filter-sphere .btn {
-	padding: 1px 8px;
+.filter-sphere .btn,
+.filter-card-type .btn {
+	padding: 0px 8px;
 } 
 
 .fg-leadership { color: #A22FA0; }

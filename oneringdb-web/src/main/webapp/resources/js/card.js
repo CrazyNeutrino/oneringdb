@@ -5,7 +5,12 @@ conquest.card = conquest.card || {};
 
 	$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
 		options.url = conquest.static.restPath + options.url + '?language=' + conquest.static.language;
-	});	
+	});
+	
+	/**
+	 * @memberOf _card
+	 */
+	_card.dummy = function() {};
 
 	_card.ViewBase = Backbone.View.extend({
 		el: '.content',
@@ -50,65 +55,6 @@ conquest.card = conquest.card || {};
 			});
 			this.$el.html(Handlebars.templates['card-view'](card));
 			conquest.router.navigate(conquest.ui.toCardRelativeUrl(card));
-		}
-	});
-
-	_card.CardSearchResultsView = _card.ViewBase.extend({
-		el: '.card-search-results-container',
-		render: function(cards, options) {
-			var view = this;
-
-			var layout = options.layout;
-			var templateName = undefined;
-			if (layout === 'grid-2') {
-				templateName = 'card-search-results-grid-2';
-			} else if (layout === 'grid-3') {
-				templateName = 'card-search-results-grid-3';
-			} else if (layout === 'grid-4') {
-				templateName = 'card-search-results-grid-4';
-			} else if (layout === 'grid-6') {
-				templateName = 'card-search-results-grid-6';
-			} else if (layout === 'grid-image-only') {
-				templateName = 'card-search-results-grid-4';
-			} else if (layout === 'grid-text-only') {
-				templateName = 'card-search-results-grid-3-text';
-			} else {
-				// list layout is the default
-				templateName = 'card-search-results-list';
-			}
-			
-			var renderPage = function(cards, options) {
-				
-				options = options || {};
-				
-				var pagination = conquest.util.buildPagination({
-					total: cards.size(),
-					pageNumber: options.pageNumber,
-					pageSize: 60
-				});
-				
-				Handlebars.registerPartial({
-					'pagination': Handlebars.templates['pagination'],
-					'card-text-content': Handlebars.templates['card-text-content']
-				});
-				
-				var template = Handlebars.templates[templateName]({				
-					results: {
-						cards: cards.toJSON().slice(pagination.pageStartIndex, pagination.pageEndIndex + 1)
-					},
-					pagination: pagination
-				});
-				view.$el.html(template);
-				
-				view.$el.find('.pagination-container a[data-page-number]').click(function(event) {
-					renderPage(cards, {
-						pageNumber: parseInt($(this).data("page-number"))
-					});
-					event.preventDefault();
-				});
-			};
-			
-			renderPage(cards, 0);
 		}
 	});
 
@@ -172,31 +118,20 @@ conquest.card = conquest.card || {};
 		},
 		
 		openCardSetFilterModal: function(e) {
-			var $modal = $('#cardSetFilterModal');
-			if ($modal.length > 0) {
-				$modal.data('bs.modal', null);
-			}
+			console.log('openCardSetFilterModal');
 			
-			var trees = conquest.dict.buildCardSetTrees();
-			Handlebars.registerPartial({
-				'card-set-filter-view': Handlebars.templates['card-set-filter-view'],
-				'common-ul-tree': Handlebars.templates['common-ul-tree']
-			});
-			$modal = $(Handlebars.templates['card-set-filter-modal']({
-				trees: trees,
-				title: 'Hello title',
-				button: {
-					title: 'Hello'
+			var view = this;
+			_card.openCardSetFilterModal({
+				sets: this.cardsFilter.get('setTechName'),
+				cycles: this.cardsFilter.get('cycleTechName')
+			}, {
+				applyFilterHandler: function(filter) {
+					view.cardsFilter.set({
+						setTechName: filter.sets,
+						cycleTechName: filter.cycles
+					});
 				}
-			}));
-
-//			if (options.button.clickHandler) {
-//				$modal.find('#' + options.button.id).click(function() {
-//					options.button.clickHandler($modal, $modal.find('#deckName').val().trim(), $modal.find('#deckDescription').val().trim());
-//				});
-//			}
-
-			$modal.modal();
+			});
 		},
 		
 		applyFilterToUI: function(filter) {
@@ -231,30 +166,6 @@ conquest.card = conquest.card || {};
 //			});
 //		
 //			this.config.get('filter').set(_.pick(filter, 'cost', 'shield', 'command', 'attack', 'hitPoints', 'setTechName', 'name', 'trait', 'keyword'));
-		},
-		
-		showCardSetFilterModal: function(deck, options) {
-			var $modal = $('#cardSetFilterModal');
-			if ($modal.length > 0) {
-				$modal.data('bs.modal', null);
-			}
-			
-			var trees = conquest.dict.buildCardSetTrees();
-			options = options || {};
-			Handlebars.registerPartial('card-set-filter-content', Handlebars.templates['card-set-filter-content']);
-			$modal = $(Handlebars.templates['card-set-filter-modal']({
-				trees: trees,
-				title: options.title,
-				button: options.button
-			}));
-
-//			if (options.button.clickHandler) {
-//				$modal.find('#' + options.button.id).click(function() {
-//					options.button.clickHandler($modal, $modal.find('#deckName').val().trim(), $modal.find('#deckDescription').val().trim());
-//				});
-//			}
-
-			$modal.modal();
 		},
 		
 		render: function(queryString) {
@@ -482,49 +393,66 @@ conquest.card = conquest.card || {};
 			});
 		}
 	});
+	
+	_card.CardSearchResultsView = _card.ViewBase.extend({
+		el: '.card-search-results-container',
+		render: function(cards, options) {
+			var view = this;
 
-//	var Router = Backbone.Router.extend({
-//		routes: {
-//			':setNumber/:cardNumber': 'viewCard',
-//			'search(?:queryString)': 'searchCards'
-//		}
-//	});
-//
-//	conquest.router = new Router();
-//	conquest.router.on('route:viewCard', function(setNumber, cardNumber) {
-//		if (conquest.app.view) {
-//			conquest.app.view.remove();
-//		}
-//		conquest.app.view = new CardView();
-//		setNumber = parseInt(setNumber);
-//		cardNumber = parseInt(cardNumber);
-//		conquest.app.view.render(setNumber, cardNumber);
-//		$('html,body').scrollTop(0);
-//
-//		var card = conquest.dict.findCardByNumber(setNumber, cardNumber);
-//		var url = conquest.ui.toCardRelativeUrl(card);
-//		if (_.isUndefined(url)) {
-//			url = setNumber + '/' + cardNumber;
-//		}
-//		ga('set', 'page', conquest.static.root + url);
-//		ga('send', 'pageview');
-//	}).on('route:searchCards', function(queryString) {
-//		if (conquest.app.view) {
-//			conquest.app.view.remove();
-//		}
-//		conquest.app.view = new CardSearchView();
-//		conquest.app.view.render(queryString);
-//		$('html,body').scrollTop(0);
-//		ga('set', 'page', conquest.static.root + 'search');
-//		ga('send', 'pageview');
-//	});
-//
-//	conquest.static.root = '/' + conquest.static.language + '/card/';
-//
-//	Backbone.history.start({
-//		pushState: true,
-//		root: conquest.static.root
-//	});
+			var layout = options.layout;
+			var templateName = undefined;
+			if (layout === 'grid-2') {
+				templateName = 'card-search-results-grid-2';
+			} else if (layout === 'grid-3') {
+				templateName = 'card-search-results-grid-3';
+			} else if (layout === 'grid-4') {
+				templateName = 'card-search-results-grid-4';
+			} else if (layout === 'grid-6') {
+				templateName = 'card-search-results-grid-6';
+			} else if (layout === 'grid-image-only') {
+				templateName = 'card-search-results-grid-4';
+			} else if (layout === 'grid-text-only') {
+				templateName = 'card-search-results-grid-3-text';
+			} else {
+				// list layout is the default
+				templateName = 'card-search-results-list';
+			}
+			
+			var renderPage = function(cards, options) {
+				
+				options = options || {};
+				
+				var pagination = conquest.util.buildPagination({
+					total: cards.size(),
+					pageNumber: options.pageNumber,
+					pageSize: 60
+				});
+				
+				Handlebars.registerPartial({
+					'pagination': Handlebars.templates['pagination'],
+					'card-text-content': Handlebars.templates['card-text-content']
+				});
+				
+				var template = Handlebars.templates[templateName]({				
+					results: {
+						cards: cards.toJSON().slice(pagination.pageStartIndex, pagination.pageEndIndex + 1)
+					},
+					pagination: pagination
+				});
+				view.$el.html(template);
+				
+				view.$el.find('.pagination-container a[data-page-number]').click(function(event) {
+					renderPage(cards, {
+						pageNumber: parseInt($(this).data("page-number"))
+					});
+					event.preventDefault();
+				});
+			};
+			
+			renderPage(cards, 0);
+		}
+	});
+	
 })(conquest.card);
 
 $(function() {

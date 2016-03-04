@@ -40,6 +40,9 @@ conquest.dict = conquest.dict || {};
 	var IDX_SPHERE_BY_TECH_NAME = "sphere#techName";
 	var indexes = {};
 
+	/**
+	 * @memberOf _dict
+	 */
 	_dict.initialize = function() {
 		indexes[IDX_CARD_BY_ID] = _.indexBy(_dict.cards, function(card) {
 			return card.id;
@@ -105,8 +108,10 @@ conquest.dict = conquest.dict || {};
 					break;
 			}
 			
-			card.hasAttrs = _.isNumber(card.threatCost || card.resourceCost || card.engagementCost 
-					|| card.willpower || card.threat || card.attack || card.defense || card.hitPoints);
+			card.hasAttrs = _.isNumber(card.threatCost) || _.isNumber(card.resourceCost) 
+								|| _.isNumber(card.engagementCost) || _.isNumber(card.willpower) 
+								|| _.isNumber(card.threat) || _.isNumber(card.attack) 
+								|| _.isNumber(card.defense) || _.isNumber(card.hitPoints);
 			
 		});
 		var end = new Date().getTime();
@@ -208,7 +213,7 @@ conquest.dict = conquest.dict || {};
 		});
 		return trees;
 	};
-
+	
 })(conquest.dict);
 
 //
@@ -216,6 +221,11 @@ conquest.dict = conquest.dict || {};
 //
 conquest.model = conquest.model || {};
 (function(_model) {
+	
+	/**
+	 * @memberOf _model
+	 */
+	_model.dummy = function() {};
 
 	_model.Card = Backbone.Model.extend({
 		urlRoot : '/card',
@@ -730,6 +740,9 @@ conquest.filter = conquest.filter || {};
 		oper : 'isnocase'
 	} ];
 
+	/**
+	 * @memberOf _filter
+	 */
 	_filter.filterToQueryString = function(filter) {
 		var parts = [];
 		_.each(_filter.fds, function(fd) {
@@ -1129,6 +1142,11 @@ conquest.util = conquest.util || {};
 		
 		return p;
 	}
+	
+	/**
+	 * @memberOf _util
+	 */
+	_util.dummy = function() {};
 
 })(conquest.util);
 
@@ -1138,6 +1156,9 @@ conquest.util = conquest.util || {};
 conquest.ui = conquest.ui || {};
 (function(_ui) {
 	
+	/**
+	 * @memberOf _ui
+	 */
 	_ui.toCardUrl = function(input) {
 		return '/' + conquest.static.language + '/card/' + _ui.toCardRelativeUrl(input);
 	};
@@ -1861,6 +1882,11 @@ conquest.deck = conquest.deck || {};
 			});
 		};
 	};
+	
+	/**
+	 * @memberOf _deck
+	 */
+	_deck.dummy = function() {};
 
 })(conquest.deck);
 

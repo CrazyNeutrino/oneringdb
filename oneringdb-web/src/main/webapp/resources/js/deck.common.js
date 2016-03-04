@@ -9,7 +9,10 @@ conquest.deck = conquest.deck || {};
 			options.data = options.data.replace(/%5B%5D/g, '');
 		}
 	});
-
+	
+	/**
+	 * @memberOf _deck
+	 */
 	_deck.buildErrorMessage = function(options) {
 		var error = options.error || {};
 		return messages = {

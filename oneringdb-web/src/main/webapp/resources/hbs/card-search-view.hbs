@@ -17,8 +17,8 @@
 						<div class="btn-group select-many filter-group filter-card-type">
 							{{#each filter.cardTypes}}
 							<label class="btn btn-default" data-card-type="{{techName}}" data-toggle="tooltip" title="{{name}}">
-								{{!-- <i class="{{cardTypeToIconClass techName}}"></i> --}}
-								{{shortName}}
+								<i class="db-icon db-icon-{{techName}}"></i>
+								{{!-- {{shortName}} --}}
 							</label>
 							{{/each}}
 						</div>
