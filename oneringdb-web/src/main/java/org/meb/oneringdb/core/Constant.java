@@ -2,13 +2,13 @@ package org.meb.oneringdb.core;
 
 public class Constant {
 
-	public static final String HOST = getSystemProperty("oneringdb.host", "www.oneringdbcom");
-	public static final String PORT = getSystemProperty("oneringdb.port", null);
-	public static final String MAIL_PASSWORD = getSystemProperty("oneringdb.mail.password", null);
-	public static final boolean MAIL_ACTIVATE = getBooleanSystemProperty("oneringdb.mail.activate",
+	public static final String HOST = getSystemProperty("ordb.host", "www.oneringdb.com");
+	public static final String PORT = getSystemProperty("ordb.port", null);
+	public static final String MAIL_PASSWORD = getSystemProperty("ordb.mail.password", null);
+	public static final boolean MAIL_ACTIVATE = getBooleanSystemProperty("ordb.mail.activate",
 			true);
 	public static final boolean MAIL_RESET_PASSWORD = getBooleanSystemProperty(
-			"oneringdb.mail.resetPassword", true);
+			"ordb.mail.resetPassword", true);
 
 	public static class Constraint {
 
@@ -24,7 +24,7 @@ public class Constant {
 	}
 
 	public static class Deck {
-		
+
 		public static final long MAX_QUANTITY = 100;
 		public static final long MAX_NAME_LEN = 50;
 		public static final long MAX_DESCRIPTION_LEN = 20 * 1024;

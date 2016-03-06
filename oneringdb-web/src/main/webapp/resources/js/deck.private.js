@@ -1,6 +1,12 @@
-$(function() {
+var conquest = conquest || {};
+conquest.deck = conquest.deck || {};
 
-	var showDeckPublishModal = function(deck, options) {
+(function(_deck) {
+	
+	/**
+	 * @memberOf _deck
+	 */
+	_deck.showDeckPublishModal = function(deck, options) {
 
 		var publish = function($modal, name, description) {
 			var attributes = {
@@ -23,9 +29,9 @@ $(function() {
 			});
 
 			snapshot.listenToOnce(snapshot, 'invalid', function(snapshot) {
-				conquest.deck.renderMessages({
+				_deck.renderMessages({
 					$target: $modal.find('.modal-body'),
-					messages: conquest.deck.buildErrorMessage({
+					messages: _deck.buildErrorMessage({
 						message: snapshot.validationError
 					})
 				});
@@ -33,18 +39,18 @@ $(function() {
 
 			snapshot.save(attributes, {
 				success: function(snapshot, response, options) {
-					conquest.deck.renderMessages({
+					_deck.renderMessages({
 						$target: $modal.find('.modal-body'),
-						messages: conquest.deck.buildSuccessMessage({
+						messages: _deck.buildSuccessMessage({
 							message: 'ok.deck.oper.publish'
 						})
 					});
 					deck.get('snapshots').unshift(snapshot);
 				},
 				error: function(snapshot, response, options) {
-					conquest.deck.renderMessages({
+					_deck.renderMessages({
 						$target: $modal.find('.modal-body'),
-						messages: conquest.deck.buildErrorMessage({
+						messages: _deck.buildErrorMessage({
 							error: response.responseJSON,
 							message: 'error.deck.oper.publish'
 						})
@@ -53,7 +59,7 @@ $(function() {
 			});
 		};
 
-		conquest.deck.showDeckDescriptionModal(deck, {
+		_deck.showDeckDescriptionModal(deck, {
 			title: 'core.publishDeck',
 			button: {
 				id: 'deckPublishButton',
@@ -66,7 +72,7 @@ $(function() {
 		});
 	};
 
-	var showDeckEditSnapshotModal = function(snapshot, modalOptions) {
+	_deck.showDeckEditSnapshotModal = function(snapshot, modalOptions) {
 
 		var editSnapshot = function($modal, name, description) {
 			var attributes = {
@@ -77,9 +83,9 @@ $(function() {
 			};
 
 			snapshot.listenToOnce(snapshot, 'invalid', function(snapshot) {
-				conquest.deck.renderMessages({
+				_deck.renderMessages({
 					$target: $modal.find('.modal-body'),
-					messages: conquest.deck.buildErrorMessage({
+					messages: _deck.buildErrorMessage({
 						message: snapshot.validationError
 					})
 				});
@@ -87,9 +93,9 @@ $(function() {
 
 			snapshot.save(attributes, {
 				success: function(snapshot, response, options) {
-					conquest.deck.renderMessages({
+					_deck.renderMessages({
 						$target: $modal.find('.modal-body'),
-						messages: conquest.deck.buildSuccessMessage({
+						messages: _deck.buildSuccessMessage({
 							message: 'ok.deck.oper.modify'
 						})
 					});
@@ -98,9 +104,9 @@ $(function() {
 					}
 				},
 				error: function(snapshot, response, options) {
-					conquest.deck.renderMessages({
+					_deck.renderMessages({
 						$target: $modal.find('.modal-body'),
-						messages: conquest.deck.buildErrorMessage({
+						messages: _deck.buildErrorMessage({
 							error: response.responseJSON,
 							message: 'error.deck.oper.modify'
 						})
@@ -109,7 +115,7 @@ $(function() {
 			});
 		};
 
-		conquest.deck.showDeckDescriptionModal(snapshot, {
+		_deck.showDeckDescriptionModal(snapshot, {
 			title: 'core.editPublishedVersion',
 			button: {
 				id: 'deckEditSnapshotButton',
@@ -121,8 +127,11 @@ $(function() {
 			publish: {}
 		});
 	};
-
-	var ViewBase = Backbone.View.extend({
+	
+	/**
+	 * Base view
+	 */
+	_deck.ViewBase = Backbone.View.extend({
 		el: '.content',
 		viewLinkClickHandler: function(event) {
 			var root = conquest.static.root;
@@ -136,7 +145,7 @@ $(function() {
 			}
 		},
 		renderMessages: function(options) {
-			conquest.deck.renderMessages({
+			_deck.renderMessages({
 				$target: this.$el.find('.content-band .container .content'),
 				messages: this.messages
 			});
@@ -162,7 +171,7 @@ $(function() {
 						},
 						buttonNo: {}
 					};
-					conquest.deck.showMessageModalDialog(options);
+					_deck.showMessageModalDialog(options);
 				}
 			}
 		},
@@ -176,13 +185,20 @@ $(function() {
 		}
 	});
 
-	var UserDeckListView = ViewBase.extend({
+	/**
+	 * Deck list view
+	 */
+	_deck.UserDeckListView = _deck.ViewBase.extend({
 		events: {
 			'click .user-deck-list-view a': 'viewLinkClickHandler'
 		},
 		decks: new conquest.model.PrivateDecks(),
 		filter: {},
 		filterAdvanced: false,
+		
+		/**
+		 * @memberOf UserDeckListView
+		 */
 		render: function() {
 			var view = this;
 
@@ -242,7 +258,7 @@ $(function() {
 					label: conquest.dict.messages[arr[1]]
 				})
 			});
-			view.deckListFilterView = new conquest.deck.DeckListFilterView({
+			view.deckListFilterView = new _deck.DeckListFilterView({
 				config: {
 					showCreateDate: true,
 					showModifyDate: true,
@@ -257,7 +273,7 @@ $(function() {
 				advanced: view.filterAdvanced,
 				searchClickHandler: queryDeckList
 			});
-			view.deckListDataView = new conquest.deck.DeckListDataView();
+			view.deckListDataView = new _deck.DeckListDataView();
 			if (view.decks.length > 0) {
 				view.deckListDataView.render(view.decks, {
 					pageClickHandler: queryDeckList,
@@ -269,223 +285,30 @@ $(function() {
 		}
 	});	
 
-	var UserDeckImportView = ViewBase.extend({
+	/**
+	 * Deck edit view
+	 */
+	_deck.UserDeckEditView = _deck.ViewBase.extend({
 		events: {
-			'click .user-deck-import-view a': 'viewLinkClickHandler'
+			'click .user-deck-edit-view a':							'onViewLinkClick',
+			'click .user-deck-edit-view .select-one .btn':			'onSelectOneGroupClick',
+			'click .user-deck-edit-view .select-many .btn':			'onSelectManyGroupClick',
+			'click .user-deck-edit-view .layout-group .btn':		'onLayoutClick',
+			'click .user-deck-edit-view .filter-sphere .btn':		'onSphereFilterClick',
+			'click .user-deck-edit-view .filter-card-type .btn':	'onCardTypeFilterClick',
+			'click .user-deck-edit-view .filter-selection .btn':	'onSelectionFilterClick',
 		},
-		render: function(id) {
-			var view = this;
-
-			var template = Handlebars.templates['user-deck-import-view']();
-			var actionsTemplate = Handlebars.templates['deck-actions']({
-				actions: {
-					decknew: {
-						showText: true
-					},
-					decklist: {
-						showText: true
-					}
-				}
-			});
-			view.$el.html(template);
-			view.$el.find('.actions-container').append(actionsTemplate);
-			conquest.ui.adjustWrapperStyle();
-
-			view.groupsView = new conquest.deck.MemberGroupsView({
-				el: '.mg-container'
-			});
-
-			$('#parseDeckButton').click(function() {
-				var cleanName = function(name) {
-					return s(name.toLowerCase()).clean().slugify().value();
-				};
-				var index = _.indexBy(conquest.dict.cards, function(card) {
-					return cleanName(card.name);
-				});
-				var indexEn = _.indexBy(conquest.dict.cards, function(card) {
-					return cleanName(card.nameEn);
-				});
-				var pattern = /(?:([1-4])x?)?([^\(\)]+)(?:\((.+)\))?/;
-
-				var warnings = [];
-				var errors = [];
-				var warlordId = undefined;
-				var members = [];
-
-				var lines = s.lines($('textarea').val());
-
-				_.each(lines, function(line) {
-					if (s.isBlank(line)) {
-						return;
-					}
-					var startsWithTypeName = _.some(conquest.dict.cardTypes, function(cardType) {
-						var tmp = s(line).trim().toLowerCase();
-						return tmp.startsWith(cardType.name.toLowerCase()) || tmp.startsWith(cardType.nameEn.toLowerCase());
-					});
-					if (startsWithTypeName) {
-						return;
-					}
-
-					var tokens = pattern.exec(s.trim(line.toLowerCase()));
-					if (tokens != null) {
-						var cn = cleanName(tokens[2]);
-						var card = index[cn] || indexEn[cn];
-						if (_.isUndefined(card)) {
-							warnings.push(conquest.dict.messages['core.skipped'] + ': ' + line);
-							return;
-						}
-
-						if (card.type === 'warlord') {
-							warlordId = card.id;
-						} else {
-							members.push({
-								cardId: card.id,
-								quantity: parseInt(tokens[1])
-							});
-						}
-					} else {
-						warnings.push(conquest.dict.messages['core.skipped'] + ': ' + line);
-					}
-				});
-
-				if (_.isUndefined(warlordId)) {
-					errors.push(conquest.dict.messages['error.deck.warlord.notFound']);
-				} else {
-					var vdms = conquest.deck.getValidDeckMembers(warlordId);
-					var vdmsIndex = _.indexBy(vdms, function(vdm) {
-						return vdm.cardId;
-					});
-					_.each(members, function(member) {
-						var vdm = vdmsIndex[member.cardId];
-						if (_.isUndefined(vdm)) {
-							errors.push(conquest.dict.messages['error.deck.invalidCard'] + ': ' + conquest.dict.findCard(member.cardId).name);
-						} else {
-							var card = conquest.dict.findCard(member.cardId);
-							if (_.isNumber(card.warlordId)) {
-								vdm.quantity = card.quantity;
-							} else if (_.isNumber(member.quantity)) {
-								vdm.quantity = Math.max(1, Math.min(3, member.quantity));
-							} else {
-								vdm.quantity = 1;
-							}
-						}
-					});
-				}
-
-				var deck = undefined;
-				if (_.isUndefined(warlordId)) {
-					view.$el.find('.mg-container').empty();
-				} else {
-					deck = new conquest.model.PrivateDeck({
-						type: 'base',
-						warlordId: warlordId,
-						members: vdms,
-						configCsQuantity: 3						
-					}, {
-						parse: true
-					});
-					view.groupsView.render(deck.get('members'), {
-						readOnly: false
-					});
-				}
-
-				if (errors.length == 0) {
-					view.$el.find('#editDeckButton').removeClass('disabled').click(function() {
-						userDeckEditView.render({
-							deck: deck
-						});
-						var warlord = conquest.dict.findCard(deck.get('warlordId'));
-						conquest.router.navigate('new/' + warlord.id + '-' + warlord.techName);
-					});
-				} else {
-					view.$el.find('#editDeckButton').addClass('disabled').off('click');
-				}
-
-				var $container = view.$el.find('.problems-container').empty();
-				if (errors.length > 0) {
-					$container.append(
-						Handlebars.templates['commons-ul']({
-							listTitle: conquest.dict.messages['core.errors'] + ':',
-							listItems: errors,
-							listContainerStyle: 'alert alert-danger'
-						})
-					);
-				}
-				if (warnings.length > 0) {
-					$container.append(
-						Handlebars.templates['commons-ul']({
-							listTitle: conquest.dict.messages['core.warnings'] + ':',
-							listItems: warnings,
-							listContainerStyle: 'alert alert-warning'
-						})
-					);
-				}
-			});
-		}
-	});
-
-	var UserDeckCreateView = ViewBase.extend({
-		events: {
-			'click .user-deck-create-view a': 'viewLinkClickHandler'
-		},
-		render: function() {
-			this.unbindMenuLinkClickHandler();
-			conquest.ui.adjustWrapperStyle();
-
-			var warlords = _.where(conquest.dict.cards, {
-				type: 'warlord'
-			});
-			warlords = _.sortBy(warlords, function(warlord) {
-				return warlord.factionDisplay + '#' + warlord.name;
-			});
-			var template = Handlebars.templates['user-deck-create-view']({
-				warlords: warlords
-			});
-			this.$el.html(template);
-			this.$el.find('.actions-container').append(
-				Handlebars.templates['deck-actions']({
-					actions: {
-						decklist: {
-							showText: true
-						},
-						deckimport: {
-							showText: true
-						}
-					}
-				}));
-
-			var view = this;
-			$('tbody tr').mouseenter(
-				function() {
-					var $this = $(this).addClass('highlight');
-					var attrs = {
-						class: 'card-lg'
-					};
-					var imgElem = conquest.ui.writeCardImgElem($this.data('card-image-base'), attrs);
-					var $container = view.$el.find('.card-container').empty().append(imgElem);
-					// _.each(conquest.dict.findSignSquadCards(91), function(card) {
-					// 	var attrs = {class: 'card-sm', style: 'margin: 0px 10px 10px 0px;'};
-					// 	var imgElem = conquest.ui.writeCardImgElem(card.imageBase, attrs);
-					// 	$container.append(imgElem);
-					// });
-				}).mouseleave(function() {
-				$(this).removeClass('highlight');
-				view.$el.find('.card-container').empty();
-			});
-		}
-	});
-
-	var UserDeckEditView = ViewBase.extend({
-		events: {
-			'click .user-deck-edit-view a': 'viewLinkClickHandler'
-		},
+		
+		membersFilter: new _deck.MembersFilter(),
+		filteredMembers: new conquest.model.DeckMembers(),
+		
 		initialize: function() {
 			this.config = new Backbone.Model({
-				layout: 'list',
-				filter: new Backbone.Model()
+				layout: 'list'
 			});			
-		},	
-		viewLinkClickHandler: function(event) {
+		},
+		
+		onViewLinkClick: function(event) {
 			var root = conquest.static.root;
 			var href = $(event.currentTarget).attr('href');
 			if (href && href.indexOf(root) == 0 && !event.ctrlKey && !event.shiftKey) {
@@ -509,12 +332,73 @@ $(function() {
 						},
 						buttonNo: {}
 					};
-					conquest.deck.showMessageModalDialog(options);
+					_deck.showMessageModalDialog(options);
 				} else {
 					navigateHandler();
 				}
 			}
 		},
+		
+		onSelectOneGroupClick: function(event) {
+			console.log('onSelectOneGroupClick');
+			
+			$(event.currentTarget).addClass('active').siblings().removeClass('active');
+		},
+		
+		onSelectManyGroupClick: function(event) {
+			console.log('onSelectManyGroupClick');
+			
+			var $target = $(event.currentTarget);
+			if (event.ctrlKey) {
+				$target.addClass('active').siblings().removeClass('active');
+			} else {
+				$target.toggleClass('active');
+			}
+		},
+		
+		onLayoutClick: function(e) {
+			console.log('onLayoutClick');
+			
+			this.config.set({
+				layout: $(e.currentTarget).data('layout')
+			});
+		},
+		
+		onSphereFilterClick: function(e) {
+			console.log('onSphereFilterClick');
+			
+			this.membersFilter.set({
+				sphere: $(e.currentTarget).parent().children().filter('.active').map(function() {
+					return $(this).data('sphere');
+				}).get()
+			});
+		},
+		
+		onCardTypeFilterClick: function(e) {
+			console.log('onCardTypeFilterClick');
+			
+			this.membersFilter.set({
+				type: $(e.currentTarget).parent().children().filter('.active').map(function() {
+					return $(this).data('card-type');
+				}).get()
+			});
+		},
+		
+		onSelectionFilterClick: function(e) {
+			console.log('onSelectionFilterClick');
+			
+			this.membersFilter.set({
+				quantity: _.flatten($(e.currentTarget).parent().children().filter('.active').map(function() {
+					var selection = $(this).data('selection');
+					if (selection === 'not-selected') {
+						return 0;
+					} else if (selection === 'selected') {
+						return [1, 2, 3, 4];
+					}
+				}).get())
+			});
+		},
+		
 		updateStats: function() {
 			var stats = this.deck.computeStats();
 			stats.cost.name = 'card.cost.sh';
@@ -532,6 +416,7 @@ $(function() {
 				trigger: 'hover click'
 			});
 		},
+		
 		buildFilterFromUI: function() {
 			var filter = {};
 			filter.layout = this.$el.find('.btn-group-layout .btn.active').map(function() {
@@ -550,7 +435,8 @@ $(function() {
 				return $(this).val();
 			});
 
-			filter = _.extend(filter, _.pick(this.config.get('filter').toJSON(), 'cost', 'shield', 'command', 'attack', 'hitPoints', 'setTechName', 'name', 'trait', 'keyword'));
+			filter = _.extend(filter, _.pick(this.membersFilter.toJSON(), 'threatCost', 'resourceCost', 'willpower', 'threat', 
+					'attack', 'defense', 'hitPoints', 'setTechName', 'name', 'traits', 'keywords'));
 
 			_.each(Object.keys(filter), function(key) {
 				var value = filter[key];
@@ -564,6 +450,7 @@ $(function() {
 
 			return filter;
 		},
+		
 		applyFilterToUI: function(filter) {
 			this.$el.find('.btn-group-layout .btn').each(function() {
 				var $this = $(this);
@@ -595,171 +482,198 @@ $(function() {
 				}
 			});
 		
-			this.config.get('filter').set(_.pick(filter, 'cost', 'shield', 'command', 'attack', 'hitPoints', 'setTechName', 'name', 'trait', 'keyword'));
+			this.membersFilter.set(_.pick(filter, 'threatCost', 'resourceCost', 'willpower', 'threat', 
+					'attack', 'defense', 'hitPoints', 'setTechName', 'name', 'trait', 'keyword'));
 		},
+		
+		renderPrivateLinksList: function() {
+			var template = Handlebars.templates['deck-private-link-list']({
+				deck: this.deck.toJSON()
+			});
+			this.$el.find('#deckPrivateLinkBlock').html(template);
+
+			//
+			// delete private link
+			//
+			this.$el.find('#deckPrivateLinkList .btn').click(function() {
+				var linkId = parseInt($(this).closest('tr').data('id'));
+				var deleteHandler = function() {
+					this.deck.get('links').findWhere({
+						id: linkId
+					}).destroy({
+						wait: true,
+						success: function(link, response, options) {
+							this.messages = [{
+								kind: 'success',
+								title: 'core.ok',
+								message: 'ok.deck.oper.deleteLink'
+							}];
+							this.renderMessages();
+						},
+						error: function(link, response, options) {
+							this.messages = _deck.buildErrorMessage({
+								error: response.responseJSON,
+								message: 'error.deck.oper.deleteLink'
+							});
+							this.renderMessages();
+						}
+					});
+				};
+
+				var options = {
+					titleKey: 'core.deck.aboutToDeleteLink.title',
+					messageKey: 'core.deck.aboutToDeleteLink.message',
+					buttonYes: {
+						labelKey: 'core.yes.long' + Math.floor(Math.random() * 2),
+						class: 'btn-danger',
+						handler: deleteHandler
+					},
+					buttonNo: {}
+				};
+
+				_deck.showMessageModalDialog(options);
+			});
+		},
+		
+		renderPublishedDecksList: function() {
+			var template = Handlebars.templates['deck-published-decks-list']({
+				decks: this.deck.get('snapshots').toJSON(),
+				editable: true
+			});
+			this.$el.find('#deckPublishedDecksBlock').html(template);
+			this.$el.find('#deckPublishedDecksBlock [data-toggle="tooltip"]').tooltip({
+				container: 'body'
+			});
+
+			//
+			// edit published deck
+			//
+			this.$el.find('.deck-oper-edit').click(function() {
+				showDeckEditSnapshotModal(this.deck.get('snapshots').findWhere({
+					id: parseInt($(this).closest('tr').data('id'))
+				}), {
+					success: view.renderPublishedDecksList
+				});
+			});
+
+			//
+			// delete published deck
+			//				
+			this.$el.find('.deck-oper-delete').click(function() {
+				var deckId = parseInt($(this).closest('tr').data('id'));
+				var deleteHandler = function() {
+					this.deck.get('snapshots').findWhere({
+						id: deckId
+					}).destroy({
+						wait: true,
+						success: function(snapshot, response, options) {
+							this.messages = _deck.buildSuccessMessage({
+								message: 'ok.deck.oper.delete'
+							});
+							this.renderMessages();
+						},
+						error: function(snapshot, response, options) {
+							this.messages = _deck.buildErrorMessage({
+								error: response.responseJSON,
+								message: 'error.deck.oper.delete'
+							});
+							this.renderMessages();
+						}
+					});
+				};
+
+				var options = {
+					titleKey: 'core.deck.aboutToDelete.title',
+					messageKey: 'core.deck.aboutToDelete.message',
+					buttonYes: {
+						labelKey: 'core.yes.long' + Math.floor(Math.random() * 2),
+						class: 'btn-danger',
+						handler: deleteHandler
+					},
+					buttonNo: {}
+				};
+
+				_deck.showMessageModalDialog(options);
+			});
+		},
+		
+		filterMembers: function() {
+			var filteredMembers = this.membersFilter.filter(this.deck.get('members'));
+			this.deck.get('filteredMembers').comparator = this.buildMembersComparator();
+			this.deck.get('filteredMembers').reset(filteredMembers);
+		},
+		
+		sortMembers: function() {
+			
+		},
+		
+		buildSortKeys: function() {
+			var sortKeys = [];
+			$('.sort-control').each(function() {
+				 var value = $(this).val();
+				 if (value) {
+				 	if (value.indexOf(',') == -1) {
+				 		sortKeys.push(value);
+				 	} else {
+				 		sortKeys.push({
+				 			property: value.split(',')[0],
+				 			descending: value.split(',')[1] == 'desc'
+				 		});
+				 	}
+				 }
+			});					
+			return sortKeys;
+		},
+
+		buildMembersComparator: function() {
+			var sortKeys = this.buildSortKeys();
+			var hasNonDefaultSortKeys = _.some(sortKeys, function(sortKey) {
+				return sortKey && sortKey != 'default';
+			});
+			if (hasNonDefaultSortKeys) {
+				return conquest.util.buildMembersComparator(sortKeys);
+			} else {
+				return conquest.util.buildMembersDefaultComparator();
+			}
+		},
+		
+		/**
+		 * @memberOf UserDeckEditView
+		 */
 		render: function(options) {
 			var view = this;
 
 			options = options || {};
 
-			var renderPrivateLinksList = function() {
-				var template = Handlebars.templates['deck-private-link-list']({
-					deck: view.deck.toJSON()
-				});
-				view.$el.find('#deckPrivateLinkBlock').html(template);
-
-				//
-				// delete private link
-				//
-				view.$el.find('#deckPrivateLinkList .btn').click(function() {
-					var linkId = parseInt($(this).closest('tr').data('id'));
-					var deleteHandler = function() {
-						view.deck.get('links').findWhere({
-							id: linkId
-						}).destroy({
-							wait: true,
-							success: function(link, response, options) {
-								view.messages = [{
-									kind: 'success',
-									title: 'core.ok',
-									message: 'ok.deck.oper.deleteLink'
-								}];
-								view.renderMessages();
-							},
-							error: function(link, response, options) {
-								view.messages = conquest.deck.buildErrorMessage({
-									error: response.responseJSON,
-									message: 'error.deck.oper.deleteLink'
-								});
-								view.renderMessages();
-							}
-						});
-					};
-
-					var options = {
-						titleKey: 'core.deck.aboutToDeleteLink.title',
-						messageKey: 'core.deck.aboutToDeleteLink.message',
-						buttonYes: {
-							labelKey: 'core.yes.long' + Math.floor(Math.random() * 2),
-							class: 'btn-danger',
-							handler: deleteHandler
-						},
-						buttonNo: {}
-					};
-
-					conquest.deck.showMessageModalDialog(options);
-				});
-			};
-
-			var renderPublishedDecksList = function() {
-				var template = Handlebars.templates['deck-published-decks-list']({
-					decks: view.deck.get('snapshots').toJSON(),
-					editable: true
-				});
-				view.$el.find('#deckPublishedDecksBlock').html(template);
-				view.$el.find('#deckPublishedDecksBlock [data-toggle="tooltip"]').tooltip({
-					container: 'body'
-				});
-
-				//
-				// edit published deck
-				//
-				view.$el.find('.deck-oper-edit').click(function() {
-					showDeckEditSnapshotModal(view.deck.get('snapshots').findWhere({
-						id: parseInt($(this).closest('tr').data('id'))
-					}), {
-						success: renderPublishedDecksList
-					});
-				});
-
-				//
-				// delete published deck
-				//				
-				view.$el.find('.deck-oper-delete').click(function() {
-					var deckId = parseInt($(this).closest('tr').data('id'));
-					var deleteHandler = function() {
-						view.deck.get('snapshots').findWhere({
-							id: deckId
-						}).destroy({
-							wait: true,
-							success: function(snapshot, response, options) {
-								view.messages = conquest.deck.buildSuccessMessage({
-									message: 'ok.deck.oper.delete'
-								});
-								view.renderMessages();
-							},
-							error: function(snapshot, response, options) {
-								view.messages = conquest.deck.buildErrorMessage({
-									error: response.responseJSON,
-									message: 'error.deck.oper.delete'
-								});
-								view.renderMessages();
-							}
-						});
-					};
-
-					var options = {
-						titleKey: 'core.deck.aboutToDelete.title',
-						messageKey: 'core.deck.aboutToDelete.message',
-						buttonYes: {
-							labelKey: 'core.yes.long' + Math.floor(Math.random() * 2),
-							class: 'btn-danger',
-							handler: deleteHandler
-						},
-						buttonNo: {}
-					};
-
-					conquest.deck.showMessageModalDialog(options);
-				});
-			};
-
 			var renderInternal = function() {
-				var warlordId = view.deck.get('warlord').id;
-				var warlord = conquest.dict.findCard(warlordId);
-				
 				conquest.ui.adjustWrapperStyle();
 				
 				var filter = {
-					factions: conquest.deck.getValidDeckFactions(warlordId),
-					cardTypes: conquest.deck.getValidDeckCardTypes(warlordId)
+					spheres: conquest.dict.spheres,
+					cardTypes: conquest.dict.playerDeckCardTypes
 				};
 		
-				var sortItems = [];
-				_.each([
-					['name', 'card.name'],
-					['number', 'card.number'],
-					['factionDisplay', 'card.faction'],
-					['typeDisplay', 'card.type'],
-					['cost', 'card.cost.sh'],
-					['shield', 'card.shieldIcons.sh'],
-					['command', 'card.commandIcons.sh'],
-					['attack', 'card.attack.sh'],
-					['hitPoints', 'card.hp.sh'],
-					['setName', 'core.setName'],
-					['setNumber', 'core.setNumber']
-				], function(arr) {
-					sortItems.push({
-						value: arr[0],
-						label: conquest.dict.messages[arr[1]]
-					})
-				});
-
 				var template = Handlebars.templates['user-deck-edit-view']({
 					deck: view.deck.toJSON(),
 					filter: filter,
-					sortItems: sortItems
+					sortItems: conquest.util.buildCardSortItems({
+						includeEDAttrs: false,
+						includeQDAttrs: false
+					})
 				});
 				var f = view.buildFilterFromUI();
 				view.$el.html(template);
 				view.applyFilterToUI(f);
 
-				view.deckDescriptionView = new conquest.deck.DeckDescriptionView();
+				view.deckDescriptionView = new _deck.DeckDescriptionView();
 				view.deckDescriptionView.render(view.deck);
 
-				renderPrivateLinksList();
-				renderPublishedDecksList();
+				view.renderPrivateLinksList();
+				view.renderPublishedDecksList();
 				view.updateStats();
 				view.renderMessages();
+				
+				view.membersFilter.on('change', view.filterMembers, view);
 
 				view.$el.find('a[data-image-base]').popover({
 					html: true,
@@ -789,90 +703,10 @@ $(function() {
 						},
 						deckdelete: _.isNumber(deckId) ? {} : undefined,
 						decklist: {},
-					},
-					faction: warlord.faction
+					}
 				}));
 
-				var buildSortKeys = function() {
-					var sortKeys = [];
-					$('.sort-control').each(function() {
-						 var value = $(this).val();
-						 if (value) {
-						 	if (value.indexOf(',') == -1) {
-						 		sortKeys.push(value);
-						 	} else {
-						 		sortKeys.push({
-						 			property: value.split(',')[0],
-						 			descending: value.split(',')[1] == 'desc'
-						 		});
-						 	}
-						 }
-					});					
-					return sortKeys;
-				}; // end:buildSortKeys
-
-				var buildMembersComparator = function() {
-					var sortKeys = buildSortKeys();
-					var hasNonDefaultSortKeys = _.some(sortKeys, function(sortKey) {
-						return sortKey && sortKey != 'default';
-					});
-					if (hasNonDefaultSortKeys) {
-						return conquest.util.buildMembersComparator(sortKeys);
-					} else {
-						return conquest.util.buildMembersDefaultComparator(view.deck.get('warlord').faction);
-					}
-				}; // end:buildMembersComparator
-
-				var filterMembers = function() {
-					var cardsFilter = new conquest.card.CardsFilter();
-					var cardsFilterAttrs = {
-						faction: $('.btn-group.btn-group-filter.filter-faction > .btn.active').map(function() {
-							return $(this).data('faction');
-						}).get(),
-						type: $('.btn-group.btn-group-filter.filter-type > .btn.active').map(function() {
-							return $(this).data('type');
-						}).get()
-					};
-
-					var membersFilter = view.config.get('filter');
-					var attrNames = ['cost', 'shield', 'command', 'attack', 'hitPoints', 'techName', 'trait', 'keyword', 'setTechName', 'text'];
-					_.each(attrNames, function(attrName) {
-						cardsFilterAttrs[attrName] = membersFilter.get(attrName);
-					});
-					cardsFilter.set(cardsFilterAttrs);					
-
-					var cards = _.pluck(view.deck.get('members').toJSON(), 'card');
-					var ids = _.pluck(cardsFilter.filter(cards), 'id');
-
-					var quantities = $('.btn-group.btn-group-filter.filter-selection > .btn.active').map(function() {
-						var selection = $(this).data('selection');
-						if (selection === 'not-selected') {
-							return 0;
-						} else if (selection === 'selected') {
-							return [1, 2, 3, 4];
-						}
-					}).get();
-					quantities = quantities.length == 0 ? undefined : _.flatten(quantities);
-					var filteredMembers = view.deck.get('members').filter(function(member) {
-						return (!quantities || _.contains(quantities, member.get('quantity'))) && _.contains(ids, member.get('card').id);
-					});
-
-					view.deck.get('filteredMembers').comparator = buildMembersComparator();
-					view.deck.get('filteredMembers').reset(filteredMembers);
-
-				}; // end:filterMembers
-
-				if (!view.config.get('filter').get('setTechName')) {
-					var warlordSetId = view.deck.get('warlord').setId;
-					var sets = _.pluck(_.filter(conquest.dict.cardSets, function(set) {
-						return set.released === true || set.id == warlordSetId;
-					}), 'techName');
-					view.config.get('filter').set({
-						setTechName: sets
-					});
-				}
-
-				view.membersListView = new conquest.deck.MembersListView({
+				view.membersListView = new _deck.MembersListView({
 					el: '.members-container',
 				});
 				view.membersListView.listenTo(view.deck.get('filteredMembers'), 'reset', function(filteredMembers) {
@@ -882,7 +716,7 @@ $(function() {
 					});
 				});
 
-				view.groupsView = new conquest.deck.MemberGroupsView({
+				view.groupsView = new _deck.MemberGroupsView({
 					el: '.mg-container'
 				});
 				view.deck.get('members').each(function(member) {
@@ -928,40 +762,15 @@ $(function() {
 					view.updateStats();
 				});
 
-				view.listenTo(view.config.get('filter'), 'change', function(fltr) {
-					filterMembers();
-				});
-				view.listenTo(view.config, 'change:filter', function(config) {
-					filterMembers();
-				});
-
-				$('.btn-group.select-many > .btn').click(function(event) {
-					var $this = $(this);
-					if (event.ctrlKey) {
-						$this.addClass('active').siblings().removeClass('active');
-					} else {
-						$this.toggleClass('active');
-					}
-					filterMembers();
-				});
-
-				$('.btn-group.btn-group-layout > .btn').click(function() {
-					var $this = $(this);
-					$this.addClass('active').siblings().removeClass('active');
-					view.config.set({
-						layout: $this.data('layout')
-					});
-				});
-
 				var layout = view.config.get('layout');
-				$('.btn-group.btn-group-layout > .btn[data-layout="' + layout + '"]').addClass('active');
+				$('.btn-group.layout-group > .btn[data-layout="' + layout + '"]').addClass('active');
 
 
 				//
 				// sorting change
 				//
 				$('.sort-control').change(function() {					
-					view.deck.get('filteredMembers').comparator = buildMembersComparator();
+					view.deck.get('filteredMembers').comparator = this.buildMembersComparator();
 					view.deck.get('filteredMembers').sort();
 					view.deck.get('filteredMembers').trigger('reset', view.deck.get('filteredMembers'));
 				});
@@ -985,13 +794,13 @@ $(function() {
 							view.deck = deck;
 							view.deck.history.reset();
 							// view.filter = view.buildFilterFromUI();
-							view.messages = conquest.deck.buildSuccessMessage({
+							view.messages = _deck.buildSuccessMessage({
 								message: 'ok.deck.oper.save'
 							});							
 							view.render();
 						},
 						error: function(deck, response, options) {
-							view.messages = conquest.deck.buildErrorMessage({
+							view.messages = _deck.buildErrorMessage({
 								error: response.responseJSON,
 								message: 'error.deck.oper.save'
 							});
@@ -1004,7 +813,7 @@ $(function() {
 				// save deck copy
 				//
 				$('a.deck-save-copy').click(function() {
-					conquest.deck.showDeckSaveCopyModal(view.deck);
+					_deck.showDeckSaveCopyModal(view.deck);
 				});
 
 				//
@@ -1018,14 +827,14 @@ $(function() {
 								conquest.router.navigate('');
 								ga('set', 'page', conquest.static.root);
 								ga('send', 'pageview');
-								userDeckListView.messages = conquest.deck.buildSuccessMessage({
+								userDeckListView.messages = _deck.buildSuccessMessage({
 									message: 'ok.deck.oper.delete'
 								});
 								delete view.deck;
 								userDeckListView.render();
 							},
 							error: function(deck, response, options) {
-								view.messages = conquest.deck.buildErrorMessage({
+								view.messages = _deck.buildErrorMessage({
 									error: response.responseJSON,
 									message: 'error.deck.oper.delete'
 								});
@@ -1045,7 +854,7 @@ $(function() {
 						buttonNo: {}
 					};
 
-					conquest.deck.showMessageModalDialog(options);
+					_deck.showMessageModalDialog(options);
 				});
 
 				//
@@ -1054,7 +863,7 @@ $(function() {
 				view.$el.find('#deckPublishButton').click(function() {
 					showDeckPublishModal(view.deck);
 				});
-				view.listenTo(view.deck.get('snapshots'), 'add remove', renderPublishedDecksList);
+				view.listenTo(view.deck.get('snapshots'), 'add remove', view.renderPublishedDecksList);
 
 				//
 				// create private link
@@ -1069,13 +878,13 @@ $(function() {
 					deckLink.save(attributes, {						
 						success: function(deckLink, response, options) {
 							view.deck.get('links').unshift(deckLink);
-							view.messages = conquest.deck.buildSuccessMessage({
+							view.messages = _deck.buildSuccessMessage({
 								message: 'ok.deck.oper.saveLink'
 							});
 							view.renderMessages();
 						},
 						error: function(deckLink, response, options) {							
-							view.messages = conquest.deck.buildErrorMessage({
+							view.messages = _deck.buildErrorMessage({
 								error: response.responseJSON,
 								message: 'error.deck.oper.saveLink'
 							});
@@ -1083,12 +892,12 @@ $(function() {
 						}
 					});
 				});
-				view.listenTo(view.deck.get('links'), 'add remove', renderPrivateLinksList);
+				view.listenTo(view.deck.get('links'), 'add remove', view.renderPrivateLinksList);
 
 				//
 				// export deck
 				//
-				conquest.deck.prepareExportModalDialog(view.deck);
+				_deck.prepareExportModalDialog(view.deck);
 
 				//
 				// tooltips
@@ -1131,20 +940,12 @@ $(function() {
 				//
 				// filter: sets
 				// 
-				new conquest.card.CardSetFilterPopoverView({
-					filter: view.config.get('filter'),
-					$trigger: view.$el.find('#cardSetfilterTrigger')
-				}).render();
-
+				// TODO
+				
 				//
 				// filter: stats
 				// 
-				new conquest.card.CardStatFilterPopoverView({
-					filter: view.config.get('filter'),
-					$trigger: view.$el.find('#cardStatfilterTrigger')
-				}).render();
-
-
+				// TODO
 
 				//
 				// draw
@@ -1155,7 +956,9 @@ $(function() {
 
 					var draw = function(quantity) {
 						if (_.isUndefined(view.shuffledCards)) {
-							view.shuffledCards = conquest.util.membersShuffle(view.deck.get('members'));
+							view.shuffledCards = conquest.util.membersShuffle(view.deck.get('members').filter(function(member) {
+								return member.get('card').type != 'hero';
+							}));
 							view.shuffledCardsIndex = 0;
 							$drawContainer.empty();
 						}
@@ -1184,7 +987,7 @@ $(function() {
 					var $button = $(this);
 					if ($buttons.index($button) == 0) {
 						view.shuffledCards = undefined;
-						quantity = view.deck.get('warlord').startingHandSize;
+						quantity = 6;
 					} else if ($buttons.index($button) == 1) {
 						view.shuffledCards = undefined;
 						quantity = view.deck.get('members').reduce(function(total, member) {
@@ -1323,25 +1126,24 @@ $(function() {
 					readOnly: false
 				});
 
-				filterMembers();
+				view.membersFilter.set({
+					type: 'hero'
+				})
 			};
 
 			if (options.deck) {
 				view.deck = options.deck;
-				// view.deck.set({
-				// 	snapshots: new conquest.model.PrivateDecks()
-				// });
 				view.deck.get('snapshots').fetch({
 					data: {
 						snapshotBaseId: view.deck.get('id')
 					},
 					success: function(decks, response, options) {
-						renderPublishedDecksList();
+						view.renderPublishedDecksList();
 					}
 				});
 				view.deck.get('links').fetch({
 					success: function(links, response, options) {
-						renderPrivateLinksList();
+						view.renderPrivateLinksList();
 					}
 				});
 								
@@ -1355,82 +1157,225 @@ $(function() {
 						renderInternal();
 					},
 					error: function(deck, response, options) {
-						view.messages = conquest.deck.buildErrorMessage({
+						view.messages = _deck.buildErrorMessage({
 							error: response.responseJSON,
 							message: 'error.deck.oper.loadDeck'
 						});
 						view.renderMessages();
 					}
 				});
-			} else if (_.isNumber(options.warlordId)) {
+			} else {
 				view.deck = new conquest.model.PrivateDeck({
 					type: 'base',
-					warlordId: options.warlordId,
-					members: conquest.deck.getValidDeckMembers(options.warlordId),
+					members: _deck.getPlayerDeckMembers(),
 					configCsQuantity: 3
 				}, {
 					parse: true
 				});
-				renderInternal();
-			} else {
 				renderInternal();
 			}
 
 			this.bindMenuLinkClickHandler();
 		}
 	});
+	
+	_deck.UserDeckImportView = _deck.ViewBase.extend({
+		events: {
+			'click .user-deck-import-view a': 'viewLinkClickHandler'
+		},
+		
+		/**
+		 * @memberOf UserDeckImportView
+		 */
+		render: function(id) {
+			var view = this;
+
+			var template = Handlebars.templates['user-deck-import-view']();
+			var actionsTemplate = Handlebars.templates['deck-actions']({
+				actions: {
+					decknew: {
+						showText: true
+					},
+					decklist: {
+						showText: true
+					}
+				}
+			});
+			view.$el.html(template);
+			view.$el.find('.actions-container').append(actionsTemplate);
+			conquest.ui.adjustWrapperStyle();
+
+			view.groupsView = new _deck.MemberGroupsView({
+				el: '.mg-container'
+			});
+
+			$('#parseDeckButton').click(function() {
+				var cleanName = function(name) {
+					return s(name.toLowerCase()).clean().slugify().value();
+				};
+				var index = _.indexBy(conquest.dict.cards, function(card) {
+					return cleanName(card.name);
+				});
+				var indexEn = _.indexBy(conquest.dict.cards, function(card) {
+					return cleanName(card.nameEn);
+				});
+				var pattern = /(?:([1-4])x?)?([^\(\)]+)(?:\((.+)\))?/;
+
+				var warnings = [];
+				var errors = [];
+				var warlordId = undefined;
+				var members = [];
+
+				var lines = s.lines($('textarea').val());
+
+				_.each(lines, function(line) {
+					if (s.isBlank(line)) {
+						return;
+					}
+					var startsWithTypeName = _.some(conquest.dict.cardTypes, function(cardType) {
+						var tmp = s(line).trim().toLowerCase();
+						return tmp.startsWith(cardType.name.toLowerCase()) || tmp.startsWith(cardType.nameEn.toLowerCase());
+					});
+					if (startsWithTypeName) {
+						return;
+					}
+
+					var tokens = pattern.exec(s.trim(line.toLowerCase()));
+					if (tokens != null) {
+						var cn = cleanName(tokens[2]);
+						var card = index[cn] || indexEn[cn];
+						if (_.isUndefined(card)) {
+							warnings.push(conquest.dict.messages['core.skipped'] + ': ' + line);
+							return;
+						}
+
+						if (card.type === 'warlord') {
+							warlordId = card.id;
+						} else {
+							members.push({
+								cardId: card.id,
+								quantity: parseInt(tokens[1])
+							});
+						}
+					} else {
+						warnings.push(conquest.dict.messages['core.skipped'] + ': ' + line);
+					}
+				});
+
+				if (_.isUndefined(warlordId)) {
+					errors.push(conquest.dict.messages['error.deck.warlord.notFound']);
+				} else {
+					var pdms = _deck.getPlayerDeckMembers();
+					var pdmsIndex = _.indexBy(pdms, function(pdm) {
+						return pdm.cardId;
+					});
+					_.each(members, function(member) {
+						var pdm = pdmsIndex[member.cardId];
+						if (_.isUndefined(pdm)) {
+							errors.push(conquest.dict.messages['error.deck.invalidCard'] + ': ' + conquest.dict.findCard(member.cardId).name);
+						} else {
+							var card = conquest.dict.findCard(member.cardId);
+							if (_.isNumber(card.warlordId)) {
+								pdm.quantity = card.quantity;
+							} else if (_.isNumber(member.quantity)) {
+								pdm.quantity = Math.max(1, Math.min(3, member.quantity));
+							} else {
+								pdm.quantity = 1;
+							}
+						}
+					});
+				}
+
+				var deck = undefined;
+				if (_.isUndefined(warlordId)) {
+					view.$el.find('.mg-container').empty();
+				} else {
+					deck = new conquest.model.PrivateDeck({
+						type: 'base',
+						warlordId: warlordId,
+						members: pdms,
+						configCsQuantity: 3						
+					}, {
+						parse: true
+					});
+					view.groupsView.render(deck.get('members'), {
+						readOnly: false
+					});
+				}
+
+				if (errors.length == 0) {
+					view.$el.find('#editDeckButton').removeClass('disabled').click(function() {
+						userDeckEditView.render({
+							deck: deck
+						});
+						var warlord = conquest.dict.findCard(deck.get('warlordId'));
+						conquest.router.navigate('new/' + warlord.id + '-' + warlord.techName);
+					});
+				} else {
+					view.$el.find('#editDeckButton').addClass('disabled').off('click');
+				}
+
+				var $container = view.$el.find('.problems-container').empty();
+				if (errors.length > 0) {
+					$container.append(
+						Handlebars.templates['commons-ul']({
+							listTitle: conquest.dict.messages['core.errors'] + ':',
+							listItems: errors,
+							listContainerStyle: 'alert alert-danger'
+						})
+					);
+				}
+				if (warnings.length > 0) {
+					$container.append(
+						Handlebars.templates['commons-ul']({
+							listTitle: conquest.dict.messages['core.warnings'] + ':',
+							listItems: warnings,
+							listContainerStyle: 'alert alert-warning'
+						})
+					);
+				}
+			});
+		}
+	});
+	
+})(conquest.deck);
+
+$(function() {
 
 	var Router = Backbone.Router.extend({
 		routes: {
-			'new': 'createNewDeck',
-			'new/:id': 'editNewDeck',
+			'edit': 'editDeck',
 			'edit/:id': 'editDeck',
 			'import': 'importDeck',
 			'': 'viewDecks',
 		}
 	});
 
-	var userDeckListView = new UserDeckListView();
-	var userDeckCreateView = new UserDeckCreateView();
-	var userDeckImportView = new UserDeckImportView();
-	var userDeckEditView = new UserDeckEditView();
+	var userDeckListView = new conquest.deck.UserDeckListView();
+	var userDeckImportView = new conquest.deck.UserDeckImportView();
+	var userDeckEditView = new conquest.deck.UserDeckEditView();
 
 	conquest.router = new Router();
-	conquest.router.on('route:createNewDeck', function() {		
-		userDeckCreateView.render();
-		ga('set', 'page', conquest.static.root + 'new');
-		ga('send', 'pageview');
-	}).on('route:editNewDeck', function(id) {
-		var warlordId = parseInt(id);
-		userDeckEditView.render({
-			warlordId: warlordId
-		});
-		$('html,body').scrollTop(0);
-
-		var url = warlordId;
-		var warlord = conquest.dict.findCard(warlordId);
-		if (warlord) {
-			url += '-' + warlord.techName;
-		}
-		ga('set', 'page', conquest.static.root + 'new/' + url);
-		ga('send', 'pageview');
-	}).on('route:editDeck', function(deckIdWithName) {
+	conquest.router.on('route:editDeck', function(deckIdWithName) {
+		var options = {};
+		
 		if (deckIdWithName) {
 			var deckId = /^\w+/.exec(deckIdWithName)[0];
 			if (/^\d+$/.test(deckId)) {
 				deckId = parseInt(deckId);
 			}
-
-			userDeckEditView.render({
-				deckId: deckId,
-				deck: userDeckListView.decks.findWhere({
-					id: deckId
+			options = {
+				deckdId : deckId,
+				deck : userDeckListView.decks.findWhere({
+					id : deckId
 				})
-			});
-			$('html,body').scrollTop(0);
-			ga('set', 'page', conquest.static.root + 'edit/' + parseInt(deckId));
-			ga('send', 'pageview');
+			};
 		}
+		
+		userDeckEditView.render(options);
+		$('html,body').scrollTop(0);
+		ga('set', 'page', conquest.static.root + 'edit/' + options.deckId);
+		ga('send', 'pageview');
 	}).on('route:viewDecks', function() {
 		userDeckListView.render();
 		$('html,body').scrollTop(0);

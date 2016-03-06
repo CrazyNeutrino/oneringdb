@@ -17,7 +17,7 @@
 						{{else}}
 						<h2>--&nbsp;{{loc 'core.unsavedDeck'}}&nbsp;--</h2>
 						{{/if}}
-						<div style="position: relative;">{{warlord.name}} &#8226; {{#if username}}{{username}} &#8226; {{/if}} 
+						<div style="position: relative;"> {{#if username}}{{username}} &#8226; {{/if}} 
 							<span data-toggle="tooltip" data-placement="bottom" title="{{loc 'core.created'}}: {{moment createDate}}">
 								{{~ momentFromNow createDate ~}}
 							</span>
@@ -70,6 +70,8 @@
 						<div class="col-md-5 col-lg-5">	
 							<div class="actions-container"></div>
 							<div class="deck-info-container row">
+							
+								{{!--
 								<div class="col-xs-12" style="font-size: 18px; margin-bottom: 10px;">
 									<a href="{{cardUrl deck.warlord.id}}" target="_blank" data-image-base="{{deck.warlord.imageBase}}" ><strong>{{deck.warlord.name}}</strong></a>
 								</div>
@@ -77,12 +79,9 @@
 									<a href="{{cardUrl deck.warlord.id}}" target="_blank">
 										<img src="{{cardImagePath deck.warlordId}}" class="card-sm" />
 									</a>
-									{{!--
-									<a href="{{cardUrl deck.warlord.id}}" target="_blank">
-										<img src="{{cardImagePath deck.warlordId bloodied='true'}}" class="card-sm" />
-									</a>
-									--}}
 								</div>
+								--}}
+								
 								<div class="deck-stats-container col-xs-6 col-md-7">				
 								</div>
 							</div>		
@@ -120,7 +119,7 @@
 					    		<div id="deckDeckTab" role="tabpanel" class="tab-pane active">
 									<div class="members-list-filter-container">
 										<div class="form-inline">
-											<div class="btn-group btn-group-layout filter-group">
+											<div class="btn-group select-one layout-group">
 												<label class="btn btn-default" data-layout="list"><span class="glyphicon glyphicon-align-justify"></span></label>
 												<label class="btn btn-default" data-layout="grid-6"><span class="glyphicon glyphicon-th"></span></label>
 												<label class="btn btn-default" data-layout="grid-4"><span class="glyphicon glyphicon-th-large"></span></label>
@@ -148,23 +147,23 @@
 												{{/each}}
 											</select>
 				
-											<div class="btn-group btn-group-filter filter-faction filter-group select-many">
-												{{#each filter.factions}}							
-												<label class="btn btn-default" data-faction="{{techName}}" data-toggle="tooltip" title="{{name}}">
+											<div class="btn-group filter-group select-many filter-sphere">
+												{{#each filter.spheres}}							
+												<label class="btn btn-default" data-sphere="{{techName}}" data-toggle="tooltip" title="{{name}}">
 													<i class="db-icon db-icon-{{techName}}"></i>
 												</label>
 												{{/each}}
 											</div>
 				
-											<div class="btn-group btn-group-filter filter-type filter-group select-many">
+											<div class="btn-group filter-group select-many filter-card-type">
 												{{#each filter.cardTypes}}
-												<label class="btn btn-default type-{{techName}} marker" data-type="{{techName}}" data-toggle="tooltip" title="{{name}}">
-													<i class="{{cardTypeToIconClass techName}}"></i>
+												<label class="btn btn-default" data-card-type="{{techName}}" data-toggle="tooltip" title="{{name}}">
+													<i class="db-icon db-icon-{{techName}}"></i>
 												</label>
 												{{/each}}
 											</div>
 				
-											<div class="btn-group btn-group-filter filter-selection filter-group select-many">
+											<div class="btn-group filter-group select-many filter-selection">
 												<label class="btn btn-default" data-selection="not-selected" data-toggle="tooltip" title="{{loc 'core.notSelected'}}"><span>0</span></label>
 												<label class="btn btn-default" data-selection="selected" data-toggle="tooltip" title="{{loc 'core.selected'}}"><span>1+</span></label>
 											</div>

@@ -68,22 +68,22 @@ conquest.card = conquest.card || {};
 		
 		events: function() {
 			return _.extend({
-				'click .btn-group.select-many > .btn':					'onSelectManyFilterClick',
-				'click .btn-group.select-many.filter-sphere > .btn':	'onSphereFilterClick',
-				'click .btn-group.select-many.filter-card-type > .btn':	'onCardTypeFilterClick',
-				'click .btn-group.select-many.filter-quantity > .btn':	'onQuantityFilterClick',
-				'click #cardSetFilterTrigger':							'openCardSetFilterModal'
+				'click .select-many .btn':		'onSelectManyFilterClick',
+				'click .filter-sphere .btn':	'onSphereFilterClick',
+				'click .filter-card-type .btn':	'onCardTypeFilterClick',
+				'click .filter-quantity .btn':	'onQuantityFilterClick',
+				'click #cardSetFilterTrigger':	'openCardSetFilterModal'
 			}, _card.ViewBase.prototype.events.call(this));
 		},
 		
 		onSelectManyFilterClick: function(event) {
 			console.log('onSelectManyFilterClick');
 			
-			var $this = $(event.currentTarget);
+			var $target = $(event.currentTarget);
 			if (event.ctrlKey) {
-				$this.addClass('active').siblings().removeClass('active');
+				$target.addClass('active').siblings().removeClass('active');
 			} else {
-				$this.toggleClass('active');
+				$target.toggleClass('active');
 			}
 		},
 		
@@ -175,33 +175,12 @@ conquest.card = conquest.card || {};
 				view.cardsFilter = new conquest.card.CardsFilter(conquest.filter.queryStringToFilter(queryString));
 			}
 
-			var sortItems = [];
-			_.each([
-				['name', 'card.name'],
-				['number', 'card.number'],
-				['sphereDisplay', 'card.sphere'],
-				['typeDisplay', 'card.type'],
-				['cost', 'card.cost.sh'],
-				['willpower', 'card.willpower'],
-				['threat', 'card.threat'],
-				['attack', 'card.attack'],
-				['attack', 'card.defense'],
-				['hitPoints', 'card.hp.sh'],
-				['setName', 'core.setName'],
-				['setNumber', 'core.setNumber']
-			], function(arr) {
-				sortItems.push({
-					value: arr[0],
-					label: conquest.dict.messages[arr[1]]
-				})
-			});
-
 			var template = Handlebars.templates['card-search-view']({
 				filter: {
 					spheres: conquest.dict.spheres,
 					cardTypes: conquest.dict.cardTypes
 				},
-				sortItems: sortItems
+				sortItems: conquest.util.buildCardSortItems()
 			});
 
 			view.$el.html(template);

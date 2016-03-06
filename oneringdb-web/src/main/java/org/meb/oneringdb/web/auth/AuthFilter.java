@@ -16,6 +16,8 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.meb.oneringdb.db.model.User;
+import org.meb.oneringdb.service.api.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +35,10 @@ public class AuthFilter implements Filter {
 	private static final Logger log = LoggerFactory.getLogger(AuthFilter.class);
 
 	@Inject
-	private AuthToken authUser;
+	private AuthToken authToken;
+	
+	@Inject
+	private UserService userService;
 
 	public void init(FilterConfig config) throws ServletException {
 	}
@@ -47,37 +52,39 @@ public class AuthFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-		if (authUser.isSignedIn()) {
+		if (authToken.isSignedIn()) {
 			chain.doFilter(request, response);
 		} else {
-			StringBuilder origin = new StringBuilder();
-			origin.append(request.getRequestURI());
-			if (request.getQueryString() != null) {
-				origin.append("/").append(request.getQueryString());
-			}
-			request.getSession().setAttribute("origin", origin.toString());
-
-			ServletContext servletContext = request.getServletContext();
-			PrettyConfig prettyConfig = (PrettyConfig) servletContext.getAttribute(PrettyContext.CONFIG_KEY);
-			if (prettyConfig == null) {
-				PrettyConfigurator configurator = new PrettyConfigurator(servletContext);
-				configurator.configure();
-				prettyConfig = configurator.getConfig();
-			}
-
-			PrettyURLBuilder builder = new PrettyURLBuilder();
-			UrlMapping mapping = prettyConfig.getMappingById("signin");
-			Pattern pattern = Pattern.compile("/(en|pl|de)(/.*|$).*", Pattern.CASE_INSENSITIVE);
-			Matcher matcher = pattern.matcher(origin.toString());
-			String language = null;
-			if (matcher.matches()) {
-				language = matcher.group(1);
-			} else {
-				language = "en";
-			}
-			String targetUrl = builder.build(mapping, true, new Object[] { language });
-			targetUrl = response.encodeRedirectURL(targetUrl);
-			response.sendRedirect(targetUrl);
+			authToken.setUser(userService.findUnique(new User(4L)));
+			chain.doFilter(request, response);
+//			StringBuilder origin = new StringBuilder();
+//			origin.append(request.getRequestURI());
+//			if (request.getQueryString() != null) {
+//				origin.append("/").append(request.getQueryString());
+//			}
+//			request.getSession().setAttribute("origin", origin.toString());
+//
+//			ServletContext servletContext = request.getServletContext();
+//			PrettyConfig prettyConfig = (PrettyConfig) servletContext.getAttribute(PrettyContext.CONFIG_KEY);
+//			if (prettyConfig == null) {
+//				PrettyConfigurator configurator = new PrettyConfigurator(servletContext);
+//				configurator.configure();
+//				prettyConfig = configurator.getConfig();
+//			}
+//
+//			PrettyURLBuilder builder = new PrettyURLBuilder();
+//			UrlMapping mapping = prettyConfig.getMappingById("signin");
+//			Pattern pattern = Pattern.compile("/(en|pl|de)(/.*|$).*", Pattern.CASE_INSENSITIVE);
+//			Matcher matcher = pattern.matcher(origin.toString());
+//			String language = null;
+//			if (matcher.matches()) {
+//				language = matcher.group(1);
+//			} else {
+//				language = "en";
+//			}
+//			String targetUrl = builder.build(mapping, true, new Object[] { language });
+//			targetUrl = response.encodeRedirectURL(targetUrl);
+//			response.sendRedirect(targetUrl);
 		}
 	}
 }

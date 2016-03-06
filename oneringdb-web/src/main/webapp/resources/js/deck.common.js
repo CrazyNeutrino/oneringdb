@@ -286,9 +286,47 @@ conquest.deck = conquest.deck || {};
 			}
 		});
 	};
+	
+	_deck.MembersFilter = Backbone.Model.extend({
+//		cardsFilter: new conquest.card.CardsFilter(),
+		
+		/**
+		 * @memberOf _deck.MembersFilter
+		 */
+		filter: function(members) {
+			console.log('membersFilter.filter: ' + members.length);
+			
+			var cardsFilter = new conquest.card.CardsFilter();
+			var cardsFilterAttrs = {
+				sphere: this.get('sphere'),
+				type: this.get('type')
+			};
+
+			var attrNames = ['threatCost', 'resourceCost', 'willpower', 'threat', 'attack', 'defense', 'hitPoints', 
+			                 'setTechName', 'name', 'traits', 'keywords'];
+			_.each(attrNames, function(attrName) {
+				cardsFilterAttrs[attrName] = this.get(attrName);
+			}, this);
+			cardsFilter.set(cardsFilterAttrs);					
+
+			var cards = _.pluck(members.toJSON(), 'card');
+			var ids = _.pluck(cardsFilter.filter(cards), 'id');
+
+			var quantities = this.get('quantity');
+			var filteredMembers = members.filter(function(member) {
+				return (!quantities || _.contains(quantities, member.get('quantity'))) && _.contains(ids, member.get('card').id);
+			});
+			
+			return filteredMembers;
+		}
+	});
 
 	_deck.PageView = Backbone.View.extend({
 		el: '.content',
+		
+		/**
+		 * @memberOf _deck.PageView
+		 */
 		renderMessages: function(options) {
 			_deck.renderMessages({
 				$target: this.$el.find('.content-band .container .content'),
@@ -342,6 +380,10 @@ conquest.deck = conquest.deck || {};
 
 	_deck.MemberGroupsView = Backbone.View.extend({
 		el: '.mg-container',
+		
+		/**
+		 * @memberOf _deck.MemberGroupsView
+		 */
 		render: function(members, options) {
 			options = options || {};
 
@@ -393,6 +435,10 @@ conquest.deck = conquest.deck || {};
 
 	_deck.DeckDescriptionView = Backbone.View.extend({
 		el: '.deck-description-view',
+		
+		/**
+		 * @memberOf _deck.DeckDescriptionView
+		 */
 		render: function(deck, options) {
 			var options = options || {};
 			var view = this;
@@ -435,6 +481,10 @@ conquest.deck = conquest.deck || {};
 
 	_deck.DeckCommentsView = Backbone.View.extend({
 		el: '.deck-comments-view',
+		
+		/**
+		 * @memberOf _deck.DeckCommentsView
+		 */
 		render: function(deck, parentView) {
 			var view = this;
 
@@ -492,6 +542,10 @@ conquest.deck = conquest.deck || {};
 
 	_deck.MembersListView = Backbone.View.extend({
 		el: '.members-container',
+		
+		/**
+		 * @memberOf _deck.MembersListView
+		 */
 		render: function(members, options) {
 			var templateName = undefined;
 			if (options.layout === 'grid-2') {
@@ -676,6 +730,10 @@ conquest.deck = conquest.deck || {};
 				});
 			}
 		},
+		
+		/**
+		 * @memberOf _deck.DeckListFilterView
+		 */
 		render: function(options) {
 			var view = this;
 			
@@ -788,6 +846,10 @@ conquest.deck = conquest.deck || {};
 
 	_deck.DeckListDataView = Backbone.View.extend({
 		el: '.deck-list-data-container',
+
+		/**
+		 * @memberOf _deck.DeckListDataView
+		 */
 		render: function(decks, options) {
 			var view = this;
 

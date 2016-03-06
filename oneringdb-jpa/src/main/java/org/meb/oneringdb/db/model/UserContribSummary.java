@@ -19,7 +19,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "vw_user_contrib_summary")
+@Table(name = "orv_user_contrib_summary")
 public class UserContribSummary {
 
 	@Id

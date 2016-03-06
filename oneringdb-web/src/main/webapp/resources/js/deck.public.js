@@ -83,8 +83,8 @@ $(function() {
 				conquest.ui.adjustWrapperStyle();
 				
 				var filter = {
-					factions: conquest.deck.getValidDeckFactions(warlordId),
-					cardTypes: conquest.deck.getValidDeckCardTypes(warlordId)
+					spheres: conquest.dict.spheres,
+					cardTypes: conquest.deck.getPlayerDeckCardTypes()
 				};
 				var template = Handlebars.templates['pub-deck-view']({
 					deck: view.deck.toJSON(),

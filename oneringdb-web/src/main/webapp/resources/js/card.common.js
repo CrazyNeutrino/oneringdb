@@ -41,6 +41,10 @@ conquest.card = conquest.card || {};
 		isNotEmpty: function() {
 			return !_.isEmpty(this.toJSON());
 		},
+		
+		/**
+		 * @memberOf CardsFilter
+		 */
 		filter: function(cards) {
 			var filter = this;
 
@@ -145,6 +149,9 @@ conquest.card = conquest.card || {};
 			}
 		},
 		
+		/**
+		 * @memberOf CardSetsFilterView
+		 */
 		render: function() {
 			var view = this;
 

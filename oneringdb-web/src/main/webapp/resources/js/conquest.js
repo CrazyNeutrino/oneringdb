@@ -21,14 +21,17 @@ conquest.static.format = {
 //
 conquest.dict = conquest.dict || {};
 (function(_dict) {
-	
+
 	_dict.triggerWords = {
-			de: ['Reise Aktion', 'Aktion', 'Erzwungen', 'Reaktion', 'Reise', 'Schatten', 'Wenn aufgedeckt'],
-			en: ['Travel Action', 'Action', 'Forced', 'Response', 'Shadow', 'Travel', 'When Revealed'],
-			pl: ['Akcja wyprawy', 'Akcja', 'Cień', 'Odpowiedź', 'Podróż', 'Po odkryciu', 'Wymuszony', ]
+		de : [ 'Reise Aktion', 'Aktion', 'Erzwungen', 'Reaktion', 'Reise',
+				'Schatten', 'Wenn aufgedeckt' ],
+		en : [ 'Travel Action', 'Action', 'Forced', 'Response', 'Shadow',
+				'Travel', 'When Revealed' ],
+		pl : [ 'Akcja wyprawy', 'Akcja', 'Cień', 'Odpowiedź', 'Podróż',
+				'Po odkryciu', 'Wymuszony', ]
 	};
-	_dict.iconWords = ['Willpower', 'Threat', 'Attack', 'Defense', 'Leadership',
-	                 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
+	_dict.iconWords = [ 'Willpower', 'Threat', 'Attack', 'Defense',
+			'Leadership', 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship' ];
 
 	var IDX_CARD_BY_ID = "card#id";
 	var IDX_CARD_BY_TECH_NAME = "card#techName";
@@ -53,19 +56,24 @@ conquest.dict = conquest.dict || {};
 		indexes[IDX_CARD_BY_NAME] = _.indexBy(_dict.cards, function(card) {
 			return card.name;
 		});
-		indexes[IDX_CARD_SET_BY_ID] = _.indexBy(_dict.cardSets, function(cardSet) {
+		indexes[IDX_CARD_SET_BY_ID] = _.indexBy(_dict.cardSets, function(
+				cardSet) {
 			return cardSet.id;
 		});
-		indexes[IDX_CARD_TYPE_BY_TECH_NAME] = _.indexBy(_dict.cardTypes, function(cardType) {
-			return cardType.techName;
-		});
-		indexes[IDX_CARD_BY_SET_NO_CARD_NO] = _.indexBy(_dict.cards, function(card) {
+		indexes[IDX_CARD_TYPE_BY_TECH_NAME] = _.indexBy(_dict.cardTypes,
+				function(cardType) {
+					return cardType.techName;
+				});
+		indexes[IDX_CARD_BY_SET_NO_CARD_NO] = _.indexBy(_dict.cards, function(
+				card) {
 			return _dict.findCardSet(card.crstId).number + '#' + card.number;
 		});
-		indexes[IDX_ENCOUNTER_SET_BY_ID] = _.indexBy(_dict.encounterSets, function(encounterSet) {
-			return encounterSet.id;
-		});
-		indexes[IDX_SPHERE_BY_TECH_NAME] = _.indexBy(_dict.spheres, function(sphere) {
+		indexes[IDX_ENCOUNTER_SET_BY_ID] = _.indexBy(_dict.encounterSets,
+				function(encounterSet) {
+					return encounterSet.id;
+				});
+		indexes[IDX_SPHERE_BY_TECH_NAME] = _.indexBy(_dict.spheres, function(
+				sphere) {
 			return sphere.techName;
 		});
 
@@ -75,45 +83,56 @@ conquest.dict = conquest.dict || {};
 				card.htmlText = conquest.ui.toHtmlText(card.text);
 				card.text = conquest.ui.toPlainText(card.text);
 			}
-			
+
 			var crst = _dict.findCardSet(card.crstId);
 			card.setName = crst.name;
 			card.setTechName = crst.techName;
 			card.setNumber = crst.number;
-			
+
 			if (card.enstId) {
 				var enst = _dict.findEncounterSet(card.enstId);
 				card.enstName = enst.name;
 				card.enstTechName = enst.techName;
-			}		
-			
-			switch (card.type) {
-				case 'hero':
-				case 'ally':
-				case 'attachment':
-				case 'event':
-				case 'treasure':
-					card.playerDeck = true;
-					break;
-				case 'enemy':
-				case 'location':
-				case 'treachery':
-				case 'objective':
-				case 'objective-ally':
-				case 'objective-location':
-					card.encounterDeck = true;
-					break;
-				case 'quest':
-					card.questDeck = true;
-					break;
 			}
-			
-			card.hasAttrs = _.isNumber(card.threatCost) || _.isNumber(card.resourceCost) 
-								|| _.isNumber(card.engagementCost) || _.isNumber(card.willpower) 
-								|| _.isNumber(card.threat) || _.isNumber(card.attack) 
-								|| _.isNumber(card.defense) || _.isNumber(card.hitPoints);
-			
+
+			switch (card.type) {
+			case 'hero':
+			case 'ally':
+			case 'attachment':
+			case 'event':
+			case 'treasure':
+				card.playerDeck = true;
+				break;
+			case 'enemy':
+			case 'location':
+			case 'treachery':
+			case 'objective':
+			case 'objective-ally':
+			case 'objective-location':
+				card.encounterDeck = true;
+				break;
+			case 'quest':
+				card.questDeck = true;
+				break;
+			}
+
+			card.hasAttrs = _.isNumber(card.threatCost) || _.isNumber(card.resourceCost)
+					|| _.isNumber(card.engagementCost) || _.isNumber(card.willpower)
+					|| _.isNumber(card.threat) || _.isNumber(card.attack)
+					|| _.isNumber(card.defense) || _.isNumber(card.hitPoints);
+
 		});
+
+		var techNames = [ 'hero', 'ally', 'attachment', 'event', 'treasure' ];
+		_dict.playerDeckCardTypes = _.filter(_dict.cardTypes,
+				function(cardType) {
+					return techNames.indexOf(cardType.techName) > -1;
+				});
+
+		_dict.playerDeckCards = _.where(_dict.cards, {
+			playerDeck: true
+		});
+		
 		var end = new Date().getTime();
 		console.log(end - start);
 	};
@@ -121,7 +140,7 @@ conquest.dict = conquest.dict || {};
 	_dict.findCardSet = function(id) {
 		return indexes[IDX_CARD_SET_BY_ID][id];
 	};
-	
+
 	_dict.findEncounterSet = function(id) {
 		return indexes[IDX_ENCOUNTER_SET_BY_ID][id];
 	};
@@ -167,7 +186,8 @@ conquest.dict = conquest.dict || {};
 		_.each(_.sortBy(_dict.cardSets, 'sequence'), function(cardSet) {
 			var nodes;
 			if (cardSet.cycleTechName) {
-				if (_.isUndefined(cycleNode) || cycleNode.techName !== cardSet.cycleTechName) {
+				if (_.isUndefined(cycleNode)
+						|| cycleNode.techName !== cardSet.cycleTechName) {
 					cycleNode = {
 						type : 'cycle',
 						name : cardSet.cycleName,
@@ -189,7 +209,7 @@ conquest.dict = conquest.dict || {};
 		});
 		return tree;
 	};
-	
+
 	_dict.buildCardSetTrees = function() {
 		var trees = [];
 
@@ -202,18 +222,19 @@ conquest.dict = conquest.dict || {};
 				trees.push(tree);
 				tree.nodes.push(node);
 			} else if (node.type == 'cycle') {
-				if (node.techName == 'the-hobbit' || node.techName == 'the-lord-of-the-rings') {
+				if (node.techName == 'the-hobbit'
+						|| node.techName == 'the-lord-of-the-rings') {
 					tree = {
 						nodes : []
-					};	
+					};
 					trees.push(tree);
 				}
 				tree.nodes.push(node);
-			}			
+			}
 		});
 		return trees;
 	};
-	
+
 })(conquest.dict);
 
 //
@@ -221,11 +242,12 @@ conquest.dict = conquest.dict || {};
 //
 conquest.model = conquest.model || {};
 (function(_model) {
-	
+
 	/**
 	 * @memberOf _model
 	 */
-	_model.dummy = function() {};
+	_model.dummy = function() {
+	};
 
 	_model.Card = Backbone.Model.extend({
 		urlRoot : '/card',
@@ -238,11 +260,13 @@ conquest.model = conquest.model || {};
 
 	_model.DeckMember = Backbone.Model.extend({
 		parse : function(response) {
-			response.card = _.clone(conquest.dict.findCard(parseInt(response.cardId)));
+			response.card = _.clone(conquest.dict
+					.findCard(parseInt(response.cardId)));
 			response.fixedQuantity = response.card.type === 'warlord'
 					|| _.isNumber(response.card.warlordId);
 			response.fixedMaxQuantity = response.card.type === 'warlord'
-					|| response.card.type === 'synapse' || _.isNumber(response.card.warlordId);
+					|| response.card.type === 'synapse'
+					|| _.isNumber(response.card.warlordId);
 			return response;
 		}
 	});
@@ -292,25 +316,26 @@ conquest.model = conquest.model || {};
 				}
 			});
 
-			_.each(keys,
-					function(key) {
-						if (stats[key].quantity > 0) {
-							stats[key].average = Math.round(stats[key].sum / stats[key].quantity
-									* 100) / 100;
-						}
-					});
+			_.each(keys, function(key) {
+				if (stats[key].quantity > 0) {
+					stats[key].average = Math.round(stats[key].sum
+							/ stats[key].quantity * 100) / 100;
+				}
+			});
 
 			return stats;
 		},
 		adjustQuantities : function(csQuantity) {
 			this.each(function(member) {
 				if (member.get('fixedMaxQuantity') === false) {
-					var availableQuantity = Math.min(3, member.get('card').quantity * csQuantity);
+					var availableQuantity = Math.min(3,
+							member.get('card').quantity * csQuantity);
 					member.set({
 						availableQuantity : availableQuantity
 					});
 					member.set({
-						quantity : Math.min(member.get('quantity'), availableQuantity)
+						quantity : Math.min(member.get('quantity'),
+								availableQuantity)
 					}, {
 						batchChange : true
 					});
@@ -378,19 +403,18 @@ conquest.model = conquest.model || {};
 	});
 
 	_model.Deck = Backbone.Model.extend({
-		history : new _model.DeckHistory(),
-		initialize : function(attributes) {
+		history: new _model.DeckHistory(),
+		initialize: function(attributes) {
 			attributes.type = attributes.type || 'base';
 		},
-		parse : function(response) {
-			response.warlord = _.clone(conquest.dict.findCard(parseInt(response.warlordId)));
-			response.createDateMillis = moment.tz(response.createDate, conquest.static.timezone)
-					.valueOf();
-			response.modifyDateMillis = moment.tz(response.modifyDate, conquest.static.timezone)
-					.valueOf();
+		parse: function(response) {
+			response.createDateMillis = moment.tz(response.createDate,
+					conquest.static.timezone).valueOf();
+			response.modifyDateMillis = moment.tz(response.modifyDate,
+					conquest.static.timezone).valueOf();
 			response.members = new _model.DeckMembers(response.members, {
 				parse : true,
-				comparator : conquest.util.buildMembersDefaultComparator(response.warlord.faction)
+				comparator : conquest.util.buildMembersDefaultComparator()
 			});
 			response.links = new _model.DeckLinks(response.links, {
 				parse : true,
@@ -419,19 +443,20 @@ conquest.model = conquest.model || {};
 					if (_.isUndefined(response.configCsQuantity)) {
 						response.configCsQuantity = 3;
 					}
-					availableQuantity = Math.min(3, cardQuantity * response.configCsQuantity);
+					availableQuantity = Math.min(3, cardQuantity
+							* response.configCsQuantity);
 				}
 				member.set({
 					availableQuantity : availableQuantity
 				});
 			});
 			response.filteredMembers = new _model.DeckMembers();
-			response.warlord = _.clone(conquest.dict.findCard(parseInt(response.warlordId)));
 
 			return response;
 		},
 		toJSON : function() {
-			var json = _model.Deck.__super__.toJSON.apply(this, arguments);
+			var json = _model.Deck.__super__.toJSON.apply(this,
+					arguments);
 			if (json.members instanceof Backbone.Collection) {
 				json.members = json.members.toJSON();
 			}
@@ -441,14 +466,8 @@ conquest.model = conquest.model || {};
 			if (json.snapshots instanceof Backbone.Collection) {
 				json.snapshots = json.snapshots.toJSON();
 			}
-			// if (json.relatedSnapshots instanceof Backbone.Collection) {
-			// json.relatedSnapshots = json.relatedSnapshots.toJSON();
-			// }
 			if (json.comments instanceof Backbone.Collection) {
 				json.comments = json.comments.toJSON();
-			}
-			if (json.warlord instanceof Backbone.Model) {
-				json.warlord = json.warlord.toJSON();
 			}
 			return json;
 		},
@@ -489,7 +508,8 @@ conquest.model = conquest.model || {};
 		},
 		adjustQuantities : function() {
 			if (this.get('members') instanceof Backbone.Collection) {
-				this.get('members').adjustQuantities(this.get('configCsQuantity'));
+				this.get('members').adjustQuantities(
+						this.get('configCsQuantity'));
 			}
 		},
 		getBackupJson : function() {
@@ -541,7 +561,8 @@ conquest.model = conquest.model || {};
 	_model.PublicDeck = _model.Deck.extend({
 		urlRoot : '/deck/public',
 		parse : function(response) {
-			var r = _model.PrivateDeck.__super__.parse.apply(this, [ response ]);
+			var r = _model.PrivateDeck.__super__.parse
+					.apply(this, [ response ]);
 			if (_.isEmpty(r.snapshots)) {
 				r.snapshots = new _model.PublicDecks();
 			} else {
@@ -591,10 +612,12 @@ conquest.model = conquest.model || {};
 				target = new _model.PrivateDeck(sourceJson);
 			}
 
-			_model.PrivateDeck.__super__.sync.apply(this, [ method, target, options ]);
+			_model.PrivateDeck.__super__.sync.apply(this, [ method, target,
+					options ]);
 		},
 		parse : function(response) {
-			var r = _model.PrivateDeck.__super__.parse.apply(this, [ response ]);
+			var r = _model.PrivateDeck.__super__.parse
+					.apply(this, [ response ]);
 			if (_.isEmpty(r.snapshots)) {
 				r.snapshots = new _model.PrivateDecks();
 			} else {
@@ -748,9 +771,11 @@ conquest.filter = conquest.filter || {};
 		_.each(_filter.fds, function(fd) {
 			var value = filter[fd.key];
 			if (value) {
-				if (fd.type == _filter.FD_TYPE_SET && _.isArray(value) && !_.isEmpty(value)) {
+				if (fd.type == _filter.FD_TYPE_SET && _.isArray(value)
+						&& !_.isEmpty(value)) {
 					parts.push(fd.queryStringKey + '=' + value.join());
-				} else if (fd.type == _filter.FD_TYPE_SIMPLE && !_.isEmpty(value)) {
+				} else if (fd.type == _filter.FD_TYPE_SIMPLE
+						&& !_.isEmpty(value)) {
 					parts.push(fd.queryStringKey + '=' + value);
 				} else if (fd.type == _filter.FD_TYPE_RANGE && _.isArray(value)
 						&& !_.isEmpty(value)) {
@@ -760,8 +785,8 @@ conquest.filter = conquest.filter || {};
 					if (hasNonEmptyValue) {
 						parts.push(fd.queryStringKey + '=' + value.join());
 					}
-				} else if (fd.type == _filter.FD_TYPE_RANGE_STAT && _.isArray(value)
-						&& !_.isEmpty(value)) {
+				} else if (fd.type == _filter.FD_TYPE_RANGE_STAT
+						&& _.isArray(value) && !_.isEmpty(value)) {
 					if (value[2] === false) {
 						parts.push(fd.queryStringKey + '=' + value.join());
 					}
@@ -780,10 +805,13 @@ conquest.filter = conquest.filter || {};
 		var filter = {};
 		if (queryString) {
 			var map = {};
-			_.each(queryString.split('&'), function(part) {
-				var keyValue = part.split('=');
-				map[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
-			});
+			_
+					.each(
+							queryString.split('&'),
+							function(part) {
+								var keyValue = part.split('=');
+								map[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
+							});
 			_.each(_filter.fds, function(fd) {
 				var value = map[fd.queryStringKey];
 				if (value) {
@@ -806,8 +834,8 @@ conquest.filter = conquest.filter || {};
 						filter[fd.key] = value.split(',');
 					} else if (fd.type === _filter.FD_TYPE_RANGE_STAT) {
 						var values = value.split(',')
-						filter[fd.key] = [ parseInt(values[0]), parseInt(values[1]),
-								values[2] == 'true' ];
+						filter[fd.key] = [ parseInt(values[0]),
+								parseInt(values[1]), values[2] == 'true' ];
 					}
 				}
 			});
@@ -832,6 +860,9 @@ conquest.filter = conquest.filter || {};
 conquest.util = conquest.util || {};
 (function(_util) {
 
+	/**
+	 * @memberOf _util
+	 */
 	_util.toJSON = function(data) {
 		var json;
 		if (_.isArray(data)) {
@@ -888,7 +919,8 @@ conquest.util = conquest.util || {};
 
 		var groups = [];
 		_.each(Object.keys(membersHash), function(key) {
-			groups.push((groupFactory || defaultGroupFactory)(key, membersHash[key]));
+			groups.push((groupFactory || defaultGroupFactory)(key,
+					membersHash[key]));
 		});
 		groups = groups.sort(function(one, two) {
 			return one.title.localeCompare(two.title);
@@ -913,9 +945,10 @@ conquest.util = conquest.util || {};
 		}
 		keys.push('name');
 
-		var stringKeys = [ 'name', 'type', 'typeDisplay', 'faction', 'factionDisplay' ];
-		var numberKeys = [ 'memberQuantity', 'quantity', 'cost', 'shield', 'comamnd', 'attack',
-				'hitPoints' ];
+		var stringKeys = [ 'name', 'type', 'typeDisplay', 'faction',
+				'factionDisplay' ];
+		var numberKeys = [ 'memberQuantity', 'quantity', 'cost', 'shield',
+				'comamnd', 'attack', 'hitPoints' ];
 
 		var sorter = function(one, two) {
 			var result = 0;
@@ -942,7 +975,8 @@ conquest.util = conquest.util || {};
 				if (stringKeys.indexOf(property) > -1) {
 					result = oneValue.localeCompare(twoValue);
 				} else if (numberKeys.indexOf(property) > -1) {
-					result = (oneValue == twoValue ? 0 : (oneValue < twoValue ? -1 : 1));
+					result = (oneValue == twoValue ? 0
+							: (oneValue < twoValue ? -1 : 1));
 				}
 
 				if (result != 0) {
@@ -969,7 +1003,7 @@ conquest.util = conquest.util || {};
 		return _.shuffle(arr);
 	};
 
-	_util.buildMembersComparator = function(keys, faction) {
+	_util.buildMembersComparator = function(keys) {
 		return _util.buildCardsComparator(keys, {
 			resolver : function(member) {
 				return member.get('card');
@@ -977,64 +1011,21 @@ conquest.util = conquest.util || {};
 		});
 	};
 
-	_util.buildMembersDefaultComparator = function(faction) {
+	_util.buildMembersDefaultComparator = function() {
 		return function(one, two) {
 			var result = 0;
 			var cardOne = one.get('card');
 			var cardTwo = two.get('card');
 
-			$.each([ 'warlord', 'synapse' ], function(index, type) {
-				if (cardOne.type == type && cardTwo.type != type) {
-					result = -1;
-					return false;
-				} else if (cardTwo.type == type && cardOne.type != type) {
-					result = 1;
-					return false;
-				} else {
-					result = 0;
-				}
-			});
-
-			if (cardOne.type == 'warlord') {
+			if (cardOne.type == 'hero') {
 				result = -1;
-			} else if (cardTwo.type == 'warlord') {
+			} else if (cardTwo.type == 'hero') {
 				result = 1;
 			} else {
 				result = 0;
 			}
 
 			if (result == 0) {
-				if (cardOne.type == 'synapse') {
-					result = -1;
-				} else if (cardTwo.type == 'synapse') {
-					result = 1;
-				} else {
-					result = 0;
-				}
-			}
-
-			if (result == 0) {
-				if (_.isNumber(cardOne.warlordId) && _.isUndefined(cardTwo.warlordId)) {
-					result = -1;
-				} else if (_.isNumber(cardTwo.warlordId) && _.isUndefined(cardOne.warlordId)) {
-					result = 1;
-				} else {
-					result = 0;
-				}
-				;
-			}
-
-			if (result == 0) {
-				if (cardOne.faction == faction && cardTwo.faction != faction) {
-					result = -1;
-				} else if (cardTwo.faction == faction && cardOne.faction != faction) {
-					result = 1;
-				} else {
-					result = cardOne.factionDisplay.localeCompare(cardTwo.factionDisplay);
-				}
-			}
-
-			if (result === 0) {
 				result = cardOne.name.localeCompare(cardTwo.name);
 			}
 			return result;
@@ -1053,13 +1044,13 @@ conquest.util = conquest.util || {};
 		validKeys.push('setNumber');
 		validKeys.push('number');
 
-		var stringKeys = [ 'name', 'type', 'typeDisplay', 'faction', 'factionDisplay', 'setName' ];
-		var numberKeys = [ 'memberQuantity', 'quantity', 'cost', 'shield', 'command', 'attack',
-				'hitPoints', 'setNumber', 'number' ];
+		var stringKeys = [ 'name', 'type', 'typeDisplay', 'sphere', 'sphereDisplay', 'setName' ];
+		var numberKeys = [ 'memberQuantity', 'quantity', 'threatCost', 'engagementCost', 'resourceCost',
+		                   'willpower', 'threat', 'attack', 'defense', 'hitPoints', 'setNumber', 'number' ];
 
 		return function(one, two) {
 			var result = 0;
-			$.each(validKeys, function(index, key) {
+			_.find(validKeys, function(key) {
 				var property;
 				var descending;
 				if (_.isObject(key)) {
@@ -1095,39 +1086,40 @@ conquest.util = conquest.util || {};
 					if (descending === true) {
 						result *= -1;
 					}
-					return false;
+					return true;
 				}
 			});
 
 			return result;
 		};
 	};
-	
+
 	_util.toTechName = function(input) {
 		// return input.toLowerCase().replace(/[\']/g,
 		// '').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\ +/g, '-');
 		return s(input).toLowerCase().slugify().value();
 	};
-	
+
 	_util.buildPagination = function(options) {
 		options = options || {};
-		
+
 		var p = {
-			total: options.total,
-			pageNumber: _.isNumber(options.pageNumber) ? options.pageNumber : 0,
-			pageSize: _.isNumber(options.pageSize) ? options.pageSize : 40,
+			total : options.total,
+			pageNumber : _.isNumber(options.pageNumber) ? options.pageNumber
+					: 0,
+			pageSize : _.isNumber(options.pageSize) ? options.pageSize : 40,
 		};
-		
-		p.pages = new Array(Math.ceil(p.total / p.pageSize));				
+
+		p.pages = new Array(Math.ceil(p.total / p.pageSize));
 		p.firstPage = p.pages[0];
-		p.lastPage = p.pages[p.pages.length - 1];		
+		p.lastPage = p.pages[p.pages.length - 1];
 		p.singlePage = p.pages.length == 1;
-		
+
 		_.each(_.range(0, p.pages.length), function(number) {
 			p.pages[number] = {
-				number: number,
-				label: "" + (number + 1),
-				active: number == p.pageNumber
+				number : number,
+				label : "" + (number + 1),
+				active : number == p.pageNumber
 			};
 		});
 		p.prevPage = p.pageNumber > 0 ? {
@@ -1136,31 +1128,67 @@ conquest.util = conquest.util || {};
 		p.nextPage = p.pageNumber < p.pages.length - 1 ? {
 			number : p.pageNumber + 1
 		} : undefined;
-				
+
 		p.pageStartIndex = p.pageNumber * p.pageSize;
-		p.pageEndIndex = Math.min(p.pageStartIndex + p.pageSize, p.total) - 1;		
-		
+		p.pageEndIndex = Math.min(p.pageStartIndex + p.pageSize, p.total) - 1;
+
 		return p;
-	}
-	
-	/**
-	 * @memberOf _util
-	 */
-	_util.dummy = function() {};
+	};
+
+	_util.buildCardSortItems = function(options) {
+		options = options || {};
+
+		var pdAttrs = [ 'threatCost', 'resourceCost', 'willpower' ];
+		var edAttrs = [ 'engagementCost', 'threat', 'victoryPoints' ];
+		var qdAttrs = [ 'questPoints' ];
+		var includePDAttrs = options.includePDAttrs || true;
+		var includeEDAttrs = options.includeEDAttrs || true;
+		var includeQDAttrs = options.includeQDAttrs || true;
+
+		var sortItems = [];
+		_.each([ [ 'name', 'card.name' ], [ 'number', 'card.number' ],
+				[ 'sphereDisplay', 'card.sphere' ],
+				[ 'typeDisplay', 'card.type' ],
+				[ 'threatCost', 'card.threatCost.sh' ],
+				[ 'engagementCost', 'card.engagementCost.sh' ],
+				[ 'resourceCost', 'card.resourceCost.sh' ],
+				[ 'willpower', 'card.willpower' ], [ 'threat', 'card.threat' ],
+				[ 'attack', 'card.attack' ], [ 'defense', 'card.defense' ],
+				[ 'hitPoints', 'card.hp.sh' ], [ 'setName', 'core.setName' ],
+				[ 'setNumber', 'core.setNumber' ] ],
+				function(item) {
+					if (includePDAttrs == false
+							&& pdAttrs.indexOf(item[0]) > -1
+							|| includeEDAttrs == false
+							&& edAttrs.indexOf(item[0]) > -1
+							|| includeQDAttrs == false
+							&& qdAttrs.indexOf(item[0]) > -1) {
+						return;
+					}
+
+					sortItems.push({
+						value : item[0],
+						label : conquest.dict.messages[item[1]]
+					})
+				});
+
+		return sortItems;
+	};
 
 })(conquest.util);
 
 //
-//util
+// util
 //
 conquest.ui = conquest.ui || {};
 (function(_ui) {
-	
+
 	/**
 	 * @memberOf _ui
 	 */
 	_ui.toCardUrl = function(input) {
-		return '/' + conquest.static.language + '/card/' + _ui.toCardRelativeUrl(input);
+		return '/' + conquest.static.language + '/card/'
+				+ _ui.toCardRelativeUrl(input);
 	};
 
 	_ui.toCardRelativeUrl = function(input) {
@@ -1176,8 +1204,8 @@ conquest.ui = conquest.ui || {};
 	};
 
 	_ui.toPublicDeckUrl = function(options) {
-		return '/' + conquest.static.language + '/public/deck/' + options.id + '-'
-				+ conquest.util.toTechName(options.name);
+		return '/' + conquest.static.language + '/public/deck/' + options.id
+				+ '-' + conquest.util.toTechName(options.name);
 	};
 
 	_ui.toUserDeckUrl = function(options) {
@@ -1187,7 +1215,7 @@ conquest.ui = conquest.ui || {};
 		}
 		return url;
 	};
-	
+
 	_ui.toFactionImageBase = function(techName) {
 		return conquest.static.imagePath + '/faction/' + techName;
 	};
@@ -1203,25 +1231,25 @@ conquest.ui = conquest.ui || {};
 	_ui.toCardImage = function(imageBase) {
 		return conquest.static.imagePath + '/card/' + imageBase + '.jpg';
 	};
-	
+
 	_ui.toSearchLinkSphere = function(card) {
-		return '<a href="/' + conquest.static.language 
-				+ '/card/search?sphere='  + card.sphere + '">' + card.sphereDisplay + '</a>';
+		return '<a href="/' + conquest.static.language + '/card/search?sphere='
+				+ card.sphere + '">' + card.sphereDisplay + '</a>';
 	};
 
 	_ui.toSearchLinkType = function(card) {
-		return '<a href="/' + conquest.static.language 
-				+ '/card/search?type='  + card.type + '">' + card.typeDisplay + '</a>';
+		return '<a href="/' + conquest.static.language + '/card/search?type='
+				+ card.type + '">' + card.typeDisplay + '</a>';
 	};
 
 	_ui.toSearchLinkSetName = function(card) {
-		return '<a href="/' + conquest.static.language 
-				+ '/card/search?set='  + card.setTechName + '">' + card.setName + '</a>';
+		return '<a href="/' + conquest.static.language + '/card/search?set='
+				+ card.setTechName + '">' + card.setName + '</a>';
 	};
-	
+
 	_ui.toSearchLinkEncounterSetName = function(card) {
-		return '<a href="/' + conquest.static.language 
-				+ '/card/search?eset='  + card.enstTechName + '">' + card.enstName + '</a>';
+		return '<a href="/' + conquest.static.language + '/card/search?eset='
+				+ card.enstTechName + '">' + card.enstName + '</a>';
 	};
 
 	_ui.toSearchLinkTraits = function(card) {
@@ -1229,85 +1257,99 @@ conquest.ui = conquest.ui || {};
 		var traits = card.traits.split('. ');
 		_.each(traits, function(trait, index) {
 			trait = s.trim(trait.replace('.', ''));
-			result += '<a href="/' + conquest.static.language + '/card/search?traits=' + trait + '">' + trait + '.</a>';
+			result += '<a href="/' + conquest.static.language
+					+ '/card/search?traits=' + trait + '">' + trait + '.</a>';
 			if (index < traits.length - 1) {
 				result += ' ';
 			}
 		});
 		return result;
 	};
-	
+
 	_ui.toSearchLinkTrait = function(name, techName) {
 		if (_.isUndefined(techName)) {
 			techName = name;
 		}
-		return '<a href="/' + conquest.static.language + '/card/search?traits=' + techName + '">' + name + '</a>';
+		return '<a href="/' + conquest.static.language + '/card/search?traits='
+				+ techName + '">' + name + '</a>';
 	};
-	
-//	_ui.toSearchLinkKeyword = function(card, options) {
-//		return '<a href="/' + conquest.static.language 
-//				+ '/card/search?faction='  + card.faction + '">' + card.factionDisplay + '</a>';
-//	};
-	
-//	_ui.test1 = function() {
-//		var start = new Date().getTime();
-//		var input = 'Attach to a hero. Restricted.\nAttached hero gains +2 [Willpower].\nIf attached hero is Aragorn, he also gains a [Spirit] resource icon.';
-//		var iconWords = ['Willpower', 'Threat', 'Attack', 'Defense', 'Leadership',
-//		                 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
-//		var regexp = new RegExp('(' + iconWords.join('|') + ')', 'g');
-//		var output;
-//		_.each(_.range(1, 100000), function(i) {
-//			output = input.replace(regexp, '<icon class="$1">');
-//		});
-//		
-//		var end = new Date().getTime();		
-//		console.log(end - start + ' ' + out);
-//	};
-//	
-//	_ui.test2 = function() {
-//		var start = new Date().getTime();
-//		var input = 'Attach to a hero. Restricted.\nAttached hero gains +2 [Willpower].\nIf attached hero is Aragorn, he also gains a [Spirit] resource icon.';
-//		var iconWords = ['Willpower', 'Threat', 'Attack', 'Defense', 'Leadership',
-//		                 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
-//		var output;
-//		_.each(_.range(1, 100000), function(i) {
-//			_.each(iconWords, function(word) {
-//				oiutput = input.replace(word, '<icon class="$1">');
-//			});
-//		});
-//		
-//		var end = new Date().getTime();		
-//		console.log(end - start + ' ' + out);
-//	};
-	
+
+	// _ui.toSearchLinkKeyword = function(card, options) {
+	// return '<a href="/' + conquest.static.language
+	// + '/card/search?faction=' + card.faction + '">' + card.factionDisplay +
+	// '</a>';
+	// };
+
+	// _ui.test1 = function() {
+	// var start = new Date().getTime();
+	// var input = 'Attach to a hero. Restricted.\nAttached hero gains +2
+	// [Willpower].\nIf attached hero is Aragorn, he also gains a [Spirit]
+	// resource icon.';
+	// var iconWords = ['Willpower', 'Threat', 'Attack', 'Defense',
+	// 'Leadership',
+	// 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
+	// var regexp = new RegExp('(' + iconWords.join('|') + ')', 'g');
+	// var output;
+	// _.each(_.range(1, 100000), function(i) {
+	// output = input.replace(regexp, '<icon class="$1">');
+	// });
+	//		
+	// var end = new Date().getTime();
+	// console.log(end - start + ' ' + out);
+	// };
+	//	
+	// _ui.test2 = function() {
+	// var start = new Date().getTime();
+	// var input = 'Attach to a hero. Restricted.\nAttached hero gains +2
+	// [Willpower].\nIf attached hero is Aragorn, he also gains a [Spirit]
+	// resource icon.';
+	// var iconWords = ['Willpower', 'Threat', 'Attack', 'Defense',
+	// 'Leadership',
+	// 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
+	// var output;
+	// _.each(_.range(1, 100000), function(i) {
+	// _.each(iconWords, function(word) {
+	// oiutput = input.replace(word, '<icon class="$1">');
+	// });
+	// });
+	//		
+	// var end = new Date().getTime();
+	// console.log(end - start + ' ' + out);
+	// };
+
 	_ui.toHtmlText = function(input) {
 		if (_.isUndefined(input)) {
 			return input;
 		}
-		
+
 		var output = input;
-		
+
 		// icons
-		var iconWordsRegExp = new RegExp('\\[(' + conquest.dict.iconWords.join('|') + ')\\]', 'g');
+		var iconWordsRegExp = new RegExp('\\[('
+				+ conquest.dict.iconWords.join('|') + ')\\]', 'g');
 		output = output.replace(iconWordsRegExp, function(g0, g1) {
 			return '<i class="db-icon db-icon-' + g1.toLowerCase() + '"></i>'
 		});
-				
+
 		// traits
-		output = output.replace(/\[t(?: ([^\[\]]+))?\]([^\[]+)\[\/t\]/g, function(g0, g1, g2) {
-			return '<i><strong>' + _ui.toSearchLinkTrait(g2, g1) + '</strong></i>';
-		});
-		
+		output = output.replace(/\[t(?: ([^\[\]]+))?\]([^\[]+)\[\/t\]/g,
+				function(g0, g1, g2) {
+					return '<i><strong>' + _ui.toSearchLinkTrait(g2, g1)
+							+ '</strong></i>';
+				});
+
 		// trigger words
 		var triggerWords = conquest.dict.triggerWords[conquest.static.language];
 		if (conquest.static.language !== 'en') {
-			triggerWords = triggerWords.concat(conquest.dict.triggerWords['en']);
+			triggerWords = triggerWords
+					.concat(conquest.dict.triggerWords['en']);
 		}
-		var triggerWordsRegExp = new RegExp('(' + triggerWords.join('|') + ':)', 'g');
+		var triggerWordsRegExp = new RegExp(
+				'(' + triggerWords.join('|') + ':)', 'g');
 		output = output.replace(triggerWordsRegExp, '<strong>$1</strong>');
-				
+
 		// italics
-		output = output.replace(/\[i\]([^\[]+)\[\/i\]/g, '<i>$1</i>')		
+		output = output.replace(/\[i\]([^\[]+)\[\/i\]/g, '<i>$1</i>')
 		// bold
 		output = output.replace(/\[b\]([^\[]+)\[\/b\]/g, '<strong>$1</strong>')
 		// paragraphs
@@ -1315,14 +1357,15 @@ conquest.ui = conquest.ui || {};
 		var pStartVictory = '<p class="card-text-block victory">';
 		var pEnd = '</p>';
 		output = pStart + output.replace(/\n/g, pEnd + pStart) + pEnd;
-		
+
 		// victory
-		var victoryRegExp = new RegExp(pStart + '((?:Victory|Zwycięstwo|Sieg) [0-9]+\.)' + pEnd);
+		var victoryRegExp = new RegExp(pStart
+				+ '((?:Victory|Zwycięstwo|Sieg) [0-9]+\.)' + pEnd);
 		output = output.replace(victoryRegExp, pStartVictory + '$1' + pEnd);
-		
+
 		return output;
 	};
-	
+
 	_ui.toPlainText = function(input) {
 		if (_.isUndefined(input)) {
 			return input;
@@ -1335,124 +1378,124 @@ conquest.ui = conquest.ui || {};
 		output = output.replace(/\[i\]([^\[]+)\[\/i\]/g, '$1')
 		return output;
 	};
-	
-	_ui.colors = {
-			factions: {
-				'astra-militarum': {
-					bg: '#3C3C3C',
-					fg: '#FFF'
-				},
-				chaos: {
-					bg: '#EA5400',
-					fg: '#FFF'
-				},
-				'dark-eldar': {
-					bg: '#AF4D9D',
-					fg: '#000'
-				},
-				eldar: {
-					bg: '#EADA67',
-					fg: '#000'
-				},
-				ork: {
-					bg: '#407424',
-					fg: '#FFF'
-				},
-				'space-marines': {
-					bg: '#095DAD',
-					fg: '#FFF'
-				},
-				tau: {
-					bg: '#4CD0DC'
-				},
-				tyranid: {
-					bg: '#A32618',
-					fg: '#FFF'
-				},
-				necron: {
-					bg: '#57D8A9',
-					fg: '#000'
-				},
-				neutral: {
-					bg: '#BBB',
-					fg: '#000'
-				}
-			},
-			types: {
-				army: {
-					bg: '#ED2626'
-				},
-				attachment: {
-					bg: '#419441'
-				},
-				event: {
-					bg: '#F0AD36'
-				},
-				support: {
-					bg: '#3B84CC'
-				},
-				synapse: {
-					bg: '#B848A3'
-				}
-			}
-	};
-	
-//	_ui.factionColors['astra-militarum'] = {
-//		bg: '#3C3C3C',
-//		fg: '#FFF'
-//	};
-//	_ui.factionColors['chaos'] = {
-//		bg: '#EA5400',
-//		fg: '#FFF'
-//	};
-//	_ui.factionColors['dark-eldar'] = {
-//		bg: '#AF4D9D',
-//		fg: '#000'
-//	};
-//	_ui.factionColors['eldar'] = {
-//		bg: '#EADA67',
-//		fg: '#000'
-//	};
-//	_ui.factionColors['ork'] = {
-//		bg: '#407424',
-//		fg: '#FFF'
-//	};
-//	_ui.factionColors['space-marines'] = {
-//		bg: '#095DAD',
-//		fg: '#FFF'
-//	};
-//	_ui.factionColors['tau'] = {
-//		bg: '#4CD0DC'
-//	};
-//	_ui.factionColors['tyranid'] = {
-//		bg: '#A32618',
-//		fg: '#FFF'
-//	};
-//	_ui.factionColors['necron'] = {
-//		bg: '#57D8A9',
-//		fg: '#000'
-//	};
-//	_ui.factionColors['neutral'] = {
-//		bg: '#BBB',
-//		fg: '#000'
-//	};
 
-//	_ui.typeColors = [];
-//	_ui.typeColors['army'] = {
-//		bg: '#ED2626'
-//	};
-//	_ui.typeColors['attachment'] = {
-//		bg: '#419441'
-//	};
-//	_ui.typeColors['support'] = {
-//		bg: '#3B84CC'
-//	};
-//	_ui.typeColors['event'] = {
-//		bg: '#F0AD36'
-//	};
-//	_ui.typeColors['synapse'] = {
-//		bg: '#B848A3'
-//	};
+	_ui.colors = {
+		factions : {
+			'astra-militarum' : {
+				bg : '#3C3C3C',
+				fg : '#FFF'
+			},
+			chaos : {
+				bg : '#EA5400',
+				fg : '#FFF'
+			},
+			'dark-eldar' : {
+				bg : '#AF4D9D',
+				fg : '#000'
+			},
+			eldar : {
+				bg : '#EADA67',
+				fg : '#000'
+			},
+			ork : {
+				bg : '#407424',
+				fg : '#FFF'
+			},
+			'space-marines' : {
+				bg : '#095DAD',
+				fg : '#FFF'
+			},
+			tau : {
+				bg : '#4CD0DC'
+			},
+			tyranid : {
+				bg : '#A32618',
+				fg : '#FFF'
+			},
+			necron : {
+				bg : '#57D8A9',
+				fg : '#000'
+			},
+			neutral : {
+				bg : '#BBB',
+				fg : '#000'
+			}
+		},
+		types : {
+			army : {
+				bg : '#ED2626'
+			},
+			attachment : {
+				bg : '#419441'
+			},
+			event : {
+				bg : '#F0AD36'
+			},
+			support : {
+				bg : '#3B84CC'
+			},
+			synapse : {
+				bg : '#B848A3'
+			}
+		}
+	};
+
+	// _ui.factionColors['astra-militarum'] = {
+	// bg: '#3C3C3C',
+	// fg: '#FFF'
+	// };
+	// _ui.factionColors['chaos'] = {
+	// bg: '#EA5400',
+	// fg: '#FFF'
+	// };
+	// _ui.factionColors['dark-eldar'] = {
+	// bg: '#AF4D9D',
+	// fg: '#000'
+	// };
+	// _ui.factionColors['eldar'] = {
+	// bg: '#EADA67',
+	// fg: '#000'
+	// };
+	// _ui.factionColors['ork'] = {
+	// bg: '#407424',
+	// fg: '#FFF'
+	// };
+	// _ui.factionColors['space-marines'] = {
+	// bg: '#095DAD',
+	// fg: '#FFF'
+	// };
+	// _ui.factionColors['tau'] = {
+	// bg: '#4CD0DC'
+	// };
+	// _ui.factionColors['tyranid'] = {
+	// bg: '#A32618',
+	// fg: '#FFF'
+	// };
+	// _ui.factionColors['necron'] = {
+	// bg: '#57D8A9',
+	// fg: '#000'
+	// };
+	// _ui.factionColors['neutral'] = {
+	// bg: '#BBB',
+	// fg: '#000'
+	// };
+
+	// _ui.typeColors = [];
+	// _ui.typeColors['army'] = {
+	// bg: '#ED2626'
+	// };
+	// _ui.typeColors['attachment'] = {
+	// bg: '#419441'
+	// };
+	// _ui.typeColors['support'] = {
+	// bg: '#3B84CC'
+	// };
+	// _ui.typeColors['event'] = {
+	// bg: '#F0AD36'
+	// };
+	// _ui.typeColors['synapse'] = {
+	// bg: '#B848A3'
+	// };
 
 	_ui.writeAttr = function(name, value) {
 		return name + '="' + value + '"';
@@ -1496,13 +1539,15 @@ conquest.ui = conquest.ui || {};
 		});
 
 		var traits = new Bloodhound({
-			datumTokenizer : Bloodhound.tokenizers.obj.whitespace('description'),
+			datumTokenizer : Bloodhound.tokenizers.obj
+					.whitespace('description'),
 			queryTokenizer : Bloodhound.tokenizers.whitespace,
 			local : conquest.dict.traits
 		});
 
 		var keywords = new Bloodhound({
-			datumTokenizer : Bloodhound.tokenizers.obj.whitespace('description'),
+			datumTokenizer : Bloodhound.tokenizers.obj
+					.whitespace('description'),
 			queryTokenizer : Bloodhound.tokenizers.whitespace,
 			local : conquest.dict.keywords
 		});
@@ -1511,78 +1556,83 @@ conquest.ui = conquest.ui || {};
 		traits.initialize();
 		keywords.initialize();
 
-		var $typeahead = $(options.selector).typeahead({
-			hint : true,
-			highlight : true,
-			minLength : 1
-		}/*, {
-			name: 'texts',
-			displayKey: function(a) {alert(a);},
-			source: function(query, syncResults) {
-				var results = [];
-				results.push(query);
-				syncResults(results);
-			},
-			templates: {
-				suggestion : function(text) { return text },
-				header: '<div class="tt-multi-header">'
-					+ conquest.dict.messages['core.textSearch'] + '</div>'
-			}
-		}*/, {
-			name : 'cards',
-			displayKey : 'name',
-			source : cards.ttAdapter(),
-			templates : {
-				suggestion : Handlebars
-						.compile('{{name}}&nbsp;<span class="tt-no-highlight">{{card.setName}} | {{card.factionDisplay}} | {{card.typeDisplay}} | {{card.trait}}</span>'),
-				header : '<div class="tt-multi-header">'
-						+ conquest.dict.messages['core.card'] + '</div>'
-			}
-		}, {
-			name : 'traits',
-			displayKey : 'description',
-			source : traits.ttAdapter(),
-			templates : {
-				header : '<div class="tt-multi-header">'
-						+ conquest.dict.messages['core.trait'] + '</div>'
-			}
-		}, {
-			name : 'keywords',
-			displayKey : 'description',
-			source : keywords.ttAdapter(),
-			templates : {
-				header : '<div class="tt-multi-header">'
-						+ conquest.dict.messages['core.keyword'] + '</div>'
-			}
-		});
+		var $typeahead = $(options.selector)
+				.typeahead(
+						{
+							hint : true,
+							highlight : true,
+							minLength : 1
+						}/*
+							 * , { name: 'texts', displayKey: function(a)
+							 * {alert(a);}, source: function(query, syncResults) {
+							 * var results = []; results.push(query);
+							 * syncResults(results); }, templates: { suggestion :
+							 * function(text) { return text }, header: '<div
+							 * class="tt-multi-header">' +
+							 * conquest.dict.messages['core.textSearch'] + '</div>' } }
+							 */,
+						{
+							name : 'cards',
+							displayKey : 'name',
+							source : cards.ttAdapter(),
+							templates : {
+								suggestion : Handlebars
+										.compile('{{name}}&nbsp;<span class="tt-no-highlight">{{card.setName}} | {{card.factionDisplay}} | {{card.typeDisplay}} | {{card.trait}}</span>'),
+								header : '<div class="tt-multi-header">'
+										+ conquest.dict.messages['core.card']
+										+ '</div>'
+							}
+						},
+						{
+							name : 'traits',
+							displayKey : 'description',
+							source : traits.ttAdapter(),
+							templates : {
+								header : '<div class="tt-multi-header">'
+										+ conquest.dict.messages['core.trait']
+										+ '</div>'
+							}
+						},
+						{
+							name : 'keywords',
+							displayKey : 'description',
+							source : keywords.ttAdapter(),
+							templates : {
+								header : '<div class="tt-multi-header">'
+										+ conquest.dict.messages['core.keyword']
+										+ '</div>'
+							}
+						});
 		return $typeahead;
 	};
-	
+
 	_ui.adjustNavbarColors = function(faction) {
-//		var selector = '.navbar, .navbar .navbar-brand, .navbar .navbar-nav a';
-//		var removeClasses = _.reduce(conquest.dict.factions, function(outcome, faction) {
-//			return outcome + 'bg-' + faction.techName + ' ';
-//		}, '');
-//		$(selector).removeClass(removeClasses);
-//		if (faction) {
-//			$(selector).addClass('bg-' + faction);
-//		}
-//		$('#wrapper').css('backgroundColor', '#f2f2f2');
+		// var selector = '.navbar, .navbar .navbar-brand, .navbar .navbar-nav
+		// a';
+		// var removeClasses = _.reduce(conquest.dict.factions,
+		// function(outcome, faction) {
+		// return outcome + 'bg-' + faction.techName + ' ';
+		// }, '');
+		// $(selector).removeClass(removeClasses);
+		// if (faction) {
+		// $(selector).addClass('bg-' + faction);
+		// }
+		// $('#wrapper').css('backgroundColor', '#f2f2f2');
 	};
-	
+
 	_ui.adjustWrapperStyle = function(css) {
 		css = css || {};
 		if (css.backgroundColor) {
 			$('#wrapper').css({
-				backgroundColor: css.backgroundColor
+				backgroundColor : css.backgroundColor
 			});
 		} else {
 			$('#wrapper').css({
-				backgroundColor: ''
+				backgroundColor : ''
 			});
 		}
 	};
-	
+
 })(conquest.ui);
 
 //
@@ -1590,11 +1640,7 @@ conquest.ui = conquest.ui || {};
 //
 conquest.deck = conquest.deck || {};
 (function(_deck) {
-	
-	_deck.isValidDeckCardType = function(cardType) {
-		return _.indexOf([ 'army', 'attachment', 'event', 'support', 'synapse' ], cardType) >= 0;
-	};
-	
+
 	_deck.getDeckHelper = function(options) {
 		var warlord;
 		if (options.warlord) {
@@ -1602,7 +1648,7 @@ conquest.deck = conquest.deck || {};
 		} else {
 			warlord = conquest.dict.findCard(options.warlordId);
 		}
-	
+
 		var deckHelper;
 		if (warlord.techName == 'commander-starblaze') {
 			deckHelper = new _deck.CommanderStarblazeDeckHelper(warlord);
@@ -1617,55 +1663,36 @@ conquest.deck = conquest.deck || {};
 		}
 		return deckHelper;
 	}
-	
-	_deck.getAlliedDeckFactions = function(warlordId) {
-		return _deck.getDeckHelper({
-			warlordId : warlordId
-		}).getAlliedDeckFactions();
+
+	_deck.getPlayerDeckCardTypes = function() {
+		return consuest.dict.playerDeckCardTypes;
 	};
-	
-	_deck.getValidDeckFactions = function(warlordId) {		
-		return _deck.getDeckHelper({
-			warlordId : warlordId
-		}).getValidDeckFactions();
+
+	_deck.getPlayerDeckCards = function() {
+		return conquest.dict.playerDeckCards;
 	};
-	
-	_deck.getValidDeckCardTypes = function(warlordId) {
-		var warlord = conquest.dict.findCard(warlordId);
-		return _.filter(conquest.dict.cardTypes, function(cardType) {
-			return _deck.isValidDeckCardType(cardType.techName) 
-				&& (cardType.techName != 'synapse' || warlord.faction == 'tyranid');
-		});
-	};
-	
-	_deck.getValidDeckCards = function(warlordId) {
-		return _deck.getDeckHelper({
-			warlordId : warlordId
-		}).filterValidDeckCards(conquest.dict.cards);
-	};
-	
-	_deck.getValidDeckMembers = function(deckWarlordId) {
-		var validDeckCards = _deck.getValidDeckCards(deckWarlordId);
-		var validDeckMembers = [];
-		_.each(validDeckCards, function(card) {
-			var availableQuantity = (_.isUndefined(card.quantity) ? 3 : card.quantity);
-			var quantity = (card.type == 'warlord' || _.isNumber(card.warlordId) ? availableQuantity : 0);
+
+	_deck.getPlayerDeckMembers = function() {
+		var playerDeckCards = _deck.getPlayerDeckCards();
+		var playerDeckMembers = [];
+		_.each(playerDeckCards, function(card) {
 			var member = {
-				cardId : card.id,
-				quantity : quantity,
-				availableQuantity : availableQuantity
+				cardId: card.id,
+				quantity: 0,
+				availableQuantity : _.isNumber(card.quantity) ? card.quantity : 3
 			};
-			validDeckMembers.push(member);
+			playerDeckMembers.push(member);
 		});
-		return validDeckMembers;
+		return playerDeckMembers;
 	};
-	
+
 	//
 	// predicate for cards from regular decks (on alignment circle)
 	//
 	_deck.buildRegularDeckCardPredicate = function(warlord) {
-		var alliedDeckFactions = _.pluck(_deck.getAlliedDeckFactions(warlord.id), 'techName');
-	
+		var alliedDeckFactions = _.pluck(_deck
+				.getAlliedDeckFactions(warlord.id), 'techName');
+
 		return function(card) {
 			// invalid type
 			if (!_deck.isValidDeckCardType(card.type)) {
@@ -1690,12 +1717,12 @@ conquest.deck = conquest.deck || {};
 			return true;
 		};
 	};
-	
+
 	//
 	// predicate for card from warlord's own faction
 	//
-	_deck.buildWarlordFactionCardPredicate = function(warlord) {	
-		return function(card) {			
+	_deck.buildWarlordFactionCardPredicate = function(warlord) {
+		return function(card) {
 			// invalid type
 			if (!_deck.isValidDeckCardType(card.type)) {
 				return false;
@@ -1715,18 +1742,18 @@ conquest.deck = conquest.deck || {};
 			return true;
 		};
 	};
-	
+
 	//
 	// predicate for common cards
 	//
 	_deck.buildCommonCardPredicate = function() {
 		return function(card) {
 			// valid type and not in signature squad and not loyal
-			return _deck.isValidDeckCardType(card.type) && _.isUndefined(card.warlordId)
-					&& card.loyal === false;
+			return _deck.isValidDeckCardType(card.type)
+					&& _.isUndefined(card.warlordId) && card.loyal === false;
 		};
 	};
-	
+
 	//
 	// predicate for cards with given trait
 	//
@@ -1735,23 +1762,26 @@ conquest.deck = conquest.deck || {};
 			// valid type and has given trait
 			var outcome = _deck.isValidDeckCardType(card.type);
 			if (outcome && card.traitEn) {
-				outcome = _.indexOf(card.traitEn.trim().toLowerCase().split(/ *\. */), trait) >= 0;
+				outcome = _.indexOf(card.traitEn.trim().toLowerCase().split(
+						/ *\. */), trait) >= 0;
 			} else {
 				outcome = false;
 			}
 			return outcome;
 		};
 	};
-	
+
 	_deck.buildRegularDeckFactionPredicate = function(warlord) {
-		var circleFactions = _.filter(conquest.dict.factions, function(faction) {
-			return faction.techName != 'neutral' && faction.techName != 'necron'
-					&& faction.techName != 'tyranid';
-		});
+		var circleFactions = _.filter(conquest.dict.factions,
+				function(faction) {
+					return faction.techName != 'neutral'
+							&& faction.techName != 'necron'
+							&& faction.techName != 'tyranid';
+				});
 		var faction = _.findWhere(conquest.dict.factions, {
 			techName : warlord.faction
 		});
-	
+
 		return function(faction) {
 			var techName = faction.techName;
 			if (techName == 'neutral') {
@@ -1771,34 +1801,38 @@ conquest.deck = conquest.deck || {};
 			return false;
 		};
 	};
-	
+
 	_deck.RegularDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
-			return _.filter(conquest.dict.factions, _deck.buildRegularDeckFactionPredicate(warlord));
+			return _.filter(conquest.dict.factions, _deck
+					.buildRegularDeckFactionPredicate(warlord));
 		};
-	
+
 		this.getValidDeckFactions = function() {
 			return this.getAlliedDeckFactions();
 		};
-		
+
 		this.filterValidDeckCards = function(cards) {
-			return _.filter(cards, _deck.buildRegularDeckCardPredicate(warlord));
+			return _
+					.filter(cards, _deck.buildRegularDeckCardPredicate(warlord));
 		};
 	};
-	
+
 	_deck.TyranidDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
 			return undefined;
 		};
-	
+
 		this.getValidDeckFactions = function() {
 			return _.filter(conquest.dict.factions, function(faction) {
-				return faction.techName == 'tyranid' || faction.techName == 'neutral';
+				return faction.techName == 'tyranid'
+						|| faction.techName == 'neutral';
 			});
 		};
-	
+
 		this.filterValidDeckCards = function(cards) {
-			var warlordFaction = _deck.buildWarlordFactionCardPredicate(warlord);
+			var warlordFaction = _deck
+					.buildWarlordFactionCardPredicate(warlord);
 			var neutralNonArmy = function(card) {
 				return card.faction == 'neutral' && card.type != 'army';
 			};
@@ -1807,20 +1841,21 @@ conquest.deck = conquest.deck || {};
 			});
 		};
 	};
-	
+
 	_deck.NecronDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
 			return undefined;
 		};
-	
+
 		this.getValidDeckFactions = function() {
 			return _.filter(conquest.dict.factions, function(faction) {
 				return faction.techName != 'tyranid';
 			});
 		};
-	
+
 		this.filterValidDeckCards = function(cards) {
-			var warlordFaction = _deck.buildWarlordFactionCardPredicate(warlord);
+			var warlordFaction = _deck
+					.buildWarlordFactionCardPredicate(warlord);
 			var common = _deck.buildCommonCardPredicate(warlord);
 			var nonTyranidArmy = function(card) {
 				return card.faction != 'tyranid' && card.type == 'army';
@@ -1829,17 +1864,18 @@ conquest.deck = conquest.deck || {};
 				return card.faction == 'neutral';
 			}
 			return _.filter(cards, function(card) {
-				return warlordFaction(card) || neutral(card) || nonTyranidArmy(card) && common(card);
+				return warlordFaction(card) || neutral(card)
+						|| nonTyranidArmy(card) && common(card);
 			});
 		};
 	};
-	
+
 	_deck.CommanderStarblazeDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
 			return _.filter(conquest.dict.factions, _deck
 					.buildRegularDeckFactionPredicate(warlord));
 		};
-	
+
 		this.getValidDeckFactions = function() {
 			var filtered = this.getAlliedDeckFactions();
 			filtered.push(_.findWhere(conquest.dict.factions, {
@@ -1847,23 +1883,24 @@ conquest.deck = conquest.deck || {};
 			}));
 			return filtered;
 		};
-	
+
 		this.filterValidDeckCards = function(cards) {
 			var standard = _deck.buildRegularDeckCardPredicate(warlord);
 			var common = _deck.buildCommonCardPredicate();
 			return _.filter(cards, function(card) {
-				return standard(card) || (common(card) && card.faction == 'astra-militarum');
+				return standard(card)
+						|| (common(card) && card.faction == 'astra-militarum');
 			});
 		};
-	
+
 	};
-	
+
 	_deck.GorzodDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
 			return _.filter(conquest.dict.factions, _deck
 					.buildRegularDeckFactionPredicate(warlord));
 		};
-	
+
 		this.getValidDeckFactions = function() {
 			var filtered = this.getAlliedDeckFactions();
 			filtered.push(_.findWhere(conquest.dict.factions, {
@@ -1871,28 +1908,32 @@ conquest.deck = conquest.deck || {};
 			}));
 			return filtered;
 		};
-	
+
 		this.filterValidDeckCards = function(cards) {
 			var standard = _deck.buildRegularDeckCardPredicate(warlord);
 			var common = _deck.buildCommonCardPredicate();
 			var vehicle = _deck.buildTraitCardPredicate("vehicle");
-			return _.filter(cards, function(card) {
-				return standard(card)
-						|| (common(card) && vehicle(card) && card.faction == 'space-marines');
-			});
+			return _
+					.filter(
+							cards,
+							function(card) {
+								return standard(card)
+										|| (common(card) && vehicle(card) && card.faction == 'space-marines');
+							});
 		};
 	};
-	
+
 	/**
 	 * @memberOf _deck
 	 */
-	_deck.dummy = function() {};
+	_deck.dummy = function() {
+	};
 
 })(conquest.deck);
 
 //
 // ???
 //
-(function(_conquest) {	
+(function(_conquest) {
 
 })(conquest);
