@@ -25,7 +25,9 @@
 		<h:outputScript name="js/jquery.ui.touch-punch.min.js" target="head" />
 		<h:outputScript name="js/chart.min.js" target="head" />
 		<h:outputScript name="js/moment-timezone-with-data.js" target="head" />
-		<h:outputScript name="js/conquest.js" target="head" />
+		<h:outputScript name="js/ordb.js" target="head" />
+		<h:outputScript name="js/ordb.model.js" target="head" />
+		<h:outputScript name="js/ordb.util.js" target="head" />
 		<h:outputScript name="js/handlebars-helpers.js" target="head" />
 		<h:outputScript name="js/handlebars-templates.js" target="head" />
 		<h:outputScript name="js/card.common.js" target="head" />
@@ -33,20 +35,20 @@
 		<h:outputScript name="js/deck.private.js" target="head" />
 		<!-- <h:outputStylesheet name="css/bootstrap-slider.css" /> -->		
 		<h:outputScript target="head">
-			conquest.static.language = '#{localeCtrl.language}';
-			conquest.static.contextPath = '#{facesContext.externalContext.request.contextPath}';
-			conquest.static.restPath = '#{facesContext.externalContext.request.contextPath}/rest';
-			conquest.static.imagePath = '/image';
-			conquest.static.user = #{bootstrapCtrl.user};
-			conquest.dict.messages = #{bootstrapCtrl.messagesData};
-			conquest.dict.cards = #{bootstrapCtrl.cardsData};
-			conquest.dict.cardSets = #{bootstrapCtrl.cardSetsData};
-			conquest.dict.encounterSets = #{bootstrapCtrl.encounterSetsData};
-			conquest.dict.spheres = #{bootstrapCtrl.domainSpheresData};
-			conquest.dict.cardTypes = #{bootstrapCtrl.domainCardTypesData};
-			conquest.dict.traits = #{bootstrapCtrl.domainTraitsData};
-			conquest.dict.keywords = #{bootstrapCtrl.domainKeywordsData};
-			conquest.dict.initialize();
+			ordb.static.language = '#{localeCtrl.language}';
+			ordb.static.contextPath = '#{facesContext.externalContext.request.contextPath}';
+			ordb.static.restPath = '#{facesContext.externalContext.request.contextPath}/rest';
+			ordb.static.imagePath = '/image';
+			ordb.static.user = #{bootstrapCtrl.user};
+			ordb.dict.messages = #{bootstrapCtrl.messagesData};
+			ordb.dict.cards = #{bootstrapCtrl.cardsData};
+			ordb.dict.cardSets = #{bootstrapCtrl.cardSetsData};
+			ordb.dict.encounterSets = #{bootstrapCtrl.encounterSetsData};
+			ordb.dict.spheres = #{bootstrapCtrl.domainSpheresData};
+			ordb.dict.cardTypes = #{bootstrapCtrl.domainCardTypesData};
+			ordb.dict.traits = #{bootstrapCtrl.domainTraitsData};
+			ordb.dict.keywords = #{bootstrapCtrl.domainKeywordsData};
+			ordb.dict.initialize();
 		</h:outputScript>
 			
 		<!-- <h:outputText value="#{bootstrapCtrl.decksBootstrapData}" escape="false" /> -->

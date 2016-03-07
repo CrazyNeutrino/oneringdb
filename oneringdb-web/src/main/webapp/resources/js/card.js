@@ -1,10 +1,10 @@
-var conquest = conquest || {};
-conquest.card = conquest.card || {};
+var ordb = ordb || {};
+ordb.card = ordb.card || {};
 
 (function(_card) {
 
 	$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-		options.url = conquest.static.restPath + options.url + '?language=' + conquest.static.language;
+		options.url = ordb.static.restPath + options.url + '?language=' + ordb.static.language;
 	});
 	
 	/**
@@ -24,11 +24,11 @@ conquest.card = conquest.card || {};
 			this.$el.empty();
 		},
 		linkClick: function(e) {
-			var root = conquest.static.root;
+			var root = ordb.static.root;
 			var href = $(e.currentTarget).attr('href');
 			if (href.indexOf(root) == 0 && !event.ctrlKey && !event.shiftKey) {
 				e.preventDefault();
-				conquest.router.navigate(href.replace(conquest.static.root, ''), {
+				ordb.router.navigate(href.replace(ordb.static.root, ''), {
 					trigger: true
 				});
 			}
@@ -49,12 +49,12 @@ conquest.card = conquest.card || {};
 
 	_card.CardView = _card.ViewBase.extend({
 		render: function(setNumber, cardNumber) {
-			var card = conquest.dict.findCardByNumber(setNumber, cardNumber);			
+			var card = ordb.dict.findCardByNumber(setNumber, cardNumber);			
 			Handlebars.registerPartial({
 				'card-text-content': Handlebars.templates['card-text-content']
 			});
 			this.$el.html(Handlebars.templates['card-view'](card));
-			conquest.router.navigate(conquest.ui.toCardRelativeUrl(card));
+			ordb.router.navigate(ordb.ui.toCardRelativeUrl(card));
 		}
 	});
 
@@ -63,8 +63,8 @@ conquest.card = conquest.card || {};
 			layout: 'grid-text-only'
 		}),
 		
-		cardsFilter: new conquest.card.CardsFilter(),
-		filteredCards: new conquest.model.Cards(),
+		cardsFilter: new ordb.card.CardsFilter(),
+		filteredCards: new ordb.model.Cards(),
 		
 		events: function() {
 			return _.extend({
@@ -172,15 +172,15 @@ conquest.card = conquest.card || {};
 			var view = this;
 
 			if (queryString) {
-				view.cardsFilter = new conquest.card.CardsFilter(conquest.filter.queryStringToFilter(queryString));
+				view.cardsFilter = new ordb.card.CardsFilter(ordb.filter.queryStringToFilter(queryString));
 			}
 
 			var template = Handlebars.templates['card-search-view']({
 				filter: {
-					spheres: conquest.dict.spheres,
-					cardTypes: conquest.dict.cardTypes
+					spheres: ordb.dict.spheres,
+					cardTypes: ordb.dict.cardTypes
 				},
-				sortItems: conquest.util.buildCardSortItems()
+				sortItems: ordb.util.buildCardSortItems()
 			});
 
 			view.$el.html(template);
@@ -194,146 +194,24 @@ conquest.card = conquest.card || {};
 			
 			view.applyFilterToUI(view.cardsFilter.toJSON());
 			
-			// view.$el.find('.btn-group.btn-group-layout > .btn').click(function() {
-			// 	$(this).addClass('active').siblings().removeClass('active');
-			// 	view.config.set({
-			// 		layout: $(this).data('layout')
-			// 	});
-			// });
-
-
-//			//
-//			// filter: sets
-//			// 
-//			new conquest.card.CardSetFilterPopoverView({
-//				filter: view.cardsFilter,
-//				$trigger: view.$el.find('#cardSetfilterTrigger')
-//			}).render();
-//
-//			//
-//			// filter: stats
-//			// 
-//			new conquest.card.CardStatFilterPopoverView({
-//				filter: view.cardsFilter,
-//				$trigger: view.$el.find('#cardStatfilterTrigger')
-//			}).render();
+			//
+			// filter: stats
+			//
+			// TODO
 
 			//
-			// filter: name/trait/keyword search bar
+			// filter: name/trait/keyword/text search bar
 			//
-			var selector = '#textFilter input';
-			var $typeahead = conquest.ui.createTypeahead({
-				selector: selector
+			var $typeahead = ordb.ui.buildCardsTypeahead(view.cardsFilter, {
+				selector: '#textFilter input'
 			});
-			var $input = $(selector);
-			
-			if (view.cardsFilter.has('traits')) {
-				$input.val(view.cardsFilter.get('traits'))
-			} else if (view.cardsFilter.has('keywords')) {
-				$input.val(view.cardsFilter.get('keywords'))
-			} else if (view.cardsFilter.has('techName')) {
-				var card = conquest.dict.findCard(view.cardsFilter.get('techName'));
-				if (card) {
-					$input.val(card.name);
-				}
-			} else if (view.cardsFilter.has('text')) {
-				$input.val(view.cardsFilter.get('text'))
-			}
-
-			var setSearchbarFilter = function(options) {
-				if (options) {
-					var suggestion = options.suggestion;
-					var dataset = options.dataset;
-					var text = options.text;
-
-					var obj = {};
-					if (suggestion && dataset) {
-						if (dataset == 'cards') {
-							obj['techName'] = suggestion.card.techName;
-						} else if (dataset == 'traits') {
-							obj['traits'] = suggestion.description;
-						} else if (dataset == 'keywords') {
-							obj['keywords'] = suggestion.description;
-						}
-					} else if (text) {
-						if (!(view.cardsFilter.has('techName') || view.cardsFilter.has('traits') || view.cardsFilter.has('keywords') || view.cardsFilter.has('text'))) {
-							obj['text'] = text;
-						}
-					} else {
-						obj['techName'] = undefined;
-						obj['traits'] = undefined;
-						obj['keywords'] = undefined;
-						obj['text'] = undefined;
-					}
-
-					view.cardsFilter.set(obj, {
-						silent: true
-					});
-				}
-			};
-
-			$typeahead.on('typeahead:selected', function($event, suggestion, dataset) {
-				console.log('selected' + $event);
-				setSearchbarFilter({
-					suggestion: suggestion,
-					dataset: dataset
-				});
-			}).on('typeahead:autocompleted', function($event, suggestion, dataset) {
-				console.log('autocompleted' + $event);
-				setSearchbarFilter({
-					suggestion: suggestion,
-					dataset: dataset
-				});
-			}).on('typeahead:closed', function($event) {
-				console.log('closed' + $event);
-				setSearchbarFilter({
-					text: $typeahead.typeahead('val')
-				});
-			}).on('typeahead:opened', function($event) {
-				console.log('opened' + $event);
-				setSearchbarFilter({});
-			}).on('keyup', function($event) {
-				if ($event.keyCode == 13) {
-					$typeahead.typeahead('close');
-					view.cardsFilter.trigger('change', view.cardsFilter);
-				}
-			});
-
-			$('#textFilter .btn').click(function() {
-				view.cardsFilter.trigger('change', view.cardsFilter);
-			});
-
-			var buildSortKeys = function() {
-				var sortKeys = [];
-				$('.sort-control').each(function() {
-					var value = $(this).val();
-					if (value) {
-						if (value.indexOf(',') == -1) {
-							sortKeys.push(value);
-						} else {
-							sortKeys.push({
-								property: value.split(',')[0],
-								descending: value.split(',')[1] == 'desc'
-							});
-						}
-					}
-				});
-				return sortKeys;
-			}; // end:buildSortKeys
-
-			var buildCardsComparator = function() {
-				return conquest.util.buildCardsComparator(buildSortKeys(), {
-					resolver: function(card) {
-						return card.attributes;
-					}
-				});
-			}; // end:buildMembersComparator
 
 			//
 			// sorting change
 			//
-			$('.sort-control').change(function() {					
-				view.filteredCards.comparator = buildCardsComparator();
+			$('.sort-control').change(function() {
+				var keys = ordb.util.buildSortKeys($('.sort-control'));
+				view.filteredCards.comparator = ordb.util.buildCardsComparator(keys);
 				view.filteredCards.sort();
 				view.filteredCards.trigger('reset', view.filteredCards);
 			});
@@ -347,15 +225,16 @@ conquest.card = conquest.card || {};
 			// listen to filter change event
 			//
 			view.cardsFilter.listenTo(view.cardsFilter, 'change', function(cardsFilter, options) {
-				view.filteredCards.comparator = buildCardsComparator();
-				view.filteredCards.reset(cardsFilter.filter.call(cardsFilter, conquest.dict.cards));
-				var queryString = conquest.filter.filterToQueryString(cardsFilter.toJSON());
+				var keys = ordb.util.buildSortKeys($('.sort-control'));
+				view.filteredCards.comparator = ordb.util.buildCardsComparator(keys);
+				view.filteredCards.reset(cardsFilter.filter.call(cardsFilter, ordb.dict.cards));
+				var queryString = ordb.filter.filterToQueryString(cardsFilter.toJSON());
 				if (queryString && queryString.length > 0) {
 					queryString = '?' + queryString;
 				} else {
 					queryString = '';
 				}
-				conquest.router.navigate('search' + queryString);
+				ordb.router.navigate('search' + queryString);
 			});
 
 			if (view.cardsFilter.isNotEmpty()) {
@@ -401,7 +280,7 @@ conquest.card = conquest.card || {};
 				
 				options = options || {};
 				
-				var pagination = conquest.util.buildPagination({
+				var pagination = ordb.util.buildPagination({
 					total: cards.size(),
 					pageNumber: options.pageNumber,
 					pageSize: 60
@@ -432,7 +311,7 @@ conquest.card = conquest.card || {};
 		}
 	});
 	
-})(conquest.card);
+})(ordb.card);
 
 $(function() {
 	var Router = Backbone.Router.extend({
@@ -442,39 +321,39 @@ $(function() {
 		}
 	});
 
-	conquest.router = new Router();
-	conquest.router.on('route:viewCard', function(setNumber, cardNumber) {
-		if (conquest.app.view) {
-			conquest.app.view.remove();
+	ordb.router = new Router();
+	ordb.router.on('route:viewCard', function(setNumber, cardNumber) {
+		if (ordb.app.view) {
+			ordb.app.view.remove();
 		}
-		conquest.app.view = new conquest.card.CardView();
+		ordb.app.view = new ordb.card.CardView();
 		setNumber = parseInt(setNumber);
 		cardNumber = parseInt(cardNumber);
-		conquest.app.view.render(setNumber, cardNumber);
+		ordb.app.view.render(setNumber, cardNumber);
 		$('html,body').scrollTop(0);
 
-		var card = conquest.dict.findCardByNumber(setNumber, cardNumber);
-		var url = conquest.ui.toCardRelativeUrl(card);
+		var card = ordb.dict.findCardByNumber(setNumber, cardNumber);
+		var url = ordb.ui.toCardRelativeUrl(card);
 		if (_.isUndefined(url)) {
 			url = setNumber + '/' + cardNumber;
 		}
-		ga('set', 'page', conquest.static.root + url);
+		ga('set', 'page', ordb.static.root + url);
 		ga('send', 'pageview');
 	}).on('route:searchCards', function(queryString) {
-		if (conquest.app.view) {
-			conquest.app.view.remove();
+		if (ordb.app.view) {
+			ordb.app.view.remove();
 		}
-		conquest.app.view = new conquest.card.CardSearchView();
-		conquest.app.view.render(queryString);
+		ordb.app.view = new ordb.card.CardSearchView();
+		ordb.app.view.render(queryString);
 		$('html,body').scrollTop(0);
-		ga('set', 'page', conquest.static.root + 'search');
+		ga('set', 'page', ordb.static.root + 'search');
 		ga('send', 'pageview');
 	});
 
-	conquest.static.root = '/' + conquest.static.language + '/card/';
+	ordb.static.root = '/' + ordb.static.language + '/card/';
 
 	Backbone.history.start({
 		pushState: true,
-		root: conquest.static.root
+		root: ordb.static.root
 	});
 });

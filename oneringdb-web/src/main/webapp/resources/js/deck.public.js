@@ -1,6 +1,6 @@
 $(function() {
 
-	var PublicDeckView = conquest.deck.PageView.extend({
+	var PublicDeckView = ordb.deck.PageView.extend({
 		events: {
 			'click .pub-deck-view a': 'viewLinkClickHandler',
 			'click .pub-deck-view i.favourite': 'markFavouriteClickHandler',
@@ -11,7 +11,7 @@ $(function() {
 			filter: new Backbone.Model()
 		}),
 		markClickHandler: function(url) {
-			if (conquest.static.user.username) {
+			if (ordb.static.user.username) {
 				var view = this;
 				$.post(url, function(data) {
 					view.deck.set({
@@ -78,13 +78,13 @@ $(function() {
 
 			var renderInternal = function() {
 				var warlordId = view.deck.get('warlord').id;
-				var warlord = conquest.dict.findCard(warlordId);
+				var warlord = ordb.dict.findCard(warlordId);
 				
-				conquest.ui.adjustWrapperStyle();
+				ordb.ui.adjustWrapperStyle();
 				
 				var filter = {
-					spheres: conquest.dict.spheres,
-					cardTypes: conquest.deck.getPlayerDeckCardTypes()
+					spheres: ordb.dict.spheres,
+					cardTypes: ordb.deck.getPlayerDeckCardTypes()
 				};
 				var template = Handlebars.templates['pub-deck-view']({
 					deck: view.deck.toJSON(),
@@ -105,9 +105,9 @@ $(function() {
 				});
 				view.$el.find('.actions-container').append(actionsTemplate);
 
-				view.deckDescriptionView = new conquest.deck.DeckDescriptionView();
+				view.deckDescriptionView = new ordb.deck.DeckDescriptionView();
 				view.deckDescriptionView.render(view.deck);
-				view.deckCommentsView = new conquest.deck.DeckCommentsView();
+				view.deckCommentsView = new ordb.deck.DeckCommentsView();
 				view.updateStats();
 				view.renderMessages();
 
@@ -118,7 +118,7 @@ $(function() {
 					html: true,
 					trigger: 'hover',
 					content: function() {
-						return conquest.ui.writeCardImgElem($(this).data('image-base'), {
+						return ordb.ui.writeCardImgElem($(this).data('image-base'), {
 							class: 'card-md'
 						});
 					}
@@ -182,12 +182,12 @@ $(function() {
 				};
 
 				view.config.get('filter').set({
-					sets: _.pluck(_.where(conquest.dict.cardSets, {
+					sets: _.pluck(_.where(ordb.dict.cardSets, {
 						released: true
 					}), 'techName')
 				});
 
-				view.membersListView = new conquest.deck.MembersListView({
+				view.membersListView = new ordb.deck.MembersListView({
 					el: '.members-container'
 				});
 				view.membersListView.listenTo(view.deck.get('filteredMembers'), 'reset', function(filteredMembers) {
@@ -196,7 +196,7 @@ $(function() {
 						readOnly: true
 					});
 				});
-				view.groupsView = new conquest.deck.MemberGroupsView({
+				view.groupsView = new ordb.deck.MemberGroupsView({
 					el: '.mg-container'
 				});
 				view.listenTo(view.config, 'change:layout', function(config) {
@@ -234,14 +234,14 @@ $(function() {
 				// save deck copy
 				//
 				$('a.deck-save-copy').click(function() {
-					conquest.deck.showDeckSaveCopyModal(view.deck);
+					ordb.deck.showDeckSaveCopyModal(view.deck);
 				});
 
 
 				//
 				// export deck
 				//
-				conquest.deck.prepareExportModalDialog(view.deck);
+				ordb.deck.prepareExportModalDialog(view.deck);
 
 				//
 				// tooltips
@@ -264,7 +264,7 @@ $(function() {
 
 					var draw = function(quantity) {
 						if (_.isUndefined(view.shuffledCards)) {
-							view.shuffledCards = conquest.util.membersShuffle(view.deck.get('members'));
+							view.shuffledCards = ordb.util.membersShuffle(view.deck.get('members'));
 							view.shuffledCardsIndex = 0;
 							$drawContainer.empty();
 						}
@@ -275,11 +275,11 @@ $(function() {
 							var attrs = {
 								class: 'card-xs'
 							};
-							$('<a />').data('image-base', imageBase).append(conquest.ui.writeCardImgElem(imageBase, attrs)).popover({
+							$('<a />').data('image-base', imageBase).append(ordb.ui.writeCardImgElem(imageBase, attrs)).popover({
 								html: true,
 								trigger: 'hover',
 								content: function() {
-									return conquest.ui.writeCardImgElem($(this).data('image-base'), {
+									return ordb.ui.writeCardImgElem($(this).data('image-base'), {
 										class: 'card-md'
 									});
 								}
@@ -325,13 +325,13 @@ $(function() {
 				var traits = new Bloodhound({
 					datumTokenizer: Bloodhound.tokenizers.obj.whitespace('description'),
 					queryTokenizer: Bloodhound.tokenizers.whitespace,
-					local: conquest.dict.traits
+					local: ordb.dict.traits
 				});
 
 				var keywords = new Bloodhound({
 					datumTokenizer: Bloodhound.tokenizers.obj.whitespace('description'),
 					queryTokenizer: Bloodhound.tokenizers.whitespace,
-					local: conquest.dict.keywords
+					local: ordb.dict.keywords
 				});
 
 				cards.initialize();
@@ -348,21 +348,21 @@ $(function() {
 					source: cards.ttAdapter(),
 					templates: {
 						suggestion: Handlebars.compile('{{name}}&nbsp;<span class="tt-no-highlight">{{card.setName}} | {{card.factionDisplay}} | {{card.typeDisplay}} | {{card.trait}}</span>'),
-						header: '<div class="tt-multi-header">' + conquest.dict.messages['core.card'] + '</div>'
+						header: '<div class="tt-multi-header">' + ordb.dict.messages['core.card'] + '</div>'
 					}
 				}, {
 					name: 'traits',
 					displayKey: 'description',
 					source: traits.ttAdapter(),
 					templates: {
-						header: '<div class="tt-multi-header">' + conquest.dict.messages['core.trait'] + '</div>'
+						header: '<div class="tt-multi-header">' + ordb.dict.messages['core.trait'] + '</div>'
 					}
 				}, {
 					name: 'keywords',
 					displayKey: 'description',
 					source: keywords.ttAdapter(),
 					templates: {
-						header: '<div class="tt-multi-header">' + conquest.dict.messages['core.keyword'] + '</div>'
+						header: '<div class="tt-multi-header">' + ordb.dict.messages['core.keyword'] + '</div>'
 					}
 				});
 
@@ -430,7 +430,7 @@ $(function() {
 			if (options.deck) {
 				view.deck = options.deck;
 				view.deck.set({
-					snapshots: new conquest.model.PublicDecks()
+					snapshots: new ordb.model.PublicDecks()
 				});
 				view.deck.get('snapshots').fetch({
 					data: {
@@ -447,7 +447,7 @@ $(function() {
 				});
 				renderInternal();
 			} else if (options.deckId) {
-				view.deck = new conquest.model.PublicDeck({
+				view.deck = new ordb.model.PublicDeck({
 					id: options.deckId
 				});
 				view.deck.fetch({
@@ -455,7 +455,7 @@ $(function() {
 						renderInternal();
 					},
 					error: function(deck, response, options) {
-						view.messages = conquest.deck.buildErrorMessage({
+						view.messages = ordb.deck.buildErrorMessage({
 							error: response.responseJSON,
 							message: 'core.deck.load.error'
 						})
@@ -468,11 +468,11 @@ $(function() {
 		}
 	});
 
-	var PublicDeckListView = conquest.deck.PageView.extend({
+	var PublicDeckListView = ordb.deck.PageView.extend({
 		events: {
 			'click #publicDeckListView a': 'viewLinkClickHandler'
 		},
-		decks: new conquest.model.PublicDecks(),
+		decks: new ordb.model.PublicDecks(),
 		filter: {},
 		filterAdvanced: false,
 		render: function(queryString) {
@@ -495,7 +495,7 @@ $(function() {
 			};
 
 			view.unbindMenuLinkClickHandler();
-			conquest.ui.adjustWrapperStyle({
+			ordb.ui.adjustWrapperStyle({
 				backgroundColor: '#f2f2f2'
 			});
 			
@@ -517,10 +517,10 @@ $(function() {
 			], function(arr) {
 				sortItems.push({
 					value: arr[0],
-					label: conquest.dict.messages[arr[1]]
+					label: ordb.dict.messages[arr[1]]
 				})
 			});
-			view.deckListFilterView = new conquest.deck.DeckListFilterView({
+			view.deckListFilterView = new ordb.deck.DeckListFilterView({
 				config: {
 					showPublishDate: true,
 					showModifyDate: true,
@@ -537,7 +537,7 @@ $(function() {
 				advanced: view.filterAdvanced,
 				searchClickHandler: queryDeckList
 			});
-			view.deckListDataView = new conquest.deck.DeckListDataView();
+			view.deckListDataView = new ordb.deck.DeckListDataView();
 			if (view.decks.length > 0) {
 				view.deckListDataView.render(view.decks, {
 					pageClickHandler: queryDeckList,
@@ -559,8 +559,8 @@ $(function() {
 	var publicDeckView = new PublicDeckView();
 	var publicDeckListView = new PublicDeckListView();
 
-	conquest.router = new Router();
-	conquest.router.on('route:viewPublicDeck', function(deckIdWithName) {
+	ordb.router = new Router();
+	ordb.router.on('route:viewPublicDeck', function(deckIdWithName) {
 		if (deckIdWithName) {
 			var deckId = /^\w+/.exec(deckIdWithName)[0];
 			if (/^\d+$/.test(deckId)) {
@@ -574,20 +574,20 @@ $(function() {
 				})
 			});
 			$('html,body').scrollTop(0);
-			ga('set', 'page', conquest.static.root + deckId);
+			ga('set', 'page', ordb.static.root + deckId);
 			ga('send', 'pageview');
 		}
 	}).on('route:viewPublicDeckList', function(queryString) {
 		publicDeckListView.render(queryString);
 		$('html,body').scrollTop(0);
-		ga('set', 'page', conquest.static.root);
+		ga('set', 'page', ordb.static.root);
 		ga('send', 'pageview');
 	});
 	
-	conquest.static.root = '/' + conquest.static.language + '/public/deck/';
+	ordb.static.root = '/' + ordb.static.language + '/public/deck/';
 
 	Backbone.history.start({
 		pushState: true,
-		root: conquest.static.root
+		root: ordb.static.root
 	});
 });

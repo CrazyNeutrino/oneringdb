@@ -15,53 +15,36 @@
 		<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.string/3.0.2/underscore.string.min.js"></script>
 		<script src="http://cdnjs.cloudflare.com/ajax/libs/highcharts/4.1.9.1/highcharts.js"></script>		
 		<h:outputStylesheet name="css/jquery-ui.min.css" />
-		<!-- script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
-		<script type="text/javascript">stLight.options({publisher: "2df2fb9d-0a50-4b50-af2b-53bee3d0d556", doNotHash: false, doNotCopy: false, hashAddressBar: false});</script -->				
 	</ui:define>
 
 	<ui:define name="content">
-		<!-- script>
-		  window.fbAsyncInit = function() {
-		    FB.init({
-		      appId      : '906938232661261',
-		      xfbml      : true,
-		      version    : 'v2.2'
-		    });
-		  };
-		
-		  (function(d, s, id){
-		     var js, fjs = d.getElementsByTagName(s)[0];
-		     if (d.getElementById(id)) {return;}
-		     js = d.createElement(s); js.id = id;
-		     js.src = "//connect.facebook.net/en_US/sdk.js";
-		     fjs.parentNode.insertBefore(js, fjs);
-		   }(document, 'script', 'facebook-jssdk'));
-		</script -->			
 		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
 		<h:outputScript name="js/jquery-ui.min.js" target="head" />
 		<h:outputScript name="js/jquery.ui.touch-punch.min.js" target="head" />
 		<h:outputScript name="js/chart.min.js" target="head" />
 		<h:outputScript name="js/moment-timezone-with-data.js" target="head" />
-		<h:outputScript name="js/conquest.js" target="head" />
+		<h:outputScript name="js/ordb.js" target="head" />
+		<h:outputScript name="js/ordb.model.js" target="head" />
+		<h:outputScript name="js/ordb.util.js" target="head" />
 		<h:outputScript name="js/handlebars-helpers.js" target="head" />
 		<h:outputScript name="js/handlebars-templates.js" target="head" />
 		<h:outputScript name="js/card.common.js" target="head" />
 		<h:outputScript name="js/deck.common.js" target="head" />
 		<h:outputScript name="js/deck.public.js" target="head" />
 		<h:outputScript target="head">
-			conquest.static.language = '#{localeCtrl.language}';
-			conquest.static.contextPath = '#{facesContext.externalContext.request.contextPath}';
-			conquest.static.restPath = '#{facesContext.externalContext.request.contextPath}/rest';
-			conquest.static.imagePath = '/image';
-			conquest.static.user = #{bootstrapCtrl.user};
-			conquest.dict.messages = #{bootstrapCtrl.messagesData};
-			conquest.dict.cards = #{bootstrapCtrl.cardsData};
-			conquest.dict.sets = #{bootstrapCtrl.cardSetsData};
-			conquest.dict.factions = #{bootstrapCtrl.factionsData};
-			conquest.dict.cardTypes = #{bootstrapCtrl.cardTypesData};
-			conquest.dict.traits = #{bootstrapCtrl.domainTraitData};
-			conquest.dict.keywords = #{bootstrapCtrl.domainKeywordData};
-			conquest.dict.initialize();
+			ordb.static.language = '#{localeCtrl.language}';
+			ordb.static.contextPath = '#{facesContext.externalContext.request.contextPath}';
+			ordb.static.restPath = '#{facesContext.externalContext.request.contextPath}/rest';
+			ordb.static.imagePath = '/image';
+			ordb.static.user = #{bootstrapCtrl.user};
+			ordb.dict.messages = #{bootstrapCtrl.messagesData};
+			ordb.dict.cards = #{bootstrapCtrl.cardsData};
+			ordb.dict.sets = #{bootstrapCtrl.cardSetsData};
+			ordb.dict.factions = #{bootstrapCtrl.factionsData};
+			ordb.dict.cardTypes = #{bootstrapCtrl.cardTypesData};
+			ordb.dict.traits = #{bootstrapCtrl.domainTraitData};
+			ordb.dict.keywords = #{bootstrapCtrl.domainKeywordData};
+			ordb.dict.initialize();
 		</h:outputScript>						
 	</ui:define>
 

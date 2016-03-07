@@ -32,12 +32,12 @@ Handlebars.registerHelper('grid', function(context, options) {
 });
 
 Handlebars.registerHelper('loc', function(context, options) {
-	var ret = conquest.dict.messages[context];
+	var ret = ordb.dict.messages[context];
 	if (_.isUndefined(ret)) {
 		ret = context;
 	}
 	if (options.hash.translate == "true") {
-		ret = conquest.ui.toHtmlText(ret);
+		ret = ordb.ui.toHtmlText(ret);
 	}
 	return ret;
 });
@@ -51,45 +51,45 @@ Handlebars.registerHelper('for', function(from, to, incr, options) {
 });
 
 Handlebars.registerHelper('factionImagePath', function(context, options) {
-	return conquest.ui.toFactionImageMd(context);
+	return ordb.ui.toFactionImageMd(context);
 });
 
 Handlebars.registerHelper('factionImagePathLg', function(context, options) {
-	return conquest.ui.toFactionImageLg(context);
+	return ordb.ui.toFactionImageLg(context);
 });
 
 Handlebars.registerHelper('cardImagePath', function(context, options) {
 	// cardId or cardImageBase
 	var imageBase;
 	if (_.isNumber(context)) {
-		imageBase = conquest.dict.findCard(context).imageBase;
+		imageBase = ordb.dict.findCard(context).imageBase;
 	} else {
 		imageBase = context;	
 	}
 	if (options.hash.bloodied == "true") {
 		imageBase += "-b";
 	}
-	return conquest.ui.toCardImage(imageBase);
+	return ordb.ui.toCardImage(imageBase);
 });
 
 Handlebars.registerHelper('findCard', function(context, options) {
-	return conquest.dict.findCard(context);
+	return ordb.dict.findCard(context);
 });
 
 Handlebars.registerHelper('findCardAttr', function(context, attr, options) {
-	return conquest.dict.findCard(context)[attr];
+	return ordb.dict.findCard(context)[attr];
 });
 
 Handlebars.registerHelper('findSet', function(context, options) {
-	return conquest.dict.findCardSet(context);
+	return ordb.dict.findCardSet(context);
 });
 
 Handlebars.registerHelper('rootUrl', function(options) {
-	return conquest.static.root;
+	return ordb.static.root;
 });
 
 Handlebars.registerHelper('rootUrlClean', function(options) {	
-	var root = conquest.static.root;
+	var root = ordb.static.root;
 	if(root.charAt(root.length - 1) == '/') {
         root = root.substr(0, root.length - 1);
     }
@@ -97,26 +97,26 @@ Handlebars.registerHelper('rootUrlClean', function(options) {
 });
 
 Handlebars.registerHelper('restUrl', function(options) {
-	return conquest.static.restPath;
+	return ordb.static.restPath;
 });
 
 Handlebars.registerHelper('cardUrl', function(context, options) {
-	return conquest.ui.toCardUrl(context);
+	return ordb.ui.toCardUrl(context);
 });
 
 Handlebars.registerHelper('cardRelativeUrl', function(context, options) {
-	return conquest.ui.toCardRelativeUrl(context);
+	return ordb.ui.toCardRelativeUrl(context);
 });
 
 Handlebars.registerHelper('publicDeckUrl', function(id, name, options) {
-	return conquest.ui.toPublicDeckUrl({
+	return ordb.ui.toPublicDeckUrl({
 		id: id,
 		name: name
 	});
 });
 
 Handlebars.registerHelper('userDeckUrl', function(id, name, options) {
-	return conquest.ui.toUserDeckUrl({
+	return ordb.ui.toUserDeckUrl({
 		id: id,
 		name: name
 	});
@@ -128,7 +128,7 @@ Handlebars.registerHelper('tweetUrl', function(text, options) {
 });
 
 Handlebars.registerHelper('href', function(context, options) {
-	return conquest.root + '#/' + context;
+	return ordb.root + '#/' + context;
 });
 
 Handlebars.registerHelper('concat', function(c0, c1, c2, c3, c4, options) {
@@ -190,40 +190,40 @@ Handlebars.registerHelper('na', function(context, options) {
 });
 
 Handlebars.registerHelper('searchLinkSphere', function(card, options) {
-	return new Handlebars.SafeString(conquest.ui.toSearchLinkSphere(card));
+	return new Handlebars.SafeString(ordb.ui.toSearchLinkSphere(card));
 });
 
 Handlebars.registerHelper('searchLinkType', function(card, options) {
-	return new Handlebars.SafeString(conquest.ui.toSearchLinkType(card));
+	return new Handlebars.SafeString(ordb.ui.toSearchLinkType(card));
 });
 
 Handlebars.registerHelper('searchLinkSetName', function(card, options) {
-	return new Handlebars.SafeString(conquest.ui.toSearchLinkSetName(card));
+	return new Handlebars.SafeString(ordb.ui.toSearchLinkSetName(card));
 });
 
 Handlebars.registerHelper('searchLinkEncounterSetName', function(card, options) {
-	return new Handlebars.SafeString(conquest.ui.toSearchLinkEncounterSetName(card));
+	return new Handlebars.SafeString(ordb.ui.toSearchLinkEncounterSetName(card));
 });
 
 Handlebars.registerHelper('searchLinkTraits', function(card, options) {
-	return new Handlebars.SafeString(conquest.ui.toSearchLinkTraits(card));
+	return new Handlebars.SafeString(ordb.ui.toSearchLinkTraits(card));
 });
 
 Handlebars.registerHelper('searchLinkType', function(card, options) {
-	return new Handlebars.SafeString(conquest.ui.toSearchLinkType(card));
+	return new Handlebars.SafeString(ordb.ui.toSearchLinkType(card));
 });
 
 Handlebars.registerHelper('momentFromNow', function(timestamp, options) {
-	return moment.tz(timestamp, conquest.static.timezone).locale(conquest.static.language).fromNow();
+	return moment.tz(timestamp, ordb.static.timezone).locale(ordb.static.language).fromNow();
 });
 
 Handlebars.registerHelper('moment', function(timestamp, options) {
-	return moment.tz(timestamp, conquest.static.timezone).locale(conquest.static.language)
-			.format(conquest.static.format[conquest.static.language].timestamp);
+	return moment.tz(timestamp, ordb.static.timezone).locale(ordb.static.language)
+			.format(ordb.static.format[ordb.static.language].timestamp);
 });
 
 Handlebars.registerHelper('ifSignedIn', function(options) {
-	if (conquest.static.user.username) {
+	if (ordb.static.user.username) {
 		return options.fn(this);
 	} else {
 		return options.inverse(this);
@@ -231,7 +231,7 @@ Handlebars.registerHelper('ifSignedIn', function(options) {
 });
 
 Handlebars.registerHelper('unlessSignedIn', function(options) {
-	if (conquest.static.user.username) {
+	if (ordb.static.user.username) {
 		return options.inverse(this);
 	} else {
 		return options.fn(this);
@@ -239,7 +239,7 @@ Handlebars.registerHelper('unlessSignedIn', function(options) {
 });
 
 Handlebars.registerHelper('ifUserDeck', function(deck, options) {
-	var username = conquest.static.user.username;
+	var username = ordb.static.user.username;
 	if (username && username === deck.username) {
 		return options.fn(this);
 	} else {
@@ -256,7 +256,7 @@ Handlebars.registerHelper('ifPublicSnapshot', function(deck, options) {
 });
 
 Handlebars.registerHelper('language', function(options) {
-	return conquest.static.language;
+	return ordb.static.language;
 });
 
 Handlebars.registerHelper('cardText', function(text, options) {
@@ -320,9 +320,9 @@ Handlebars.registerHelper('translate', function(value, context, options) {
 
 Handlebars.registerHelper('sphereColor', function(sphere, options) {
 	if (sphere) {
-		return conquest.ui.colors.spheres[sphere].bg;
+		return ordb.ui.colors.spheres[sphere].bg;
 	} else {
-		return conquest.ui.colors.spheres.neutral.bg;
+		return ordb.ui.colors.spheres.neutral.bg;
 	}
 });
 
@@ -343,8 +343,8 @@ Handlebars.registerHelper('cardBgColorClass', function(card, options) {
 });
 
 Handlebars.registerHelper('factionColorStyle', function(faction, options) {	
-	return 'background-color: ' + conquest.ui.colors.factions[faction].bg + ' !important; '
-			+ 'color:' + conquest.ui.colors.factions[faction].fg + ' !important;';
+	return 'background-color: ' + ordb.ui.colors.factions[faction].bg + ' !important; '
+			+ 'color:' + ordb.ui.colors.factions[faction].fg + ' !important;';
 });
 
 Handlebars.registerHelper('deckBoxShadowStyle', function(color, options) {	

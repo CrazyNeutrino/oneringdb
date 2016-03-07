@@ -1,5 +1,5 @@
-var conquest = conquest || {};
-conquest.deck = conquest.deck || {};
+var ordb = ordb || {};
+ordb.deck = ordb.deck || {};
 
 (function(_deck) {
 	
@@ -24,7 +24,7 @@ conquest.deck = conquest.deck || {};
 			delete json.name;
 			delete json.description;
 
-			var snapshot = new conquest.model.PrivateDeck(json, {
+			var snapshot = new ordb.model.PrivateDeck(json, {
 				parse: true
 			});
 
@@ -134,12 +134,12 @@ conquest.deck = conquest.deck || {};
 	_deck.ViewBase = Backbone.View.extend({
 		el: '.content',
 		viewLinkClickHandler: function(event) {
-			var root = conquest.static.root;
+			var root = ordb.static.root;
 			var href = $(event.currentTarget).attr('href');
 			if (href && href.indexOf(root) == 0 && !event.ctrlKey && !event.shiftKey) {
 				$(event.currentTarget).tooltip('hide');
 				event.preventDefault();
-				conquest.router.navigate(href.replace(conquest.static.root, ''), {
+				ordb.router.navigate(href.replace(ordb.static.root, ''), {
 					trigger: true
 				});
 			}
@@ -192,7 +192,7 @@ conquest.deck = conquest.deck || {};
 		events: {
 			'click .user-deck-list-view a': 'viewLinkClickHandler'
 		},
-		decks: new conquest.model.PrivateDecks(),
+		decks: new ordb.model.PrivateDecks(),
 		filter: {},
 		filterAdvanced: false,
 		
@@ -219,7 +219,7 @@ conquest.deck = conquest.deck || {};
 			};
 
 			view.unbindMenuLinkClickHandler();
-			conquest.ui.adjustWrapperStyle({
+			ordb.ui.adjustWrapperStyle({
 				backgroundColor: '#f2f2f2'
 			});
 			
@@ -255,7 +255,7 @@ conquest.deck = conquest.deck || {};
 			], function(arr) {
 				sortItems.push({
 					value: arr[0],
-					label: conquest.dict.messages[arr[1]]
+					label: ordb.dict.messages[arr[1]]
 				})
 			});
 			view.deckListFilterView = new _deck.DeckListFilterView({
@@ -297,10 +297,12 @@ conquest.deck = conquest.deck || {};
 			'click .user-deck-edit-view .filter-sphere .btn':		'onSphereFilterClick',
 			'click .user-deck-edit-view .filter-card-type .btn':	'onCardTypeFilterClick',
 			'click .user-deck-edit-view .filter-selection .btn':	'onSelectionFilterClick',
+			'change .user-deck-edit-view .sort-control':			'onSortControlChange'
 		},
 		
 		membersFilter: new _deck.MembersFilter(),
-		filteredMembers: new conquest.model.DeckMembers(),
+		membersSorter: new Backbone.Model(),
+		filteredMembers: new ordb.model.DeckMembers(),
 		
 		initialize: function() {
 			this.config = new Backbone.Model({
@@ -309,14 +311,14 @@ conquest.deck = conquest.deck || {};
 		},
 		
 		onViewLinkClick: function(event) {
-			var root = conquest.static.root;
+			var root = ordb.static.root;
 			var href = $(event.currentTarget).attr('href');
 			if (href && href.indexOf(root) == 0 && !event.ctrlKey && !event.shiftKey) {
 				$(event.currentTarget).tooltip('hide');
 				event.preventDefault();
 
 				var navigateHandler = function() {
-					conquest.router.navigate(href.replace(conquest.static.root, ''), {
+					ordb.router.navigate(href.replace(ordb.static.root, ''), {
 						trigger: true
 					});
 				};
@@ -399,91 +401,76 @@ conquest.deck = conquest.deck || {};
 			});
 		},
 		
-		updateStats: function() {
-			var stats = this.deck.computeStats();
-			stats.cost.name = 'card.cost.sh';
-			stats.shield.name = 'card.shieldIcons.sh';
-			stats.command.name = 'card.commandIcons.sh';
-			stats.attack.name = 'card.attack.sh';
-			stats.hitPoints.name = 'card.hp.sh';
-
-			var template = Handlebars.templates['deck-stats-table']({
-				stats: stats
-			});
-			this.$el.find('.deck-stats-container').html(template);
-			this.$el.find('.deck-stats-container [data-toggle="tooltip"]').tooltip({
-				container: 'body',
-				trigger: 'hover click'
+		onSortControlChange: function(e) {
+			console.log('onSortControlChange');
+			
+			this.membersSorter.set({
+				keys: ordb.util.buildSortKeys($('.sort-control'))
 			});
 		},
 		
-		buildFilterFromUI: function() {
-			var filter = {};
-			filter.layout = this.$el.find('.btn-group-layout .btn.active').map(function() {
-				return $(this).data('layout');
-			}).get();
-			filter.faction = this.$el.find('.btn-group-filter.filter-faction .btn.active').map(function() {
-				return $(this).data('faction');
-			}).get();
-			filter.type = this.$el.find('.btn-group-filter.filter-type .btn.active').map(function() {
-				return $(this).data('type');
-			}).get();
-			filter.selection = this.$el.find('.btn-group-filter.filter-selection .btn.active').map(function() {
-				return $(this).data('selection');
-			}).get();
-			filter.sorting = this.$el.find('.sort-control').map(function() {
-				return $(this).val();
-			});
-
-			filter = _.extend(filter, _.pick(this.membersFilter.toJSON(), 'threatCost', 'resourceCost', 'willpower', 'threat', 
-					'attack', 'defense', 'hitPoints', 'setTechName', 'name', 'traits', 'keywords'));
-
-			_.each(Object.keys(filter), function(key) {
-				var value = filter[key];
-				if (_.isString(value)) {
-					value = $.trim(value);
-				}
-				if ((_.isObject(value) || _.isString(value)) && _.isEmpty(value)) {
-					delete filter[key];
-				}
-			});
-
-			return filter;
-		},
+//		buildFilterFromUI: function() {
+//			var filter = {};
+//			filter.layout = this.$el.find('.btn-group-layout .btn.active').map(function() {
+//				return $(this).data('layout');
+//			}).get();
+//			filter.faction = this.$el.find('.btn-group-filter.filter-faction .btn.active').map(function() {
+//				return $(this).data('faction');
+//			}).get();
+//			filter.type = this.$el.find('.btn-group-filter.filter-type .btn.active').map(function() {
+//				return $(this).data('type');
+//			}).get();
+//			filter.selection = this.$el.find('.btn-group-filter.filter-selection .btn.active').map(function() {
+//				return $(this).data('selection');
+//			}).get();
+//			filter.sorting = this.$el.find('.sort-control').map(function() {
+//				return $(this).val();
+//			});
+//
+//			filter = _.extend(filter, _.pick(this.membersFilter.toJSON(), 'threatCost', 'resourceCost', 'willpower', 'threat', 
+//					'attack', 'defense', 'hitPoints', 'setTechName', 'name', 'traits', 'keywords'));
+//
+//			_.each(Object.keys(filter), function(key) {
+//				var value = filter[key];
+//				if (_.isString(value)) {
+//					value = $.trim(value);
+//				}
+//				if ((_.isObject(value) || _.isString(value)) && _.isEmpty(value)) {
+//					delete filter[key];
+//				}
+//			});
+//
+//			return filter;
+//		},
 		
-		applyFilterToUI: function(filter) {
-			this.$el.find('.btn-group-layout .btn').each(function() {
+//		applyFilterToUI: function(filter) {
+		applyFilterToUI: function() {
+			var filter = _.pick(this.membersFilter.attributes, ordb.filter.CARD_ATTRS);
+			
+			this.$el.find('.layout-group .btn').each(function() {
 				var $this = $(this);
 				if (_.contains(filter.layout, $this.data('layout'))) {
 					$this.addClass('active');
 				}
 			});
-			this.$el.find('.btn-group-filter.filter-faction .btn').each(function() {
+			this.$el.find('.filter-group.filter-sphere .btn').each(function() {
 				var $this = $(this);
-				if (_.contains(filter.faction, $this.data('faction'))) {
+				if (_.contains(filter.faction, $this.data('sphere'))) {
 					$this.addClass('active');
 				}
 			});
-			this.$el.find('.btn-group-filter.filter-type .btn').each(function() {
+			this.$el.find('.filter-group.filter-card-type .btn').each(function() {
 				var $this = $(this);
-				if (_.contains(filter.type, $this.data('type'))) {
+				if (_.contains(filter.type, $this.data('card-type'))) {
 					$this.addClass('active');
 				}
 			});
-			this.$el.find('.btn-group-filter.filter-selection .btn').each(function() {
+			this.$el.find('.filter-group.filter-selection .btn').each(function() {
 				var $this = $(this);
-				if (_.contains(filter.selection, $this.data('selection'))) {
+				if (_.contains(filter.quantity, $this.data('selection') == 'non-selected' ? 0 : 1)) {
 					$this.addClass('active');
 				}
 			});
-			this.$el.find('.sort-control').each(function(index) {
-				if (filter.sorting && filter.sorting.length > index) {
-					$(this).val(filter.sorting[index]);
-				}
-			});
-		
-			this.membersFilter.set(_.pick(filter, 'threatCost', 'resourceCost', 'willpower', 'threat', 
-					'attack', 'defense', 'hitPoints', 'setTechName', 'name', 'trait', 'keyword'));
 		},
 		
 		renderPrivateLinksList: function() {
@@ -598,42 +585,49 @@ conquest.deck = conquest.deck || {};
 		},
 		
 		filterMembers: function() {
+			console.log('filterMembers');
+			
 			var filteredMembers = this.membersFilter.filter(this.deck.get('members'));
-			this.deck.get('filteredMembers').comparator = this.buildMembersComparator();
+			this.deck.get('filteredMembers').comparator = this.buildMembersComparator(
+					this.membersSorter.get('keys'));
 			this.deck.get('filteredMembers').reset(filteredMembers);
 		},
 		
 		sortMembers: function() {
+			console.log('sortMembers');
 			
+			this.deck.get('filteredMembers').comparator = this.buildMembersComparator(
+					this.membersSorter.get('keys'));
+			this.deck.get('filteredMembers').sort();
+			this.deck.get('filteredMembers').trigger('reset', this.deck.get('filteredMembers'));
 		},
 		
-		buildSortKeys: function() {
-			var sortKeys = [];
-			$('.sort-control').each(function() {
-				 var value = $(this).val();
-				 if (value) {
-				 	if (value.indexOf(',') == -1) {
-				 		sortKeys.push(value);
-				 	} else {
-				 		sortKeys.push({
-				 			property: value.split(',')[0],
-				 			descending: value.split(',')[1] == 'desc'
-				 		});
-				 	}
-				 }
-			});					
-			return sortKeys;
+		updateStats: function() {
+			var stats = this.deck.computeStats();
+			stats.resourceCost.name = ordb.dict.messages['card.cost.sh'];
+			stats.willpower.name = '<i class="db-icon db-icon-willpower"></i>';
+			stats.attack.name = '<i class="db-icon db-icon-attack"></i>';
+			stats.defense.name = '<i class="db-icon db-icon-defense"></i>';
+			stats.hitPoints.name = ordb.dict.messages['card.hp.sh'];
+
+			var template = Handlebars.templates['deck-stats-table']({
+				stats: stats
+			});
+			this.$el.find('.deck-stats-container').html(template);
+			this.$el.find('.deck-stats-container [data-toggle="tooltip"]').tooltip({
+				container: 'body',
+				trigger: 'hover click'
+			});
 		},
 
-		buildMembersComparator: function() {
-			var sortKeys = this.buildSortKeys();
-			var hasNonDefaultSortKeys = _.some(sortKeys, function(sortKey) {
-				return sortKey && sortKey != 'default';
+		buildMembersComparator: function(keys) {
+			var hasNonDefaultKeys = _.some(keys, function(key) {
+				return key && key != 'default';
 			});
-			if (hasNonDefaultSortKeys) {
-				return conquest.util.buildMembersComparator(sortKeys);
+			if (hasNonDefaultKeys) {
+				return ordb.util.buildMembersComparator(keys);
 			} else {
-				return conquest.util.buildMembersDefaultComparator();
+				return ordb.util.buildMembersDefaultComparator();
 			}
 		},
 		
@@ -646,48 +640,18 @@ conquest.deck = conquest.deck || {};
 			options = options || {};
 
 			var renderInternal = function() {
-				conquest.ui.adjustWrapperStyle();
+				ordb.ui.adjustWrapperStyle();
 				
-				var filter = {
-					spheres: conquest.dict.spheres,
-					cardTypes: conquest.dict.playerDeckCardTypes
-				};
-		
-				var template = Handlebars.templates['user-deck-edit-view']({
-					deck: view.deck.toJSON(),
-					filter: filter,
-					sortItems: conquest.util.buildCardSortItems({
-						includeEDAttrs: false,
-						includeQDAttrs: false
-					})
+				// register partials
+				Handlebars.registerPartial({
+					'deck-actions': Handlebars.templates['deck-actions']
 				});
-				var f = view.buildFilterFromUI();
-				view.$el.html(template);
-				view.applyFilterToUI(f);
-
-				view.deckDescriptionView = new _deck.DeckDescriptionView();
-				view.deckDescriptionView.render(view.deck);
-
-				view.renderPrivateLinksList();
-				view.renderPublishedDecksList();
-				view.updateStats();
-				view.renderMessages();
 				
-				view.membersFilter.on('change', view.filterMembers, view);
-
-				view.$el.find('a[data-image-base]').popover({
-					html: true,
-					trigger: 'hover',
-					content: function() {
-						return conquest.ui.writeCardImgElem($(this).data('image-base'), {
-							class: 'card-md'
-						});
-					}
-				});
-
+				// render view
 				var deckId = view.deck.get('id');
 				var deckTechName = view.deck.get('techName');
-				view.$el.find('.actions-container').append(Handlebars.templates['deck-actions']({
+				var template = Handlebars.templates['user-deck-edit-view']({
+					deck: view.deck.toJSON(),
 					actions: {
 						decknew: {},
 						deckimport: {},
@@ -703,9 +667,73 @@ conquest.deck = conquest.deck || {};
 						},
 						deckdelete: _.isNumber(deckId) ? {} : undefined,
 						decklist: {},
-					}
-				}));
+					},
+					filterItems: {
+						spheres: ordb.dict.spheres,
+						cardTypes: ordb.dict.playerDeckCardTypes
+					},
+					sortItems: ordb.util.buildCardSortItems({
+						includeEDAttrs: false,
+						includeQDAttrs: false
+					})
+				});
+				
+//				var f = view.buildFilterFromUI();
+				view.$el.html(template);
+				if (view.membersFilter.isEmpty()) {
+					view.membersFilter.set({
+						type : ['hero']
+					}, {
+						silent: true
+					});
+				}
+				view.applyFilterToUI();
 
+				view.deckDescriptionView = new _deck.DeckDescriptionView();
+				view.deckDescriptionView.render(view.deck);
+
+				view.renderPrivateLinksList();
+				view.renderPublishedDecksList();
+				view.updateStats();
+				view.renderMessages();
+				
+				// bind handlers for filter change, sort change
+				view.membersFilter.on('change', view.filterMembers, view);
+				view.membersSorter.on('change', view.sortMembers, view);
+
+				// cards popovers
+				view.$el.find('a[data-image-base]').popover({
+					html: true,
+					trigger: 'hover',
+					content: function() {
+						return ordb.ui.writeCardImgElem($(this).data('image-base'), {
+							class: 'card-md'
+						});
+					}
+				});
+
+//				var deckId = view.deck.get('id');
+//				var deckTechName = view.deck.get('techName');
+//				view.$el.find('.actions-container').append(Handlebars.templates['deck-actions']({
+//					actions: {
+//						decknew: {},
+//						deckimport: {},
+//						deckexport: _.isNumber(deckId) ? {
+//							id: deckId
+//						} : undefined,
+//						deckview: _.isNumber(deckId) ? {
+//							id: deckId,
+//							techName: deckTechName
+//						} : undefined,
+//						decksave: {
+//							showText: true
+//						},
+//						deckdelete: _.isNumber(deckId) ? {} : undefined,
+//						decklist: {},
+//					}
+//				}));
+
+				// members list
 				view.membersListView = new _deck.MembersListView({
 					el: '.members-container',
 				});
@@ -715,7 +743,8 @@ conquest.deck = conquest.deck || {};
 						readOnly: false
 					});
 				});
-
+				
+				// members groups
 				view.groupsView = new _deck.MemberGroupsView({
 					el: '.mg-container'
 				});
@@ -761,19 +790,12 @@ conquest.deck = conquest.deck || {};
 					});
 					view.updateStats();
 				});
-
-				var layout = view.config.get('layout');
-				$('.btn-group.layout-group > .btn[data-layout="' + layout + '"]').addClass('active');
-
-
-				//
-				// sorting change
-				//
-				$('.sort-control').change(function() {					
-					view.deck.get('filteredMembers').comparator = this.buildMembersComparator();
-					view.deck.get('filteredMembers').sort();
-					view.deck.get('filteredMembers').trigger('reset', view.deck.get('filteredMembers'));
+				
+				view.groupsView.render(view.deck.get('members'), {
+					readOnly: false
 				});
+
+				$('.btn-group.layout-group > .btn[data-layout="' + view.config.get('layout') + '"]').addClass('active');
 
 				//
 				// save deck
@@ -786,9 +808,9 @@ conquest.deck = conquest.deck || {};
 					var deckIdBeforeSave = view.deck.get('id');
 					view.deck.save(attributes, {
 						success: function(deck, response, options) {
-							conquest.router.navigate('edit/' + deck.get('id') + '-' + deck.get('techName'));
+							ordb.router.navigate('edit/' + deck.get('id') + '-' + deck.get('techName'));
 							if (_.isUndefined(deckIdBeforeSave)) {
-								ga('set', 'page', conquest.static.root + 'edit/' + parseInt(deck.get('id')));
+								ga('set', 'page', ordb.static.root + 'edit/' + parseInt(deck.get('id')));
 							}
 							ga('send', 'pageview');
 							view.deck = deck;
@@ -824,8 +846,8 @@ conquest.deck = conquest.deck || {};
 						view.deck.destroy({
 							wait: true,
 							success: function(deck, response, options) {
-								conquest.router.navigate('');
-								ga('set', 'page', conquest.static.root);
+								ordb.router.navigate('');
+								ga('set', 'page', ordb.static.root);
 								ga('send', 'pageview');
 								userDeckListView.messages = _deck.buildSuccessMessage({
 									message: 'ok.deck.oper.delete'
@@ -869,11 +891,11 @@ conquest.deck = conquest.deck || {};
 				// create private link
 				//
 				view.$el.find('#createLinkButton').click(function() {
-					var attributes = new conquest.model.DeckLink({
+					var attributes = new ordb.model.DeckLink({
 						deckId: view.deck.get('id'),
 						name: $('#createLinkInput').val()
 					});
-					var deckLink = new conquest.model.DeckLink();
+					var deckLink = new ordb.model.DeckLink();
 					deckLink.owner = view.deck.get('links').owner;
 					deckLink.save(attributes, {						
 						success: function(deckLink, response, options) {
@@ -956,7 +978,7 @@ conquest.deck = conquest.deck || {};
 
 					var draw = function(quantity) {
 						if (_.isUndefined(view.shuffledCards)) {
-							view.shuffledCards = conquest.util.membersShuffle(view.deck.get('members').filter(function(member) {
+							view.shuffledCards = ordb.util.membersShuffle(view.deck.get('members').filter(function(member) {
 								return member.get('card').type != 'hero';
 							}));
 							view.shuffledCardsIndex = 0;
@@ -969,11 +991,11 @@ conquest.deck = conquest.deck || {};
 							var attrs = {
 								class: 'card-xs'
 							};
-							$('<a />').data('image-base', imageBase).append(conquest.ui.writeCardImgElem(imageBase, attrs)).popover({
+							$('<a />').data('image-base', imageBase).append(ordb.ui.writeCardImgElem(imageBase, attrs)).popover({
 								html: true,
 								trigger: 'hover',
 								content: function() {
-									return conquest.ui.writeCardImgElem($(this).data('image-base'), {
+									return ordb.ui.writeCardImgElem($(this).data('image-base'), {
 										class: 'card-md'
 									});
 								}
@@ -1001,134 +1023,13 @@ conquest.deck = conquest.deck || {};
 				});
 
 				//
-				// search
+				// filter: name/trait/keyword/text search bar
 				//
-
-				// constructs the suggestion engine
-				var cards = new Bloodhound({
-					datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-					queryTokenizer: Bloodhound.tokenizers.whitespace,
-					local: $.map(view.deck.get('members').toJSON(), function(member) {
-						return {
-							name: member.card.name,
-							card: member.card
-						};
-					})
+				var $typeahead = ordb.ui.buildCardsTypeahead(view.membersFilter, {
+					selector: '#textFilter input'
 				});
 
-				var traits = new Bloodhound({
-					datumTokenizer: Bloodhound.tokenizers.obj.whitespace('description'),
-					queryTokenizer: Bloodhound.tokenizers.whitespace,
-					local: conquest.dict.traits
-				});
-
-				var keywords = new Bloodhound({
-					datumTokenizer: Bloodhound.tokenizers.obj.whitespace('description'),
-					queryTokenizer: Bloodhound.tokenizers.whitespace,
-					local: conquest.dict.keywords
-				});
-
-				cards.initialize();
-				traits.initialize();
-				keywords.initialize();
-
-				var $typeahead = $('#search').typeahead({
-					hint: true,
-					highlight: true,
-					minLength: 1
-				}, {
-					name: 'cards',
-					displayKey: 'name',
-					source: cards.ttAdapter(),
-					templates: {
-						suggestion: Handlebars.compile('{{name}}&nbsp;<span class="tt-no-highlight">{{card.setName}} | {{card.factionDisplay}} | {{card.typeDisplay}} | {{card.trait}}</span>'),
-						header: '<div class="tt-multi-header">' + conquest.dict.messages['core.card'] + '</div>'
-					}
-				}, {
-					name: 'traits',
-					displayKey: 'description',
-					source: traits.ttAdapter(),
-					templates: {
-						header: '<div class="tt-multi-header">' + conquest.dict.messages['core.trait'] + '</div>'
-					}
-				}, {
-					name: 'keywords',
-					displayKey: 'description',
-					source: keywords.ttAdapter(),
-					templates: {
-						header: '<div class="tt-multi-header">' + conquest.dict.messages['core.keyword'] + '</div>'
-					}
-				});
-
-				var setSearchbarFilter = function(options) {
-					if (options) {
-						var filter = view.config.get('filter');
-
-						var suggestion = options.suggestion;
-						var dataset = options.dataset;
-						var text = options.text;
-
-						var obj = {};
-						if (suggestion && dataset) {
-							if (dataset == 'cards') {
-								obj['techName'] = suggestion.card.techName;
-							} else if (dataset == 'traits') {
-								obj['trait'] = suggestion.description;
-							} else if (dataset == 'keywords') {
-								obj['keyword'] = suggestion.description;
-							}
-						} else if (text) {
-							if (!(filter.has('techName') || filter.has('trait') || filter.has('keyword') || filter.has('text'))) {
-								obj['text'] = text;
-							}
-						} else {
-							obj['techName'] = undefined;
-							obj['trait'] = undefined;
-							obj['keyword'] = undefined;
-							obj['text'] = undefined;
-						}
-
-						filter.set(obj, {
-							silent: true
-						});
-					}
-				};
-
-				$typeahead.on('typeahead:selected', function($event, suggestion, dataset) {
-					console.log('selected' + $event);
-					setSearchbarFilter({
-						suggestion: suggestion,
-						dataset: dataset
-					});
-				}).on('typeahead:autocompleted', function($event, suggestion, dataset) {
-					console.log('autocompleted' + $event);
-					setSearchbarFilter({
-						suggestion: suggestion,
-						dataset: dataset
-					});
-				}).on('typeahead:closed', function($event) {
-					console.log('closed' + $event);
-					setSearchbarFilter({
-						text: $('#search').typeahead('val')
-					});
-				}).on('typeahead:opened', function($event) {
-					console.log('opened' + $event);
-					setSearchbarFilter({});
-				}).on('keyup', function($event) {
-					if ($event.keyCode == 13) {
-						$typeahead.typeahead('close');
-						// view.filter.trigger('change', view.filter);
-						filterMembers();
-					}
-				});
-
-				view.groupsView.render(view.deck.get('members'), {
-					readOnly: false
-				});
-
-				view.membersFilter.set({
-					type: 'hero'
-				})
+				view.filterMembers();
 			};
 
 			if (options.deck) {
@@ -1149,7 +1050,7 @@ conquest.deck = conquest.deck || {};
 								
 				renderInternal();
 			} else if (options.deckId) {
-				view.deck = new conquest.model.PrivateDeck({
+				view.deck = new ordb.model.PrivateDeck({
 					id: options.deckId
 				});
 				view.deck.fetch({
@@ -1165,7 +1066,7 @@ conquest.deck = conquest.deck || {};
 					}
 				});
 			} else {
-				view.deck = new conquest.model.PrivateDeck({
+				view.deck = new ordb.model.PrivateDeck({
 					type: 'base',
 					members: _deck.getPlayerDeckMembers(),
 					configCsQuantity: 3
@@ -1203,7 +1104,7 @@ conquest.deck = conquest.deck || {};
 			});
 			view.$el.html(template);
 			view.$el.find('.actions-container').append(actionsTemplate);
-			conquest.ui.adjustWrapperStyle();
+			ordb.ui.adjustWrapperStyle();
 
 			view.groupsView = new _deck.MemberGroupsView({
 				el: '.mg-container'
@@ -1213,10 +1114,10 @@ conquest.deck = conquest.deck || {};
 				var cleanName = function(name) {
 					return s(name.toLowerCase()).clean().slugify().value();
 				};
-				var index = _.indexBy(conquest.dict.cards, function(card) {
+				var index = _.indexBy(ordb.dict.cards, function(card) {
 					return cleanName(card.name);
 				});
-				var indexEn = _.indexBy(conquest.dict.cards, function(card) {
+				var indexEn = _.indexBy(ordb.dict.cards, function(card) {
 					return cleanName(card.nameEn);
 				});
 				var pattern = /(?:([1-4])x?)?([^\(\)]+)(?:\((.+)\))?/;
@@ -1232,7 +1133,7 @@ conquest.deck = conquest.deck || {};
 					if (s.isBlank(line)) {
 						return;
 					}
-					var startsWithTypeName = _.some(conquest.dict.cardTypes, function(cardType) {
+					var startsWithTypeName = _.some(ordb.dict.cardTypes, function(cardType) {
 						var tmp = s(line).trim().toLowerCase();
 						return tmp.startsWith(cardType.name.toLowerCase()) || tmp.startsWith(cardType.nameEn.toLowerCase());
 					});
@@ -1245,7 +1146,7 @@ conquest.deck = conquest.deck || {};
 						var cn = cleanName(tokens[2]);
 						var card = index[cn] || indexEn[cn];
 						if (_.isUndefined(card)) {
-							warnings.push(conquest.dict.messages['core.skipped'] + ': ' + line);
+							warnings.push(ordb.dict.messages['core.skipped'] + ': ' + line);
 							return;
 						}
 
@@ -1258,12 +1159,12 @@ conquest.deck = conquest.deck || {};
 							});
 						}
 					} else {
-						warnings.push(conquest.dict.messages['core.skipped'] + ': ' + line);
+						warnings.push(ordb.dict.messages['core.skipped'] + ': ' + line);
 					}
 				});
 
 				if (_.isUndefined(warlordId)) {
-					errors.push(conquest.dict.messages['error.deck.warlord.notFound']);
+					errors.push(ordb.dict.messages['error.deck.warlord.notFound']);
 				} else {
 					var pdms = _deck.getPlayerDeckMembers();
 					var pdmsIndex = _.indexBy(pdms, function(pdm) {
@@ -1272,9 +1173,9 @@ conquest.deck = conquest.deck || {};
 					_.each(members, function(member) {
 						var pdm = pdmsIndex[member.cardId];
 						if (_.isUndefined(pdm)) {
-							errors.push(conquest.dict.messages['error.deck.invalidCard'] + ': ' + conquest.dict.findCard(member.cardId).name);
+							errors.push(ordb.dict.messages['error.deck.invalidCard'] + ': ' + ordb.dict.findCard(member.cardId).name);
 						} else {
-							var card = conquest.dict.findCard(member.cardId);
+							var card = ordb.dict.findCard(member.cardId);
 							if (_.isNumber(card.warlordId)) {
 								pdm.quantity = card.quantity;
 							} else if (_.isNumber(member.quantity)) {
@@ -1290,7 +1191,7 @@ conquest.deck = conquest.deck || {};
 				if (_.isUndefined(warlordId)) {
 					view.$el.find('.mg-container').empty();
 				} else {
-					deck = new conquest.model.PrivateDeck({
+					deck = new ordb.model.PrivateDeck({
 						type: 'base',
 						warlordId: warlordId,
 						members: pdms,
@@ -1308,8 +1209,8 @@ conquest.deck = conquest.deck || {};
 						userDeckEditView.render({
 							deck: deck
 						});
-						var warlord = conquest.dict.findCard(deck.get('warlordId'));
-						conquest.router.navigate('new/' + warlord.id + '-' + warlord.techName);
+						var warlord = ordb.dict.findCard(deck.get('warlordId'));
+						ordb.router.navigate('new/' + warlord.id + '-' + warlord.techName);
 					});
 				} else {
 					view.$el.find('#editDeckButton').addClass('disabled').off('click');
@@ -1319,7 +1220,7 @@ conquest.deck = conquest.deck || {};
 				if (errors.length > 0) {
 					$container.append(
 						Handlebars.templates['commons-ul']({
-							listTitle: conquest.dict.messages['core.errors'] + ':',
+							listTitle: ordb.dict.messages['core.errors'] + ':',
 							listItems: errors,
 							listContainerStyle: 'alert alert-danger'
 						})
@@ -1328,7 +1229,7 @@ conquest.deck = conquest.deck || {};
 				if (warnings.length > 0) {
 					$container.append(
 						Handlebars.templates['commons-ul']({
-							listTitle: conquest.dict.messages['core.warnings'] + ':',
+							listTitle: ordb.dict.messages['core.warnings'] + ':',
 							listItems: warnings,
 							listContainerStyle: 'alert alert-warning'
 						})
@@ -1338,7 +1239,7 @@ conquest.deck = conquest.deck || {};
 		}
 	});
 	
-})(conquest.deck);
+})(ordb.deck);
 
 $(function() {
 
@@ -1351,12 +1252,12 @@ $(function() {
 		}
 	});
 
-	var userDeckListView = new conquest.deck.UserDeckListView();
-	var userDeckImportView = new conquest.deck.UserDeckImportView();
-	var userDeckEditView = new conquest.deck.UserDeckEditView();
+	var userDeckListView = new ordb.deck.UserDeckListView();
+	var userDeckImportView = new ordb.deck.UserDeckImportView();
+	var userDeckEditView = new ordb.deck.UserDeckEditView();
 
-	conquest.router = new Router();
-	conquest.router.on('route:editDeck', function(deckIdWithName) {
+	ordb.router = new Router();
+	ordb.router.on('route:editDeck', function(deckIdWithName) {
 		var options = {};
 		
 		if (deckIdWithName) {
@@ -1374,24 +1275,24 @@ $(function() {
 		
 		userDeckEditView.render(options);
 		$('html,body').scrollTop(0);
-		ga('set', 'page', conquest.static.root + 'edit/' + options.deckId);
+		ga('set', 'page', ordb.static.root + 'edit/' + options.deckId);
 		ga('send', 'pageview');
 	}).on('route:viewDecks', function() {
 		userDeckListView.render();
 		$('html,body').scrollTop(0);
-		ga('set', 'page', conquest.static.root);
+		ga('set', 'page', ordb.static.root);
 		ga('send', 'pageview');
 	}).on('route:importDeck', function() {
 		userDeckImportView.render();
 		$('html,body').scrollTop(0);
-		ga('set', 'page', conquest.static.root + 'import');
+		ga('set', 'page', ordb.static.root + 'import');
 		ga('send', 'pageview');
 	});
 
-	conquest.static.root = '/' + conquest.static.language + '/deck/';
+	ordb.static.root = '/' + ordb.static.language + '/deck/';
 
 	Backbone.history.start({
 		pushState: true,
-		root: conquest.static.root
+		root: ordb.static.root
 	});
 });

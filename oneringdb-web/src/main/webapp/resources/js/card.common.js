@@ -1,5 +1,5 @@
-var conquest = conquest || {};
-conquest.card = conquest.card || {};
+var ordb = ordb || {};
+ordb.card = ordb.card || {};
 
 (function(_card) {
 	
@@ -19,7 +19,7 @@ conquest.card = conquest.card || {};
 			'common-ul-tree': Handlebars.templates['common-ul-tree']
 		});
 		$modal = $(Handlebars.templates['card-set-filter-modal']({
-			trees: conquest.dict.buildCardSetTrees()
+			trees: ordb.dict.buildCardSetTrees()
 		}));
 		var view = new _card.CardSetFilterView({
 			el : $modal.find('.card-set-filter-view')
@@ -52,20 +52,20 @@ conquest.card = conquest.card || {};
 			var query = {};
 			var query2;
 
-			_.each(conquest.filter.fds, function(fd) {
+			_.each(ordb.filter.fds, function(fd) {
 				var value = filter.get(fd.key);
-				if (fd.type === conquest.filter.FD_TYPE_SET) {					
+				if (fd.type === ordb.filter.FD_TYPE_SET) {					
 					if (value && value.length > 0) {
 						query[fd.key] = value;
 					}
-				} else if (fd.type === conquest.filter.FD_TYPE_RANGE_STAT) {
+				} else if (fd.type === ordb.filter.FD_TYPE_RANGE_STAT) {
 					if (value && (value.length == 2 || value.length === 3 && value[2] !== true)) {
 						query[fd.key] = {
 							gte: value[0],
 							lte: value[1]
 						};
 					}
-				} else if (fd.type === conquest.filter.FD_TYPE_SIMPLE/* && fd.key != 'anyText'*/) {
+				} else if (fd.type === ordb.filter.FD_TYPE_SIMPLE/* && fd.key != 'anyText'*/) {
 					if (value) {
 						var obj = {};
 						obj[fd.oper] = value;
@@ -156,7 +156,7 @@ conquest.card = conquest.card || {};
 			var view = this;
 
 			var template = Handlebars.templates['card-set-filter-view']({
-				trees: conquest.dict.buildCardSetTrees(),
+				trees: ordb.dict.buildCardSetTrees(),
 			});
 			view.$el.html(template);
 		}
@@ -174,7 +174,7 @@ conquest.card = conquest.card || {};
 			var view = this;
 
 			var filterContent = Handlebars.templates['card-set-filter-popover-view']({
-				tree: conquest.dict.buildCardSetTree(),
+				tree: ordb.dict.buildCardSetTree(),
 			});
 			view.$trigger.popover({
 				html: true,
@@ -319,4 +319,4 @@ conquest.card = conquest.card || {};
 		}
 	});
 	
-})(conquest.card);
+})(ordb.card);

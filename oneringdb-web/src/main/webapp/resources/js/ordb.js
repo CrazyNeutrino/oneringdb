@@ -1,10 +1,10 @@
-var conquest = conquest || {};
+var ordb = ordb || {};
 
-conquest.app = conquest.app || {};
+ordb.app = ordb.app || {};
 
-conquest.static = conquest.static || {};
-conquest.static.timezone = jstz.determine().name();
-conquest.static.format = {
+ordb.static = ordb.static || {};
+ordb.static.timezone = jstz.determine().name();
+ordb.static.format = {
 	en : {
 		timestamp : "dddd, MMMM Do YYYY, h:mm:ss a"
 	},
@@ -19,7 +19,7 @@ conquest.static.format = {
 //
 // dict
 //
-conquest.dict = conquest.dict || {};
+ordb.dict = ordb.dict || {};
 (function(_dict) {
 
 	_dict.triggerWords = {
@@ -80,8 +80,8 @@ conquest.dict = conquest.dict || {};
 		var start = new Date().getTime();
 		_.each(_dict.cards, function(card) {
 			if (card.text) {
-				card.htmlText = conquest.ui.toHtmlText(card.text);
-				card.text = conquest.ui.toPlainText(card.text);
+				card.htmlText = ordb.ui.toHtmlText(card.text);
+				card.text = ordb.ui.toPlainText(card.text);
 			}
 
 			var crst = _dict.findCardSet(card.crstId);
@@ -235,416 +235,18 @@ conquest.dict = conquest.dict || {};
 		return trees;
 	};
 
-})(conquest.dict);
-
-//
-// model
-//
-conquest.model = conquest.model || {};
-(function(_model) {
-
-	/**
-	 * @memberOf _model
-	 */
-	_model.dummy = function() {
-	};
-
-	_model.Card = Backbone.Model.extend({
-		urlRoot : '/card',
-	});
-
-	_model.Cards = Backbone.Collection.extend({
-		url : '/card',
-		model : _model.Card
-	});
-
-	_model.DeckMember = Backbone.Model.extend({
-		parse : function(response) {
-			response.card = _.clone(conquest.dict
-					.findCard(parseInt(response.cardId)));
-			response.fixedQuantity = response.card.type === 'warlord'
-					|| _.isNumber(response.card.warlordId);
-			response.fixedMaxQuantity = response.card.type === 'warlord'
-					|| response.card.type === 'synapse'
-					|| _.isNumber(response.card.warlordId);
-			return response;
-		}
-	});
-
-	_model.DeckMembers = Backbone.Collection.extend({
-		model : _model.DeckMember,
-		computeTotalQuantity : function() {
-			var total = 0;
-			this.each(function(member) {
-				total += member.get('quantity');
-			});
-			return total;
-		},
-		computeTotalCost : function() {
-			var total = 0;
-			this.each(function(member) {
-				total += member.get('quantity') * member.get('card').cost;
-			});
-			return total;
-		},
-		computeStats : function() {
-			var stats = {};
-			var keys = [ 'cost', 'shield', 'command', 'attack', 'hitPoints' ];
-
-			_.each(keys, function(key) {
-				stats[key] = {
-					sum : 0,
-					quantity : 0,
-					quantityX : 0
-				};
-			});
-
-			this.each(function(member) {
-				var quantity = member.get('quantity');
-				if (quantity > 0) {
-					var card = member.get('card');
-					_.each(keys, function(key) {
-						if (!_.isUndefined(card[key])) {
-							if (card[key] === -1) {
-								stats[key].quantityX += quantity;
-							} else {
-								stats[key].sum += card[key] * quantity;
-								stats[key].quantity += quantity;
-							}
-						}
-					});
-				}
-			});
-
-			_.each(keys, function(key) {
-				if (stats[key].quantity > 0) {
-					stats[key].average = Math.round(stats[key].sum
-							/ stats[key].quantity * 100) / 100;
-				}
-			});
-
-			return stats;
-		},
-		adjustQuantities : function(csQuantity) {
-			this.each(function(member) {
-				if (member.get('fixedMaxQuantity') === false) {
-					var availableQuantity = Math.min(3,
-							member.get('card').quantity * csQuantity);
-					member.set({
-						availableQuantity : availableQuantity
-					});
-					member.set({
-						quantity : Math.min(member.get('quantity'),
-								availableQuantity)
-					}, {
-						batchChange : true
-					});
-				}
-			});
-		}
-	});
-
-	_model.DeckHistoryItem = Backbone.Model;
-
-	_model.DeckHistory = Backbone.Collection.extend({
-		model : _model.DeckHistoryItem
-	});
-
-	_model.DeckLink = Backbone.Model.extend({
-		initialize : function(attributes, options) {
-			if (options) {
-				this.owner = options.owner;
-			}
-		},
-		urlRoot : function() {
-			return _.result(this.owner, 'url', '') + '/link';
-		},
-	});
-
-	_model.DeckLinks = Backbone.Collection.extend({
-		initialize : function(models, options) {
-			this.owner = options.owner;
-		},
-		url : function() {
-			return _.result(this.owner, 'url', '') + '/link';
-		},
-		model : function(attributes, options) {
-			return new _model.DeckLink(attributes, options);
-		}
-	});
-
-	_model.DeckComment = Backbone.Model.extend({
-		initialize : function(attributes, options) {
-			if (options) {
-				this.owner = options.owner;
-			}
-		},
-		urlRoot : function() {
-			return _.result(this.owner, 'url', '') + '/comment';
-		},
-		validate : function(attributes, options) {
-			var value = $.trim(attributes.value);
-			if (value.length == 0) {
-				return 'error.deck.comment.empty';
-			}
-		}
-	});
-
-	_model.DeckComments = Backbone.Collection.extend({
-		initialize : function(models, options) {
-			this.owner = options.owner;
-		},
-		url : function() {
-			return _.result(this.owner, 'url', '') + '/comment';
-		},
-		model : function(attributes, options) {
-			return new _model.DeckComment(attributes, options);
-		}
-	});
-
-	_model.Deck = Backbone.Model.extend({
-		history: new _model.DeckHistory(),
-		initialize: function(attributes) {
-			attributes.type = attributes.type || 'base';
-		},
-		parse: function(response) {
-			response.createDateMillis = moment.tz(response.createDate,
-					conquest.static.timezone).valueOf();
-			response.modifyDateMillis = moment.tz(response.modifyDate,
-					conquest.static.timezone).valueOf();
-			response.members = new _model.DeckMembers(response.members, {
-				parse : true,
-				comparator : conquest.util.buildMembersDefaultComparator()
-			});
-			response.links = new _model.DeckLinks(response.links, {
-				parse : true,
-				owner : this
-			});
-			response.links.on('add', function(link) {
-				link.owner = this.owner;
-			}).on('remove', function(link) {
-				link.owner = undefined;
-			});
-			response.comments = new _model.DeckComments(response.comments, {
-				parse : true,
-				owner : this
-			});
-			response.comments.on('add', function(comment) {
-				comment.owner = this.owner;
-			}).on('remove', function(comment) {
-				comment.owner = undefined;
-			});
-			response.members.each(function(member) {
-				var cardQuantity = member.get('card').quantity;
-				var availableQuantity;
-				if (member.get('fixedMaxQuantity') === true) {
-					availableQuantity = cardQuantity;
-				} else {
-					if (_.isUndefined(response.configCsQuantity)) {
-						response.configCsQuantity = 3;
-					}
-					availableQuantity = Math.min(3, cardQuantity
-							* response.configCsQuantity);
-				}
-				member.set({
-					availableQuantity : availableQuantity
-				});
-			});
-			response.filteredMembers = new _model.DeckMembers();
-
-			return response;
-		},
-		toJSON : function() {
-			var json = _model.Deck.__super__.toJSON.apply(this,
-					arguments);
-			if (json.members instanceof Backbone.Collection) {
-				json.members = json.members.toJSON();
-			}
-			if (json.links instanceof Backbone.Collection) {
-				json.links = json.links.toJSON();
-			}
-			if (json.snapshots instanceof Backbone.Collection) {
-				json.snapshots = json.snapshots.toJSON();
-			}
-			if (json.comments instanceof Backbone.Collection) {
-				json.comments = json.comments.toJSON();
-			}
-			return json;
-		},
-		validate : function(attributes, options) {
-			var name = $.trim(attributes.name);
-			if (name.length == 0) {
-				return 'error.deck.name.empty';
-			}
-			// if (attributes.type == 'base') {
-			// var other = conquest.getDeck(name);
-			// var id = attributes.id;
-			// if (other && (_.isUndefined(id) || other.get('id') !==
-			// id)) {
-			// return 'error.deck.name.duplicate';
-			// }
-			// }
-		},
-		computeTotalQuantity : function() {
-			var total = 0;
-			if (this.get('members') instanceof Backbone.Collection) {
-				total = this.get('members').computeTotalQuantity();
-			}
-			return total;
-		},
-		computeTotalCost : function() {
-			var total = 0;
-			if (this.get('members') instanceof Backbone.Collection) {
-				total = this.get('members').computeTotalCost();
-			}
-			return total;
-		},
-		computeStats : function() {
-			var stats = {};
-			if (this.get('members') instanceof Backbone.Collection) {
-				stats = this.get('members').computeStats();
-			}
-			return stats;
-		},
-		adjustQuantities : function() {
-			if (this.get('members') instanceof Backbone.Collection) {
-				this.get('members').adjustQuantities(
-						this.get('configCsQuantity'));
-			}
-		},
-		getBackupJson : function() {
-			var json = this.toJSON();
-			delete json.techName;
-			delete json.filteredMembers;
-			delete json.createDate;
-			delete json.modifyDate;
-			delete json.warlord;
-			delete json.snapshots;
-			// delete json.relatedSnapshots;
-			delete json.links;
-			delete json.comments;
-			var members = json.members;
-			json.members = [];
-			_.each(members, function(member) {
-				if (member.quantity && member.quantity > 0) {
-					delete member.availableQuantity;
-					delete member.fixedQuantity;
-					delete member.fixedMaxQuantity;
-					delete member.card;
-					json.members.push(member);
-				}
-			});
-			return json;
-		}
-	});
-
-	_model.Decks = Backbone.Collection.extend({
-		initialize : function() {
-			this.config = new Backbone.Model();
-		},
-		parse : function(response) {
-			var decks;
-			if (_.isArray(response)) {
-				decks = response;
-			} else {
-				this.config.set({
-					total : response.total,
-					pageNumber : response.pageNumber,
-					pageSize : response.pageSize
-				});
-				decks = response.decks;
-			}
-			return decks;
-		}
-	});
-
-	_model.PublicDeck = _model.Deck.extend({
-		urlRoot : '/deck/public',
-		parse : function(response) {
-			var r = _model.PrivateDeck.__super__.parse
-					.apply(this, [ response ]);
-			if (_.isEmpty(r.snapshots)) {
-				r.snapshots = new _model.PublicDecks();
-			} else {
-				r.snapshots = new _model.PublicDecks(r.snapshots, {
-					parse : true,
-					comparator : function(model) {
-						return model.get('createDateMillis') * -1;
-					}
-				});
-			}
-			return r;
-		}
-	});
-
-	_model.PublicDecks = _model.Decks.extend({
-		url : '/deck/public',
-		model : _model.PublicDeck
-	});
-
-	_model.PrivateDeck = _model.Deck.extend({
-		urlRoot : '/deck',
-		sync : function(method, source, options) {
-			console.info('sync: ' + method);
-			var target = source;
-			if (method === 'create' || method === 'update') {
-				var sourceJson = source.toJSON();
-
-				delete sourceJson.warlord;
-				delete sourceJson.createDate;
-				delete sourceJson.modifyDate;
-				delete sourceJson.createDateMillis;
-				delete sourceJson.modifyDateMillis;
-				delete sourceJson.snapshots;
-				delete sourceJson.relatedSnapshots;
-				delete sourceJson.links;
-				delete sourceJson.comments;
-				delete sourceJson.filteredMembers;
-
-				if (_.isArray(sourceJson.members)) {
-					_.each(sourceJson.members, function(member) {
-						delete member.card;
-						delete member.fixedQuantity;
-						delete member.fixedMaxQuantity;
-						delete member.availableQuantity;
-					});
-				}
-				target = new _model.PrivateDeck(sourceJson);
-			}
-
-			_model.PrivateDeck.__super__.sync.apply(this, [ method, target,
-					options ]);
-		},
-		parse : function(response) {
-			var r = _model.PrivateDeck.__super__.parse
-					.apply(this, [ response ]);
-			if (_.isEmpty(r.snapshots)) {
-				r.snapshots = new _model.PrivateDecks();
-			} else {
-				r.snapshots = new _model.PrivateDecks(r.snapshots, {
-					parse : true,
-					comparator : function(model) {
-						return model.get('createDateMillis') * -1;
-					}
-				});
-			}
-			return r;
-		}
-	});
-
-	_model.PrivateDecks = _model.Decks.extend({
-		url : '/deck',
-		model : _model.PrivateDeck
-	});
-
-})(conquest.model);
+})(ordb.dict);
 
 //
 // filter
 //
-conquest.filter = conquest.filter || {};
+ordb.filter = ordb.filter || {};
 
 (function(_filter) {
+	
+	_filter.CARD_ATTRS = ['type', 'sphere', 'techName', 'number', 'quantity', 'name', 'traits', 'keywords', 'text', 
+	                      'threatCost', 'resourceCost', 'willpower', 'threat', 'attack', 'defense', 'hitPoints', 
+	                      'setTechName', 'enstTechName'];
 
 	_filter.FD_TYPE_SET = 'set';
 	_filter.FD_TYPE_SIMPLE = 'simple';
@@ -805,13 +407,10 @@ conquest.filter = conquest.filter || {};
 		var filter = {};
 		if (queryString) {
 			var map = {};
-			_
-					.each(
-							queryString.split('&'),
-							function(part) {
-								var keyValue = part.split('=');
-								map[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
-							});
+			_.each(queryString.split('&'), function(part) {
+				var keyValue = part.split('=');
+				map[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
+			});
 			_.each(_filter.fds, function(fd) {
 				var value = map[fd.queryStringKey];
 				if (value) {
@@ -834,8 +433,7 @@ conquest.filter = conquest.filter || {};
 						filter[fd.key] = value.split(',');
 					} else if (fd.type === _filter.FD_TYPE_RANGE_STAT) {
 						var values = value.split(',')
-						filter[fd.key] = [ parseInt(values[0]),
-								parseInt(values[1]), values[2] == 'true' ];
+						filter[fd.key] = [ parseInt(values[0]), parseInt(values[1]), values[2] == 'true' ];
 					}
 				}
 			});
@@ -852,403 +450,68 @@ conquest.filter = conquest.filter || {};
 		return filter;
 	};
 
-})(conquest.filter);
+})(ordb.filter);
 
 //
-// util
+// ui
 //
-conquest.util = conquest.util || {};
-(function(_util) {
-
-	/**
-	 * @memberOf _util
-	 */
-	_util.toJSON = function(data) {
-		var json;
-		if (_.isArray(data)) {
-			json = [];
-			_.each(data, function(inputItem) {
-				json.push(inputItem.toJSON());
-			});
-		} else {
-			json = data.toJSON();
-		}
-		return json;
-	};
-
-	_util.membersGroupBy = function(data, groupKey, sortKey, groupFactory) {
-		var members;
-		if (data instanceof Backbone.Collection) {
-			members = data.models;
-		} else {
-			members = data;
-		}
-
-		members = members.filter(function(member) {
-			return member.get('quantity') > 0;
-		});
-
-		if (sortKey) {
-			members = this.membersSortBy(members, sortKey);
-		}
-
-		var membersHash = _.groupBy(members, function(member) {
-			if (groupKey == 'memberQuantity') {
-				return member.get('quantity');
-			} else {
-				return member.get('card')[groupKey];
-			}
-		});
-
-		var defaultGroupFactory = function(key, members) {
-			var title = key;
-			if (groupKey == 'memberQuantity') {
-				title = key + 'x';
-			} else if (groupKey == 'cost' && key == -1) {
-				title = 'X';
-			}
-			return {
-				title : title,
-				members : _util.toJSON(members),
-				quantity : _.reduce(members, function(totalQuantity, member) {
-					return totalQuantity + member.get('quantity');
-				}, 0)
-
-			};
-		};
-
-		var groups = [];
-		_.each(Object.keys(membersHash), function(key) {
-			groups.push((groupFactory || defaultGroupFactory)(key,
-					membersHash[key]));
-		});
-		groups = groups.sort(function(one, two) {
-			return one.title.localeCompare(two.title);
-		});
-
-		return groups;
-	};
-
-	_util.membersSortBy = function(input, key) {
-		var members;
-		if (input instanceof Backbone.Collection) {
-			members = input.models;
-		} else {
-			members = input;
-		}
-
-		var keys;
-		if (_.isArray(key)) {
-			keys = key;
-		} else {
-			keys = [ key ];
-		}
-		keys.push('name');
-
-		var stringKeys = [ 'name', 'type', 'typeDisplay', 'faction',
-				'factionDisplay' ];
-		var numberKeys = [ 'memberQuantity', 'quantity', 'cost', 'shield',
-				'comamnd', 'attack', 'hitPoints' ];
-
-		var sorter = function(one, two) {
-			var result = 0;
-			$.each(keys, function(index, key) {
-				var property;
-				var descending;
-				if (_.isObject(key)) {
-					property = key.property;
-					descending = key.descending;
-				} else {
-					property = key;
-					descending = false;
-				}
-				var oneValue;
-				var twoValue;
-				if (property == 'memberQuantity') {
-					oneValue = one.get('quantity');
-					twoValue = two.get('quantity');
-				} else {
-					oneValue = one.get('card')[property];
-					twoValue = two.get('card')[property];
-				}
-
-				if (stringKeys.indexOf(property) > -1) {
-					result = oneValue.localeCompare(twoValue);
-				} else if (numberKeys.indexOf(property) > -1) {
-					result = (oneValue == twoValue ? 0
-							: (oneValue < twoValue ? -1 : 1));
-				}
-
-				if (result != 0) {
-					if (descending === true) {
-						result *= -1;
-					}
-					return false;
-				}
-			});
-
-			return result;
-		};
-
-		return members.sort(sorter);
-	};
-
-	_util.membersShuffle = function(members) {
-		var arr = [];
-		_.each(members.toJSON(), function(member) {
-			_.times(member.quantity, function(index) {
-				arr.push(member.card);
-			});
-		});
-		return _.shuffle(arr);
-	};
-
-	_util.buildMembersComparator = function(keys) {
-		return _util.buildCardsComparator(keys, {
-			resolver : function(member) {
-				return member.get('card');
-			}
-		});
-	};
-
-	_util.buildMembersDefaultComparator = function() {
-		return function(one, two) {
-			var result = 0;
-			var cardOne = one.get('card');
-			var cardTwo = two.get('card');
-
-			if (cardOne.type == 'hero') {
-				result = -1;
-			} else if (cardTwo.type == 'hero') {
-				result = 1;
-			} else {
-				result = 0;
-			}
-
-			if (result == 0) {
-				result = cardOne.name.localeCompare(cardTwo.name);
-			}
-			return result;
-		};
-	};
-
-	_util.buildCardsComparator = function(keys, options) {
-		var options = options || {};
-
-		var validKeys = [];
-		_.each(keys, function(key) {
-			if (key && key !== 'none' && key !== 'default') {
-				validKeys.push(key);
-			}
-		});
-		validKeys.push('setNumber');
-		validKeys.push('number');
-
-		var stringKeys = [ 'name', 'type', 'typeDisplay', 'sphere', 'sphereDisplay', 'setName' ];
-		var numberKeys = [ 'memberQuantity', 'quantity', 'threatCost', 'engagementCost', 'resourceCost',
-		                   'willpower', 'threat', 'attack', 'defense', 'hitPoints', 'setNumber', 'number' ];
-
-		return function(one, two) {
-			var result = 0;
-			_.find(validKeys, function(key) {
-				var property;
-				var descending;
-				if (_.isObject(key)) {
-					property = key.property;
-					descending = key.descending;
-				} else {
-					property = key;
-					descending = false;
-				}
-				var oneValue;
-				var twoValue;
-				if (property == 'memberQuantity') {
-					oneValue = one.get('quantity');
-					twoValue = two.get('quantity');
-				} else {
-					oneValue = (options.resolver ? options.resolver(one) : one)[property];
-					twoValue = (options.resolver ? options.resolver(two) : two)[property];
-				}
-
-				if (_.isUndefined(oneValue) && _.isUndefined(twoValue)) {
-					result = 0;
-				} else if (_.isUndefined(oneValue)) {
-					result = -1;
-				} else if (_.isUndefined(twoValue)) {
-					result = 1;
-				} else if (stringKeys.indexOf(property) > -1) {
-					result = oneValue.localeCompare(twoValue);
-				} else if (numberKeys.indexOf(property) > -1) {
-					result = (oneValue == twoValue ? 0 : (oneValue < twoValue ? -1 : 1));
-				}
-
-				if (result != 0) {
-					if (descending === true) {
-						result *= -1;
-					}
-					return true;
-				}
-			});
-
-			return result;
-		};
-	};
-
-	_util.toTechName = function(input) {
-		// return input.toLowerCase().replace(/[\']/g,
-		// '').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\ +/g, '-');
-		return s(input).toLowerCase().slugify().value();
-	};
-
-	_util.buildPagination = function(options) {
-		options = options || {};
-
-		var p = {
-			total : options.total,
-			pageNumber : _.isNumber(options.pageNumber) ? options.pageNumber
-					: 0,
-			pageSize : _.isNumber(options.pageSize) ? options.pageSize : 40,
-		};
-
-		p.pages = new Array(Math.ceil(p.total / p.pageSize));
-		p.firstPage = p.pages[0];
-		p.lastPage = p.pages[p.pages.length - 1];
-		p.singlePage = p.pages.length == 1;
-
-		_.each(_.range(0, p.pages.length), function(number) {
-			p.pages[number] = {
-				number : number,
-				label : "" + (number + 1),
-				active : number == p.pageNumber
-			};
-		});
-		p.prevPage = p.pageNumber > 0 ? {
-			number : p.pageNumber - 1
-		} : undefined;
-		p.nextPage = p.pageNumber < p.pages.length - 1 ? {
-			number : p.pageNumber + 1
-		} : undefined;
-
-		p.pageStartIndex = p.pageNumber * p.pageSize;
-		p.pageEndIndex = Math.min(p.pageStartIndex + p.pageSize, p.total) - 1;
-
-		return p;
-	};
-
-	_util.buildCardSortItems = function(options) {
-		options = options || {};
-
-		var pdAttrs = [ 'threatCost', 'resourceCost', 'willpower' ];
-		var edAttrs = [ 'engagementCost', 'threat', 'victoryPoints' ];
-		var qdAttrs = [ 'questPoints' ];
-		var includePDAttrs = options.includePDAttrs || true;
-		var includeEDAttrs = options.includeEDAttrs || true;
-		var includeQDAttrs = options.includeQDAttrs || true;
-
-		var sortItems = [];
-		_.each([ [ 'name', 'card.name' ], [ 'number', 'card.number' ],
-				[ 'sphereDisplay', 'card.sphere' ],
-				[ 'typeDisplay', 'card.type' ],
-				[ 'threatCost', 'card.threatCost.sh' ],
-				[ 'engagementCost', 'card.engagementCost.sh' ],
-				[ 'resourceCost', 'card.resourceCost.sh' ],
-				[ 'willpower', 'card.willpower' ], [ 'threat', 'card.threat' ],
-				[ 'attack', 'card.attack' ], [ 'defense', 'card.defense' ],
-				[ 'hitPoints', 'card.hp.sh' ], [ 'setName', 'core.setName' ],
-				[ 'setNumber', 'core.setNumber' ] ],
-				function(item) {
-					if (includePDAttrs == false
-							&& pdAttrs.indexOf(item[0]) > -1
-							|| includeEDAttrs == false
-							&& edAttrs.indexOf(item[0]) > -1
-							|| includeQDAttrs == false
-							&& qdAttrs.indexOf(item[0]) > -1) {
-						return;
-					}
-
-					sortItems.push({
-						value : item[0],
-						label : conquest.dict.messages[item[1]]
-					})
-				});
-
-		return sortItems;
-	};
-
-})(conquest.util);
-
-//
-// util
-//
-conquest.ui = conquest.ui || {};
+ordb.ui = ordb.ui || {};
 (function(_ui) {
 
 	/**
 	 * @memberOf _ui
 	 */
 	_ui.toCardUrl = function(input) {
-		return '/' + conquest.static.language + '/card/'
+		return '/' + ordb.static.language + '/card/'
 				+ _ui.toCardRelativeUrl(input);
 	};
 
 	_ui.toCardRelativeUrl = function(input) {
 		var card;
 		if (_.isNumber(input)) {
-			card = conquest.dict.findCard(input);
+			card = ordb.dict.findCard(input);
 		} else {
 			card = input;
 		}
 
-		return s.pad(card.setNumber, 2, '0') + '-' + card.setTechName + '/'
+		return s.pad(card.setNumber, 3, '0') + '-' + card.setTechName + '/'
 				+ s.pad(card.number, 3, '0') + '-' + card.techName;
 	};
 
 	_ui.toPublicDeckUrl = function(options) {
-		return '/' + conquest.static.language + '/public/deck/' + options.id
-				+ '-' + conquest.util.toTechName(options.name);
+		return '/' + ordb.static.language + '/public/deck/' + options.id
+				+ '-' + ordb.util.toTechName(options.name);
 	};
 
 	_ui.toUserDeckUrl = function(options) {
-		var url = '/' + conquest.static.language + '/deck/edit/' + options.id;
+		var url = '/' + ordb.static.language + '/deck/edit/' + options.id;
 		if (options.name) {
-			url += '-' + conquest.util.toTechName(options.name);
+			url += '-' + ordb.util.toTechName(options.name);
 		}
 		return url;
 	};
 
-	_ui.toFactionImageBase = function(techName) {
-		return conquest.static.imagePath + '/faction/' + techName;
-	};
-
-	_ui.toFactionImageMd = function(techName) {
-		return _ui.toFactionImageBase(techName) + '-b-md.png';
-	};
-
-	_ui.toFactionImageLg = function(techName) {
-		return _ui.toFactionImageBase(techName) + '-b.png';
-	};
-
 	_ui.toCardImage = function(imageBase) {
-		return conquest.static.imagePath + '/card/' + imageBase + '.jpg';
+		return ordb.static.imagePath + '/card/' + imageBase + '.jpg';
 	};
 
 	_ui.toSearchLinkSphere = function(card) {
-		return '<a href="/' + conquest.static.language + '/card/search?sphere='
+		return '<a href="/' + ordb.static.language + '/card/search?sphere='
 				+ card.sphere + '">' + card.sphereDisplay + '</a>';
 	};
 
 	_ui.toSearchLinkType = function(card) {
-		return '<a href="/' + conquest.static.language + '/card/search?type='
+		return '<a href="/' + ordb.static.language + '/card/search?type='
 				+ card.type + '">' + card.typeDisplay + '</a>';
 	};
 
 	_ui.toSearchLinkSetName = function(card) {
-		return '<a href="/' + conquest.static.language + '/card/search?set='
+		return '<a href="/' + ordb.static.language + '/card/search?set='
 				+ card.setTechName + '">' + card.setName + '</a>';
 	};
 
 	_ui.toSearchLinkEncounterSetName = function(card) {
-		return '<a href="/' + conquest.static.language + '/card/search?eset='
+		return '<a href="/' + ordb.static.language + '/card/search?eset='
 				+ card.enstTechName + '">' + card.enstName + '</a>';
 	};
 
@@ -1257,7 +520,7 @@ conquest.ui = conquest.ui || {};
 		var traits = card.traits.split('. ');
 		_.each(traits, function(trait, index) {
 			trait = s.trim(trait.replace('.', ''));
-			result += '<a href="/' + conquest.static.language
+			result += '<a href="/' + ordb.static.language
 					+ '/card/search?traits=' + trait + '">' + trait + '.</a>';
 			if (index < traits.length - 1) {
 				result += ' ';
@@ -1270,12 +533,12 @@ conquest.ui = conquest.ui || {};
 		if (_.isUndefined(techName)) {
 			techName = name;
 		}
-		return '<a href="/' + conquest.static.language + '/card/search?traits='
+		return '<a href="/' + ordb.static.language + '/card/search?traits='
 				+ techName + '">' + name + '</a>';
 	};
 
 	// _ui.toSearchLinkKeyword = function(card, options) {
-	// return '<a href="/' + conquest.static.language
+	// return '<a href="/' + ordb.static.language
 	// + '/card/search?faction=' + card.faction + '">' + card.factionDisplay +
 	// '</a>';
 	// };
@@ -1326,7 +589,7 @@ conquest.ui = conquest.ui || {};
 
 		// icons
 		var iconWordsRegExp = new RegExp('\\[('
-				+ conquest.dict.iconWords.join('|') + ')\\]', 'g');
+				+ ordb.dict.iconWords.join('|') + ')\\]', 'g');
 		output = output.replace(iconWordsRegExp, function(g0, g1) {
 			return '<i class="db-icon db-icon-' + g1.toLowerCase() + '"></i>'
 		});
@@ -1339,10 +602,10 @@ conquest.ui = conquest.ui || {};
 				});
 
 		// trigger words
-		var triggerWords = conquest.dict.triggerWords[conquest.static.language];
-		if (conquest.static.language !== 'en') {
+		var triggerWords = ordb.dict.triggerWords[ordb.static.language];
+		if (ordb.static.language !== 'en') {
 			triggerWords = triggerWords
-					.concat(conquest.dict.triggerWords['en']);
+					.concat(ordb.dict.triggerWords['en']);
 		}
 		var triggerWordsRegExp = new RegExp(
 				'(' + triggerWords.join('|') + ':)', 'g');
@@ -1525,12 +788,14 @@ conquest.ui = conquest.ui || {};
 
 	};
 
-	_ui.createTypeahead = function(options) {
-		// constructs the suggestion engine
+	_ui.buildCardsTypeahead = function(filter, options) {
+		//
+		// create suggestion engine
+		//
 		var cards = new Bloodhound({
 			datumTokenizer : Bloodhound.tokenizers.obj.whitespace('name'),
 			queryTokenizer : Bloodhound.tokenizers.whitespace,
-			local : $.map(conquest.dict.cards, function(card) {
+			local : $.map(ordb.dict.cards, function(card) {
 				return {
 					name : card.name,
 					card : card
@@ -1539,77 +804,139 @@ conquest.ui = conquest.ui || {};
 		});
 
 		var traits = new Bloodhound({
-			datumTokenizer : Bloodhound.tokenizers.obj
-					.whitespace('description'),
+			datumTokenizer : Bloodhound.tokenizers.obj.whitespace('description'),
 			queryTokenizer : Bloodhound.tokenizers.whitespace,
-			local : conquest.dict.traits
+			local : ordb.dict.traits
 		});
 
 		var keywords = new Bloodhound({
-			datumTokenizer : Bloodhound.tokenizers.obj
-					.whitespace('description'),
+			datumTokenizer : Bloodhound.tokenizers.obj.whitespace('description'),
 			queryTokenizer : Bloodhound.tokenizers.whitespace,
-			local : conquest.dict.keywords
+			local : ordb.dict.keywords
 		});
 
 		cards.initialize();
 		traits.initialize();
 		keywords.initialize();
+		
+		//
+		// build typeahed object
+		//
+		var $typeahead = $(options.selector).typeahead({
+			hint : true,
+			highlight : true,
+			minLength : 1
+		}, {
+			name : 'cards',
+			displayKey : 'name',
+			source : cards.ttAdapter(),
+			templates : {
+				suggestion : Handlebars.compile('{{name}}&nbsp;<span class="tt-no-highlight">{{card.setName}} | {{card.sphereDisplay}} | {{card.typeDisplay}} | {{card.traits}}</span>'),
+				header : '<div class="tt-multi-header">' + ordb.dict.messages['core.card']+ '</div>'
+			}
+		}, {
+			name : 'traits',
+			displayKey : 'description',
+			source : traits.ttAdapter(),
+			templates : {
+				header : '<div class="tt-multi-header">' + ordb.dict.messages['core.trait'] + '</div>'
+			}
+		}, {
+			name : 'keywords',
+			displayKey : 'description',
+			source : keywords.ttAdapter(),
+			templates : {
+				header : '<div class="tt-multi-header">' + ordb.dict.messages['core.keyword'] + '</div>'
+			}
+		});
+		
+		//
+		// put values from filter object into input
+		//
+		var $input = $(options.selector);		
+		if (filter.has('traits')) {
+			$input.val(filter.get('traits'))
+		} else if (filter.has('keywords')) {
+			$input.val(filter.get('keywords'))
+		} else if (filter.has('techName')) {
+			var card = ordb.dict.findCard(filter.get('techName'));
+			if (card) {
+				$input.val(card.name);
+			}
+		} else if (filter.has('text')) {
+			$input.val(filter.get('text'))
+		}
 
-		var $typeahead = $(options.selector)
-				.typeahead(
-						{
-							hint : true,
-							highlight : true,
-							minLength : 1
-						}/*
-							 * , { name: 'texts', displayKey: function(a)
-							 * {alert(a);}, source: function(query, syncResults) {
-							 * var results = []; results.push(query);
-							 * syncResults(results); }, templates: { suggestion :
-							 * function(text) { return text }, header: '<div
-							 * class="tt-multi-header">' +
-							 * conquest.dict.messages['core.textSearch'] + '</div>' } }
-							 */,
-						{
-							name : 'cards',
-							displayKey : 'name',
-							source : cards.ttAdapter(),
-							templates : {
-								suggestion : Handlebars
-										.compile('{{name}}&nbsp;<span class="tt-no-highlight">{{card.setName}} | {{card.factionDisplay}} | {{card.typeDisplay}} | {{card.trait}}</span>'),
-								header : '<div class="tt-multi-header">'
-										+ conquest.dict.messages['core.card']
-										+ '</div>'
-							}
-						},
-						{
-							name : 'traits',
-							displayKey : 'description',
-							source : traits.ttAdapter(),
-							templates : {
-								header : '<div class="tt-multi-header">'
-										+ conquest.dict.messages['core.trait']
-										+ '</div>'
-							}
-						},
-						{
-							name : 'keywords',
-							displayKey : 'description',
-							source : keywords.ttAdapter(),
-							templates : {
-								header : '<div class="tt-multi-header">'
-										+ conquest.dict.messages['core.keyword']
-										+ '</div>'
-							}
-						});
+		var setSearchbarFilter = function(options) {
+			if (options) {
+				var suggestion = options.suggestion;
+				var dataset = options.dataset;
+				var text = options.text;
+
+				var obj = {};
+				if (suggestion && dataset) {
+					if (dataset == 'cards') {
+						obj['techName'] = suggestion.card.techName;
+					} else if (dataset == 'traits') {
+						obj['traits'] = suggestion.description;
+					} else if (dataset == 'keywords') {
+						obj['keywords'] = suggestion.description;
+					}
+				} else if (text) {
+					if (!(filter.has('techName') || filter.has('traits') || filter.has('keywords') || filter.has('text'))) {
+						obj['text'] = text;
+					}
+				} else {
+					obj['techName'] = undefined;
+					obj['traits'] = undefined;
+					obj['keywords'] = undefined;
+					obj['text'] = undefined;
+				}
+
+				filter.set(obj, {
+					silent: true
+				});
+			}
+		};
+
+		$typeahead.on('typeahead:selected', function($event, suggestion, dataset) {
+			console.log('selected' + $event);
+			setSearchbarFilter({
+				suggestion: suggestion,
+				dataset: dataset
+			});
+		}).on('typeahead:autocompleted', function($event, suggestion, dataset) {
+			console.log('autocompleted' + $event);
+			setSearchbarFilter({
+				suggestion: suggestion,
+				dataset: dataset
+			});
+		}).on('typeahead:closed', function($event) {
+			console.log('closed' + $event);
+			setSearchbarFilter({
+				text: $typeahead.typeahead('val')
+			});
+		}).on('typeahead:opened', function($event) {
+			console.log('opened' + $event);
+			setSearchbarFilter({});
+		}).on('keyup', function($event) {
+			if ($event.keyCode == 13) {
+				$typeahead.typeahead('close');
+				filter.trigger('change', filter);
+			}
+		});
+
+		$('#textFilter .btn').click(function() {
+			filter.trigger('change', filter);
+		});
+		
 		return $typeahead;
 	};
 
 	_ui.adjustNavbarColors = function(faction) {
 		// var selector = '.navbar, .navbar .navbar-brand, .navbar .navbar-nav
 		// a';
-		// var removeClasses = _.reduce(conquest.dict.factions,
+		// var removeClasses = _.reduce(ordb.dict.factions,
 		// function(outcome, faction) {
 		// return outcome + 'bg-' + faction.techName + ' ';
 		// }, '');
@@ -1633,12 +960,12 @@ conquest.ui = conquest.ui || {};
 		}
 	};
 
-})(conquest.ui);
+})(ordb.ui);
 
 //
 // deck
 //
-conquest.deck = conquest.deck || {};
+ordb.deck = ordb.deck || {};
 (function(_deck) {
 
 	_deck.getDeckHelper = function(options) {
@@ -1646,7 +973,7 @@ conquest.deck = conquest.deck || {};
 		if (options.warlord) {
 			warlord = options.warlord;
 		} else {
-			warlord = conquest.dict.findCard(options.warlordId);
+			warlord = ordb.dict.findCard(options.warlordId);
 		}
 
 		var deckHelper;
@@ -1669,7 +996,7 @@ conquest.deck = conquest.deck || {};
 	};
 
 	_deck.getPlayerDeckCards = function() {
-		return conquest.dict.playerDeckCards;
+		return ordb.dict.playerDeckCards;
 	};
 
 	_deck.getPlayerDeckMembers = function() {
@@ -1772,13 +1099,13 @@ conquest.deck = conquest.deck || {};
 	};
 
 	_deck.buildRegularDeckFactionPredicate = function(warlord) {
-		var circleFactions = _.filter(conquest.dict.factions,
+		var circleFactions = _.filter(ordb.dict.factions,
 				function(faction) {
 					return faction.techName != 'neutral'
 							&& faction.techName != 'necron'
 							&& faction.techName != 'tyranid';
 				});
-		var faction = _.findWhere(conquest.dict.factions, {
+		var faction = _.findWhere(ordb.dict.factions, {
 			techName : warlord.faction
 		});
 
@@ -1804,7 +1131,7 @@ conquest.deck = conquest.deck || {};
 
 	_deck.RegularDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
-			return _.filter(conquest.dict.factions, _deck
+			return _.filter(ordb.dict.factions, _deck
 					.buildRegularDeckFactionPredicate(warlord));
 		};
 
@@ -1824,7 +1151,7 @@ conquest.deck = conquest.deck || {};
 		};
 
 		this.getValidDeckFactions = function() {
-			return _.filter(conquest.dict.factions, function(faction) {
+			return _.filter(ordb.dict.factions, function(faction) {
 				return faction.techName == 'tyranid'
 						|| faction.techName == 'neutral';
 			});
@@ -1848,7 +1175,7 @@ conquest.deck = conquest.deck || {};
 		};
 
 		this.getValidDeckFactions = function() {
-			return _.filter(conquest.dict.factions, function(faction) {
+			return _.filter(ordb.dict.factions, function(faction) {
 				return faction.techName != 'tyranid';
 			});
 		};
@@ -1872,13 +1199,13 @@ conquest.deck = conquest.deck || {};
 
 	_deck.CommanderStarblazeDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
-			return _.filter(conquest.dict.factions, _deck
+			return _.filter(ordb.dict.factions, _deck
 					.buildRegularDeckFactionPredicate(warlord));
 		};
 
 		this.getValidDeckFactions = function() {
 			var filtered = this.getAlliedDeckFactions();
-			filtered.push(_.findWhere(conquest.dict.factions, {
+			filtered.push(_.findWhere(ordb.dict.factions, {
 				techName : 'astra-militarum'
 			}));
 			return filtered;
@@ -1897,13 +1224,13 @@ conquest.deck = conquest.deck || {};
 
 	_deck.GorzodDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
-			return _.filter(conquest.dict.factions, _deck
+			return _.filter(ordb.dict.factions, _deck
 					.buildRegularDeckFactionPredicate(warlord));
 		};
 
 		this.getValidDeckFactions = function() {
 			var filtered = this.getAlliedDeckFactions();
-			filtered.push(_.findWhere(conquest.dict.factions, {
+			filtered.push(_.findWhere(ordb.dict.factions, {
 				techName : 'space-marines'
 			}));
 			return filtered;
@@ -1929,11 +1256,11 @@ conquest.deck = conquest.deck || {};
 	_deck.dummy = function() {
 	};
 
-})(conquest.deck);
+})(ordb.deck);
 
 //
 // ???
 //
-(function(_conquest) {
+(function(_ordb) {
 
-})(conquest);
+})(ordb);

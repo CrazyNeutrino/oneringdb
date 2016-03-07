@@ -68,7 +68,10 @@
 						{{!-- left column --}}
 						
 						<div class="col-md-5 col-lg-5">	
-							<div class="actions-container"></div>
+							<div class="actions-container">
+								{{> deck-actions this}}
+							</div>
+							
 							<div class="deck-info-container row">
 							
 								{{!--
@@ -148,7 +151,7 @@
 											</select>
 				
 											<div class="btn-group filter-group select-many filter-sphere">
-												{{#each filter.spheres}}							
+												{{#each filterItems.spheres}}							
 												<label class="btn btn-default" data-sphere="{{techName}}" data-toggle="tooltip" title="{{name}}">
 													<i class="db-icon db-icon-{{techName}}"></i>
 												</label>
@@ -156,7 +159,7 @@
 											</div>
 				
 											<div class="btn-group filter-group select-many filter-card-type">
-												{{#each filter.cardTypes}}
+												{{#each filterItems.cardTypes}}
 												<label class="btn btn-default" data-card-type="{{techName}}" data-toggle="tooltip" title="{{name}}">
 													<i class="db-icon db-icon-{{techName}}"></i>
 												</label>
@@ -178,7 +181,12 @@
 										</div>
 										
 										<div class="form">
-											<input id="search" type="text" class="form-control filter-group" placeholder="{{loc 'core.nameOrTraitOrKeyword'}}">
+											<div id="textFilter" class="input-group" style="margin-bottom: 10px;">
+												<input class="form-control" id="mainSearchInput" type="text" placeholder="{{loc 'core.nameOrTraitOrKeyword'}}" value="" />
+												<span class="input-group-btn">
+													<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
+												</span>
+											</div>
 										</div>
 									</div>
 									<div class="members-container"></div>

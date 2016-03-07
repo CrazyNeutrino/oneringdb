@@ -797,8 +797,8 @@ table.table-with-btn > tbody > tr > td {
 /*
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
-    font-family: 'conquest';
-    src: url(#{resource['fonts/conquest.svg']}#conquest) format('svg');
+    font-family: 'ordb';
+    src: url(#{resource['fonts/ordb.svg']}#ordb) format('svg');
   }
 }
 */
