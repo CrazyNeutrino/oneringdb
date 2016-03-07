@@ -701,37 +701,26 @@ ordb.deck = ordb.deck || {};
 				view.membersFilter.on('change', view.filterMembers, view);
 				view.membersSorter.on('change', view.sortMembers, view);
 
-				// cards popovers
-				view.$el.find('a[data-image-base]').popover({
-					html: true,
-					trigger: 'hover',
-					content: function() {
-						return ordb.ui.writeCardImgElem($(this).data('image-base'), {
-							class: 'card-md'
-						});
-					}
-				});
-
-//				var deckId = view.deck.get('id');
-//				var deckTechName = view.deck.get('techName');
-//				view.$el.find('.actions-container').append(Handlebars.templates['deck-actions']({
-//					actions: {
-//						decknew: {},
-//						deckimport: {},
-//						deckexport: _.isNumber(deckId) ? {
-//							id: deckId
-//						} : undefined,
-//						deckview: _.isNumber(deckId) ? {
-//							id: deckId,
-//							techName: deckTechName
-//						} : undefined,
-//						decksave: {
-//							showText: true
-//						},
-//						deckdelete: _.isNumber(deckId) ? {} : undefined,
-//						decklist: {},
+//				// cards popovers
+//				view.$el.find('a[data-image-base]').popover({
+//					html: true,
+//					trigger: 'hover',
+//					content: function() {
+//						return ordb.ui.writeCardImgElem($(this).data('image-base'), {
+//							class: 'card-md'
+//						});
 //					}
-//				}));
+////					template: '<div class="popover popover-card" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
+////					content: Handlebars.template['card-text-content']()
+//				});
+//				var $popovers = view.$el.find('a[data-card-id]').popover({
+//					html: true,
+//					trigger: 'hover',
+//					template: '<div class="popover popover-card" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
+//					content: function() {
+//						return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
+//					}
+//				});
 
 				// members list
 				view.membersListView = new _deck.MembersListView({

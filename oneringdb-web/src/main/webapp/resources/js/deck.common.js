@@ -414,13 +414,16 @@ ordb.deck = ordb.deck || {};
 				view.render(members);
 			});
 
-			var $popovers = view.$el.find('a[data-image-base]').popover({
+			var $popovers = view.$el.find('a[data-card-id]').popover({
 				html: true,
 				trigger: 'hover',
+				template: '<div class="popover popover-card" role="tooltip">'
+							+ '<div class="arrow"></div>'
+							+ '<h3 class="popover-title"></h3>'
+							+ '<div class="popover-content"></div>'
+						+ '</div>',
 				content: function() {
-					return ordb.ui.writeCardImgElem($(this).data('image-base'), {
-						class: 'card-md'
-					});
+					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
 				}
 			});
 
@@ -589,13 +592,16 @@ ordb.deck = ordb.deck || {};
 			this.$el.find('[data-toggle="tooltip"]').tooltip({
 				container: 'body'
 			});
-			var $popovers = this.$el.find('a[data-image-base]').popover({
+			var $popovers = this.$el.find('a[data-card-id]').popover({
 				html: true,
 				trigger: 'hover',
+				template: '<div class="popover popover-card" role="tooltip">'
+							+ '<div class="arrow"></div>'
+							+ '<h3 class="popover-title"></h3>'
+							+ '<div class="popover-content"></div>'
+						+ '</div>',
 				content: function() {
-					return ordb.ui.writeCardImgElem($(this).data('image-base'), {
-						class: 'card-md'
-					});
+					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
 				}
 			});
 

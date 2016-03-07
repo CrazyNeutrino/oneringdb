@@ -225,61 +225,55 @@ footer.footer > .container > p:first-child {
 .attr-engagement-cost { color: #EC7002; }
 .attr-hit-points { color: #E30000; }
 
-.card-view .card > .header a,
-.card-view .card > .header a:hover, 
-.card-search-list .card > .header a,
-.card-search-list .card > .header a:hover {
+.card.text > .header a,
+.card.text > .header a:hover {
 	color: inherit;
 }
 
-.card-view .card > .content a,
-.card-view .card > .content a:hover,
-.card-search-list .card > .content a,
-.card-search-list .card > .content a:hover {
+.card.text > .content a,
+.card.text > .content a:hover {
 	color: black;
 }
 
-.card-view .card, 
-.card-search-list .card {
+.card-search-list .card.text {
 	border: none;
 	background-color: #fff;
 	margin: 10px 0px;
 	border-radius: 2px;	
 }
 
-.card-view .card > .header,
-.card-search-list .card > .header {
+.card.text > .header {
 	padding: 8px 10px 6px 10px;
-	border-top-left-radius: 2px;
-	border-top-right-radius: 2px;
+	/* border-top-left-radius: 2px;
+	border-top-right-radius: 2px; */
 }
 
-.card-view .card > .header > .box-left > .db-icon,
-.card-search-list .card > .header > .box-left > .db-icon {
+.card.text > .header > .box-left > .db-icon {
 	font-size: 20px; 
 	margin-right: 5px;
 }
 
-.card-view .card > .header > .box-left > .db-icon.db-icon-unique,
-.card-search-list .card > .header > .box-left > .db-icon.db-icon-unique {
+.card.text > .header > .box-left > .db-icon.db-icon-unique.card.text {
 	font-size: 14px; 
 	margin-top: 1px;
 	margin-right: 5px;
 }
 
-.card-view .card > .header > .box-center > .primary-text,
-.card-search-list .card > .header > .box-center > .primary-text {
+.card.text > .header > .box-center > .primary-text {
 	margin-top: 3px;
 	margin-bottom: 3px;
 }
 
-.card-view .card > .content,
-.card-search-list .card > .content {
+.card.text > .content {
 	padding: 5px 10px 5px 10px;
 }
 
 .card-search-list .card > .footer {
 	padding: 5px 10px;
+}
+
+.popover-card .popover-content .card {
+	width: 400px;
 }
 
 /**
@@ -1009,4 +1003,19 @@ table.table-with-btn > tbody > tr > td {
 .jumbotron.db {
 	background-color: #f8f8f8;
 	border: 1px solid #e7e7e7;
+}
+
+.popover.popover-card {
+	max-width: 400px;
+	padding: 0px;
+	border: none;
+	border-radius: 2px;
+	/* -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); */
+}
+.popover.popover-card-title {
+	padding: 0px;
+}
+.popover-card .popover-content {
+	padding: 0px;
 }
