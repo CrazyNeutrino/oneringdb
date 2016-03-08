@@ -50,9 +50,6 @@ ordb.card = ordb.card || {};
 	_card.CardView = _card.ViewBase.extend({
 		render: function(setNumber, cardNumber) {
 			var card = ordb.dict.findCardByNumber(setNumber, cardNumber);			
-			Handlebars.registerPartial({
-				'card-text-content': Handlebars.templates['card-text-content']
-			});
 			this.$el.html(Handlebars.templates['card-view'](card));
 			ordb.router.navigate(ordb.ui.toCardRelativeUrl(card));
 		}
@@ -286,11 +283,6 @@ ordb.card = ordb.card || {};
 					pageSize: 60
 				});
 				
-				Handlebars.registerPartial({
-					'pagination': Handlebars.templates['pagination'],
-					'card-text-content': Handlebars.templates['card-text-content']
-				});
-				
 				var template = Handlebars.templates[templateName]({				
 					results: {
 						cards: cards.toJSON().slice(pagination.pageStartIndex, pagination.pageEndIndex + 1)
@@ -348,6 +340,11 @@ $(function() {
 		$('html,body').scrollTop(0);
 		ga('set', 'page', ordb.static.root + 'search');
 		ga('send', 'pageview');
+	});
+	
+	Handlebars.registerPartial({
+		'pagination': Handlebars.templates['pagination'],
+		'card-text-content': Handlebars.templates['card-text-content']
 	});
 
 	ordb.static.root = '/' + ordb.static.language + '/card/';

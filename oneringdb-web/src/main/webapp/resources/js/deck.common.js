@@ -435,6 +435,78 @@ ordb.deck = ordb.deck || {};
 			});
 		}
 	});
+	
+	_deck.MembersListView = Backbone.View.extend({
+		el: '.members-container',
+		
+		/**
+		 * @memberOf _deck.MembersListView
+		 */
+		render: function(members, options) {
+			var templateName = undefined;
+			if (options.layout === 'grid-2') {
+				templateName = 'deck-members-grid-2';
+			} else if (options.layout === 'grid-3') {
+				templateName = 'deck-members-grid-3';
+			} else if (options.layout === 'grid-4') {
+				templateName = 'deck-members-grid-4';
+			} else if (options.layout === 'grid-6') {
+				templateName = 'deck-members-grid-6';
+			} else {
+				// list layout is the default
+				templateName = 'deck-members-list';
+			}
+
+			var template = Handlebars.templates[templateName]({
+				members: members.toJSON(),
+				readOnly: options.readOnly
+			});
+			this.$el.html(template);
+
+			var $members = this.$el.find('.members-grid-item:not(:disabled), .members-list-item:not(:disabled)');
+			$members.each(function() {
+				var $member = $(this);
+				var $buttons = $member.find('.btn-group-qty .btn');
+				var member = members.models[$members.index($member)];
+				var $active = $buttons.eq(member.get('quantity')).addClass('active');
+				if (member.get('fixedQuantity') === true) {
+					$active.siblings().attr('disabled', 'disabled');
+				}
+
+				$buttons.click(function() {
+					var $button = $(this);
+					$button.addClass('active').siblings().removeClass('active');
+					member.set({
+						quantity: parseInt($button.text())
+					});
+				});
+			});
+
+			this.$el.find('[data-toggle="tooltip"]').tooltip({
+				container: 'body'
+			});
+			var $popovers = this.$el.find('a[data-card-id]').popover({
+				html: true,
+				trigger: 'hover',
+				placement: 'auto right',	
+				template: '<div class="popover popover-card" role="tooltip">'
+							+ '<div class="arrow"></div>'
+							+ '<h3 class="popover-title"></h3>'
+							+ '<div class="popover-content"></div>'
+						+ '</div>',
+				content: function() {
+					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
+				}
+			});
+
+			this.$el.find('a[data-card-id]').click(function() {
+				$popovers.popover('hide');
+				_deck.showDeckMemberModal(members.findWhere({
+					cardId: $(this).data('card-id')
+				}), options);
+			});
+		}
+	});
 
 	_deck.DeckDescriptionView = Backbone.View.extend({
 		el: '.deck-description-view',
@@ -540,77 +612,6 @@ ordb.deck = ordb.deck || {};
 					}
 				});
 			});			
-		}
-	});
-
-	_deck.MembersListView = Backbone.View.extend({
-		el: '.members-container',
-		
-		/**
-		 * @memberOf _deck.MembersListView
-		 */
-		render: function(members, options) {
-			var templateName = undefined;
-			if (options.layout === 'grid-2') {
-				templateName = 'deck-members-grid-2';
-			} else if (options.layout === 'grid-3') {
-				templateName = 'deck-members-grid-3';
-			} else if (options.layout === 'grid-4') {
-				templateName = 'deck-members-grid-4';
-			} else if (options.layout === 'grid-6') {
-				templateName = 'deck-members-grid-6';
-			} else {
-				// list layout is the default
-				templateName = 'deck-members-list';
-			}
-
-			var template = Handlebars.templates[templateName]({
-				members: members.toJSON(),
-				readOnly: options.readOnly
-			});
-			this.$el.html(template);
-
-			var $members = this.$el.find('.members-grid-item:not(:disabled), .members-list-item:not(:disabled)');
-			$members.each(function() {
-				var $member = $(this);
-				var $buttons = $member.find('.btn-group-qty .btn');
-				var member = members.models[$members.index($member)];
-				var $active = $buttons.eq(member.get('quantity')).addClass('active');
-				if (member.get('fixedQuantity') === true) {
-					$active.siblings().attr('disabled', 'disabled');
-				}
-
-				$buttons.click(function() {
-					var $button = $(this);
-					$button.addClass('active').siblings().removeClass('active');
-					member.set({
-						quantity: parseInt($button.text())
-					});
-				});
-			});
-
-			this.$el.find('[data-toggle="tooltip"]').tooltip({
-				container: 'body'
-			});
-			var $popovers = this.$el.find('a[data-card-id]').popover({
-				html: true,
-				trigger: 'hover',
-				template: '<div class="popover popover-card" role="tooltip">'
-							+ '<div class="arrow"></div>'
-							+ '<h3 class="popover-title"></h3>'
-							+ '<div class="popover-content"></div>'
-						+ '</div>',
-				content: function() {
-					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
-				}
-			});
-
-			this.$el.find('a[data-card-id]').click(function() {
-				$popovers.popover('hide');
-				_deck.showDeckMemberModal(members.findWhere({
-					cardId: $(this).data('card-id')
-				}), options);
-			});
 		}
 	});
 

@@ -26,7 +26,6 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Type;
 import org.meb.oneringdb.db.converter.DeckTypeConverter;
-import org.meb.oneringdb.db.converter.FactionConverter;
 import org.meb.oneringdb.db.converter.TournamentPlaceConverter;
 import org.meb.oneringdb.db.converter.TournamentTypeConverter;
 import org.meb.oneringdb.db.model.loc.Card;
@@ -64,14 +63,6 @@ public class Deck {
 	@Column(name = "type_code")
 	private DeckType type;
 
-	@Convert(converter = FactionConverter.class)
-	@Column(name = "comp_primary_faction")
-	private Faction primaryFaction;
-
-	@Convert(converter = FactionConverter.class)
-	@Column(name = "comp_secondary_faction")
-	private Faction secondaryFaction;
-
 	@Column(name = "comp_crst_bitmap")
 	private Long crstBitmap;
 
@@ -86,10 +77,10 @@ public class Deck {
 
 	@Column(name = "comp_evt_cards_qty")
 	private Integer eventCardsQuantity;
-	
+
 	@Convert(converter = TournamentTypeConverter.class)
 	private TournamentType tournamentType;
-	
+
 	@Convert(converter = TournamentPlaceConverter.class)
 	private TournamentPlace tournamentPlace;
 
@@ -118,19 +109,21 @@ public class Deck {
 	@OrderBy("createDate ASC")
 	private Set<DeckComment> deckComments = new HashSet<>();
 
-	@OneToMany(mappedBy = "snapshotBase"/*, cascade = CascadeType.ALL, orphanRemoval = true*/)
+	@OneToMany(mappedBy = "snapshotBase"/*
+										 * , cascade = CascadeType.ALL,
+										 * orphanRemoval = true
+										 */)
 	@OrderBy("createDate DESC")
 	private Set<Deck> snapshots = new HashSet<Deck>();
 
 	@Transient
 	private Set<Deck> relatedSnapshots = new HashSet<Deck>();
-	
+
 	@Transient
 	private DeckInterest totalDeckInterest;
-	
+
 	@Transient
 	private DeckInterest userDeckInterest;
-	
 
 	@Version
 	private Long version;

@@ -1,6 +1,5 @@
 package org.meb.oneringdb.service.impl;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.security.SecureRandom;
@@ -11,10 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -26,7 +22,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.map.MultiValueMap;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.deltaspike.jpa.api.transaction.Transactional;
 import org.jboss.resteasy.util.Hex;
@@ -47,7 +42,6 @@ import org.meb.oneringdb.db.model.DeckLink;
 import org.meb.oneringdb.db.model.DeckLinkType;
 import org.meb.oneringdb.db.model.DeckMember;
 import org.meb.oneringdb.db.model.DeckType;
-import org.meb.oneringdb.db.model.Faction;
 import org.meb.oneringdb.db.model.User;
 import org.meb.oneringdb.db.model.loc.Card;
 import org.meb.oneringdb.db.query.DeckCommentQuery;
@@ -700,41 +694,41 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 			return null;
 		}
 
-		MultiValueMap<Faction, Deck> deckMap = new MultiValueMap<>();
-		MapUtils.populateMap(deckMap, decks, Transformers.DECK_PRI_FACT);
+//		MultiValueMap<Faction, Deck> deckMap = new MultiValueMap<>();
+//		MapUtils.populateMap(deckMap, decks, Transformers.DECK_PRI_FACT);
 
 		ExportedDeck exported = null;
-		try {
-			switch (type) {
-			case OCTGN:
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				ZipOutputStream zos = new ZipOutputStream(baos);
-
-				Set<Faction> factions = deckMap.keySet();
-				for (Faction faction : factions) {
-					Collection<Deck> factionDecks = deckMap.getCollection(faction);
-					for (Deck fd : factionDecks) {
-						StringBuilder nameBuilder = new StringBuilder(faction.toString().toLowerCase());
-						nameBuilder.append("/");
-						nameBuilder.append(StringUtils.replaceChars(fd.getName(), "/\\?%*:;|\"<>", " "));
-						nameBuilder.append(".o8d");
-						zos.putNextEntry(new ZipEntry(nameBuilder.toString()));
-						zos.write(exportOctgn(fd).getCharacterData().getBytes());
-						zos.closeEntry();
-					}
-				}
-				zos.flush();
-				zos.close();
-
-				exported = new ExportedDeck();
-				exported.setByteData(baos.toByteArray());
-				break;
-			default:
-				throw new IllegalArgumentException("Unsupported export type");
-			}
-		} catch (IOException e) {
-			throw new DeckException("error.deck.oper.export");
-		}
+//		try {
+//			switch (type) {
+//			case OCTGN:
+//				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//				ZipOutputStream zos = new ZipOutputStream(baos);
+//
+//				Set<Faction> factions = deckMap.keySet();
+//				for (Faction faction : factions) {
+//					Collection<Deck> factionDecks = deckMap.getCollection(faction);
+//					for (Deck fd : factionDecks) {
+//						StringBuilder nameBuilder = new StringBuilder(faction.toString().toLowerCase());
+//						nameBuilder.append("/");
+//						nameBuilder.append(StringUtils.replaceChars(fd.getName(), "/\\?%*:;|\"<>", " "));
+//						nameBuilder.append(".o8d");
+//						zos.putNextEntry(new ZipEntry(nameBuilder.toString()));
+//						zos.write(exportOctgn(fd).getCharacterData().getBytes());
+//						zos.closeEntry();
+//					}
+//				}
+//				zos.flush();
+//				zos.close();
+//
+//				exported = new ExportedDeck();
+//				exported.setByteData(baos.toByteArray());
+//				break;
+//			default:
+//				throw new IllegalArgumentException("Unsupported export type");
+//			}
+//		} catch (IOException e) {
+//			throw new DeckException("error.deck.oper.export");
+//		}
 
 		return exported;
 	}

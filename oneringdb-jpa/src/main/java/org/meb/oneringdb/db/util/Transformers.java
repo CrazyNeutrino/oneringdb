@@ -6,7 +6,6 @@ import org.meb.oneringdb.db.model.Deck;
 import org.meb.oneringdb.db.model.DeckComment;
 import org.meb.oneringdb.db.model.DeckLink;
 import org.meb.oneringdb.db.model.DeckMember;
-import org.meb.oneringdb.db.model.Faction;
 import org.meb.oneringdb.db.model.loc.Card;
 import org.meb.oneringdb.db.model.loc.Domain;
 
@@ -33,14 +32,6 @@ public class Transformers {
 		}
 	};
 	
-	public static final Transformer<Deck, Faction> DECK_PRI_FACT = new Transformer<Deck, Faction>() {
-
-		@Override
-		public Faction transform(Deck input) {
-			return input.getPrimaryFaction();
-		}
-	};
-
 	public static final Transformer<DeckMember, Long> DEME_ID = new Transformer<DeckMember, Long>() {
 
 		@Override

@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.meb.oneringdb.db.model.Deck;
-import org.meb.oneringdb.db.model.Faction;
 import org.meb.oneringdb.db.model.TournamentPlace;
 import org.meb.oneringdb.db.model.TournamentType;
 
@@ -34,12 +33,6 @@ public class DeckQuery extends Query<Deck> {
 
 	@CriteriaIn(value = "id", negate = true)
 	private Set<Long> excludeIds;
-
-	@CriteriaIn("primaryFaction")
-	private Set<Faction> primaryFactions;
-
-	@CriteriaIn("secondaryFaction")
-	private Set<Faction> secondaryFactions;
 
 	@CriteriaIn("tournamentType")
 	private Set<TournamentType> tournamentTypes;

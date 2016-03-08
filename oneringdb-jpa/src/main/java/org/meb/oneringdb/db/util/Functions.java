@@ -8,7 +8,6 @@ import org.meb.oneringdb.db.model.DeckComment;
 import org.meb.oneringdb.db.model.DeckInterest;
 import org.meb.oneringdb.db.model.DeckLink;
 import org.meb.oneringdb.db.model.DeckMember;
-import org.meb.oneringdb.db.model.Faction;
 import org.meb.oneringdb.db.model.loc.Card;
 import org.meb.oneringdb.db.model.loc.CardSet;
 import org.meb.oneringdb.db.model.loc.Domain;
@@ -83,14 +82,6 @@ public class Functions {
 			} else {
 				return snaphotBase.getId();
 			}
-		}
-	};
-
-	public static final Function<Deck, Faction> DeckPrimaryFaction = new Function<Deck, Faction>() {
-
-		@Override
-		public Faction apply(Deck input) {
-			return input.getPrimaryFaction();
 		}
 	};
 

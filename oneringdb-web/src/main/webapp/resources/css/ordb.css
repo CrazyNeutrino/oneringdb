@@ -13,9 +13,7 @@
 html,body {	height: 100%; }
 body {overflow-y: scroll; }
 
-table { font-size: 14px; }
-table.faction-image-container-md>tbody>tr {	line-height: 30px; }
-table.faction-image-container-md>tbody>tr>td {vertical-align: middle; /* line-height: inherit; */ }
+/* table { font-size: 14px; } */
 
 #wrapper {
 	min-height: 100%;
@@ -167,6 +165,10 @@ footer.footer > .container > p:first-child {
     top: -1px;
 }
 
+.modal.modal-member .card {
+	width: 350px;
+}
+
 .tournament-group {
 	display: inline-block;
 	margin-top: 10px;
@@ -273,7 +275,7 @@ footer.footer > .container > p:first-child {
 }
 
 .popover-card .popover-content .card {
-	width: 400px;
+	width: 350px;
 }
 
 /**
@@ -1006,7 +1008,7 @@ table.table-with-btn > tbody > tr > td {
 }
 
 .popover.popover-card {
-	max-width: 400px;
+	max-width: 350px;
 	padding: 0px;
 	border: none;
 	border-radius: 2px;

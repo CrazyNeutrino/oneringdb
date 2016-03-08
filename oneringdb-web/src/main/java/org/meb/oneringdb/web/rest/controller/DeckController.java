@@ -32,7 +32,6 @@ import org.meb.oneringdb.db.model.Deck;
 import org.meb.oneringdb.db.model.DeckComment;
 import org.meb.oneringdb.db.model.DeckLink;
 import org.meb.oneringdb.db.model.DeckType;
-import org.meb.oneringdb.db.model.Faction;
 import org.meb.oneringdb.db.model.TournamentPlace;
 import org.meb.oneringdb.db.model.TournamentType;
 import org.meb.oneringdb.db.model.User;
@@ -76,8 +75,8 @@ public class DeckController extends AbstractController {
 			DeckQuery query = new DeckQuery().withMembers();
 			query.setPageNumber(params.getPageNumber());
 			query.setPageSize(params.getPageSize());
-			query.setPrimaryFactions(Faction.convertToFactions(params.getPrimaryFaction()));
-			query.setSecondaryFactions(Faction.convertToFactions(params.getSecondaryFaction()));
+//			query.setPrimaryFactions(Faction.convertToFactions(params.getPrimaryFaction()));
+//			query.setSecondaryFactions(Faction.convertToFactions(params.getSecondaryFaction()));
 			query.setTournamentTypes(TournamentType.convertToTournamentTypes(params.getTournamentType()));
 			query.setTournamentPlaces(TournamentPlace.convertToTournamentPlaces(params.getTournamentPlace()));
 			query.setWarlordTechNames(new HashSet<>(params.getWarlordTechNames()));
@@ -262,8 +261,8 @@ public class DeckController extends AbstractController {
 			deck.setUser(new User(requestContext.getUserId()));
 
 			DeckQuery query = new DeckQuery(deck).withMembers();
-			query.setPrimaryFactions(Faction.convertToFactions(params.getPrimaryFaction()));
-			query.setSecondaryFactions(Faction.convertToFactions(params.getSecondaryFaction()));
+//			query.setPrimaryFactions(Faction.convertToFactions(params.getPrimaryFaction()));
+//			query.setSecondaryFactions(Faction.convertToFactions(params.getSecondaryFaction()));
 			query.setWarlordTechNames(new HashSet<>(params.getWarlordTechNames()));
 
 			List<String> crstTechNames = params.getCrstTechNames();
@@ -409,8 +408,8 @@ public class DeckController extends AbstractController {
 			DeckQuery query = new DeckQuery(example).withMembers().withInterests();
 			query.setPageNumber(params.getPageNumber());
 			query.setPageSize(params.getPageSize());
-			query.setPrimaryFactions(Faction.convertToFactions(params.getPrimaryFaction()));
-			query.setSecondaryFactions(Faction.convertToFactions(params.getSecondaryFaction()));
+//			query.setPrimaryFactions(Faction.convertToFactions(params.getPrimaryFaction()));
+//			query.setSecondaryFactions(Faction.convertToFactions(params.getSecondaryFaction()));
 			query.setTournamentTypes(TournamentType.convertToTournamentTypes(params.getTournamentType()));
 			query.setTournamentPlaces(TournamentPlace.convertToTournamentPlaces(params.getTournamentPlace()));
 			query.setWarlordTechNames(new HashSet<>(params.getWarlordTechNames()));
