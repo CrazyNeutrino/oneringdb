@@ -309,7 +309,6 @@ ordb.deck = ordb.deck || {};
 		}),
 		membersFilter: new _deck.MembersFilter(),
 		membersSorter: new Backbone.Model(),
-		filteredMembers: new ordb.model.DeckMembers(),
 
 		/**
 		 * @memberOf UserDeckEditView
@@ -363,18 +362,32 @@ ordb.deck = ordb.deck || {};
 				});
 			}
 
-			this.deckDescriptionView = new _deck.DeckDescriptionView({
-				deck: this.deck
-			});
-
-			// members groups view
-			this.groupsView = new _deck.MembersGroupsView({
+			// heroes view
+			this.heroesView = new _deck.DeckHeroesView({
 				deck: this.deck,
 				config: this.config
 			});
+			// members groups view
+			this.membersGroupsView = new _deck.MembersGroupsView({
+				deck: this.deck,
+				config: this.config
+			});
+			// members list view
+			this.membersListView = new _deck.MembersListView({
+				deck: this.deck,
+				config: this.config
+			});
+			// description view
+			this.deckDescriptionView = new _deck.DeckDescriptionView({
+				deck: this.deck
+			});
+			// deck draw view
+			this.deckDrawView = new _deck.DeckDrawView({
+				deck: this.deck
+			});
 			
 			// Listen to quantity change event on each member separately.
-			this.deck.get('members').each(function(member) {
+			this.deck.getMembers().each(function(member) {
 				this.listenTo(member, 'change:quantity', function(member, quantity, options) {
 					this.deck.history.add({
 						member: member,
@@ -400,20 +413,9 @@ ordb.deck = ordb.deck || {};
 				this.renderMessages();
 			});
 
-			// members list view
-			this.membersListView = new _deck.MembersListView({
-				deck: this.deck,
-				config: this.config
-			});
-
-			// deck draw view
-			this.deckDrawView = new _deck.DeckDrawView({
-				deck: this.deck
-			});
-
 			// bind handlers for filter change, sort change
-			this.membersFilter.on('change', this.filterMembers, this);
-			this.membersSorter.on('change', this.sortMembers, this);
+			this.listenTo(this.membersFilter, 'change', this.filterMembers);
+			this.listenTo(this.membersSorter, 'change', this.sortMembers);
 		},
 
 		render: function() {
@@ -477,7 +479,7 @@ ordb.deck = ordb.deck || {};
 			this.renderMessages();
 			var svItems = [ {
 				ctr: '.members-groups-view-ctr',
-				sv: this.groupsView
+				sv: this.membersGroupsView
 			}, {
 				ctr: '.members-list-view-ctr',
 				sv: this.membersListView
@@ -583,17 +585,17 @@ ordb.deck = ordb.deck || {};
 		filterMembers: function() {
 			console.log('filterMembers');
 
-			var filteredMembers = this.membersFilter.filter(this.deck.get('members'));
-			this.deck.get('filteredMembers').comparator = this.buildMembersComparator(this.membersSorter.get('keys'));
-			this.deck.get('filteredMembers').reset(filteredMembers);
+			var filteredMembers = this.membersFilter.filter(this.deck.getMembers());
+			this.deck.getFilteredMembers().comparator = this.buildMembersComparator(this.membersSorter.get('keys'));
+			this.deck.getFilteredMembers().reset(filteredMembers);
 		},
 
 		sortMembers: function() {
 			console.log('sortMembers');
 
-			this.deck.get('filteredMembers').comparator = this.buildMembersComparator(this.membersSorter.get('keys'));
-			this.deck.get('filteredMembers').sort();
-			this.deck.get('filteredMembers').trigger('reset', this.deck.get('filteredMembers'));
+			this.deck.getFilteredMembers().comparator = this.buildMembersComparator(this.membersSorter.get('keys'));
+			this.deck.getFilteredMembers().sort();
+			this.deck.getFilteredMembers().trigger('reset', this.deck.getFilteredMembers());
 		},
 
 		applyFilterToUI: function() {
@@ -1003,135 +1005,134 @@ ordb.deck = ordb.deck || {};
 			view.$el.find('.actions-container').append(actionsTemplate);
 			ordb.ui.adjustWrapperStyle();
 
-			view.groupsView = new _deck.MemberGroupsView({
+			view.membersGroupsView = new _deck.MembersGroupsView({
 				el: '.mg-container'
 			});
 
-			$('#parseDeckButton').click(
-					function() {
-						var cleanName = function(name) {
-							return s(name.toLowerCase()).clean().slugify().value();
-						};
-						var index = _.indexBy(ordb.dict.cards, function(card) {
-							return cleanName(card.name);
-						});
-						var indexEn = _.indexBy(ordb.dict.cards, function(card) {
-							return cleanName(card.nameEn);
-						});
-						var pattern = /(?:([1-4])x?)?([^\(\)]+)(?:\((.+)\))?/;
+			$('#parseDeckButton').click(function() {
+				var cleanName = function(name) {
+					return s(name.toLowerCase()).clean().slugify().value();
+				};
+				var index = _.indexBy(ordb.dict.cards, function(card) {
+					return cleanName(card.name);
+				});
+				var indexEn = _.indexBy(ordb.dict.cards, function(card) {
+					return cleanName(card.nameEn);
+				});
+				var pattern = /(?:([1-4])x?)?([^\(\)]+)(?:\((.+)\))?/;
 
-						var warnings = [];
-						var errors = [];
-						var warlordId = undefined;
-						var members = [];
+				var warnings = [];
+				var errors = [];
+				var warlordId = undefined;
+				var members = [];
 
-						var lines = s.lines($('textarea').val());
+				var lines = s.lines($('textarea').val());
 
-						_.each(lines, function(line) {
-							if (s.isBlank(line)) {
-								return;
-							}
-							var startsWithTypeName = _.some(ordb.dict.cardTypes, function(cardType) {
-								var tmp = s(line).trim().toLowerCase();
-								return tmp.startsWith(cardType.name.toLowerCase())
-										|| tmp.startsWith(cardType.nameEn.toLowerCase());
+				_.each(lines, function(line) {
+					if (s.isBlank(line)) {
+						return;
+					}
+					var startsWithTypeName = _.some(ordb.dict.cardTypes, function(cardType) {
+						var tmp = s(line).trim().toLowerCase();
+						return tmp.startsWith(cardType.name.toLowerCase())
+								|| tmp.startsWith(cardType.nameEn.toLowerCase());
+					});
+					if (startsWithTypeName) {
+						return;
+					}
+
+					var tokens = pattern.exec(s.trim(line.toLowerCase()));
+					if (tokens != null) {
+						var cn = cleanName(tokens[2]);
+						var card = index[cn] || indexEn[cn];
+						if (_.isUndefined(card)) {
+							warnings.push(ordb.dict.messages['core.skipped'] + ': ' + line);
+							return;
+						}
+
+						if (card.type === 'warlord') {
+							warlordId = card.id;
+						} else {
+							members.push({
+								cardId: card.id,
+								quantity: parseInt(tokens[1])
 							});
-							if (startsWithTypeName) {
-								return;
-							}
+						}
+					} else {
+						warnings.push(ordb.dict.messages['core.skipped'] + ': ' + line);
+					}
+				});
 
-							var tokens = pattern.exec(s.trim(line.toLowerCase()));
-							if (tokens != null) {
-								var cn = cleanName(tokens[2]);
-								var card = index[cn] || indexEn[cn];
-								if (_.isUndefined(card)) {
-									warnings.push(ordb.dict.messages['core.skipped'] + ': ' + line);
-									return;
-								}
-
-								if (card.type === 'warlord') {
-									warlordId = card.id;
-								} else {
-									members.push({
-										cardId: card.id,
-										quantity: parseInt(tokens[1])
-									});
-								}
+				if (_.isUndefined(warlordId)) {
+					errors.push(ordb.dict.messages['error.deck.warlord.notFound']);
+				} else {
+					var pdms = _deck.getPlayerDeckMembers();
+					var pdmsIndex = _.indexBy(pdms, function(pdm) {
+						return pdm.cardId;
+					});
+					_.each(members, function(member) {
+						var pdm = pdmsIndex[member.cardId];
+						if (_.isUndefined(pdm)) {
+							errors.push(ordb.dict.messages['error.deck.invalidCard'] + ': '
+									+ ordb.dict.findCard(member.cardId).name);
+						} else {
+							var card = ordb.dict.findCard(member.cardId);
+							if (_.isNumber(card.warlordId)) {
+								pdm.quantity = card.quantity;
+							} else if (_.isNumber(member.quantity)) {
+								pdm.quantity = Math.max(1, Math.min(3, member.quantity));
 							} else {
-								warnings.push(ordb.dict.messages['core.skipped'] + ': ' + line);
+								pdm.quantity = 1;
 							}
-						});
-
-						if (_.isUndefined(warlordId)) {
-							errors.push(ordb.dict.messages['error.deck.warlord.notFound']);
-						} else {
-							var pdms = _deck.getPlayerDeckMembers();
-							var pdmsIndex = _.indexBy(pdms, function(pdm) {
-								return pdm.cardId;
-							});
-							_.each(members, function(member) {
-								var pdm = pdmsIndex[member.cardId];
-								if (_.isUndefined(pdm)) {
-									errors.push(ordb.dict.messages['error.deck.invalidCard'] + ': '
-											+ ordb.dict.findCard(member.cardId).name);
-								} else {
-									var card = ordb.dict.findCard(member.cardId);
-									if (_.isNumber(card.warlordId)) {
-										pdm.quantity = card.quantity;
-									} else if (_.isNumber(member.quantity)) {
-										pdm.quantity = Math.max(1, Math.min(3, member.quantity));
-									} else {
-										pdm.quantity = 1;
-									}
-								}
-							});
-						}
-
-						var deck = undefined;
-						if (_.isUndefined(warlordId)) {
-							view.$el.find('.mg-container').empty();
-						} else {
-							deck = new ordb.model.PrivateDeck({
-								type: 'base',
-								warlordId: warlordId,
-								members: pdms,
-								configCsQuantity: 3
-							}, {
-								parse: true
-							});
-							view.groupsView.render(deck.get('members'), {
-								readOnly: false
-							});
-						}
-
-						if (errors.length == 0) {
-							view.$el.find('#editDeckButton').removeClass('disabled').click(function() {
-								userDeckEditView.render({
-									deck: deck
-								});
-								var warlord = ordb.dict.findCard(deck.get('warlordId'));
-								ordb.router.navigate('new/' + warlord.id + '-' + warlord.techName);
-							});
-						} else {
-							view.$el.find('#editDeckButton').addClass('disabled').off('click');
-						}
-
-						var $container = view.$el.find('.problems-container').empty();
-						if (errors.length > 0) {
-							$container.append(Handlebars.templates['commons-ul']({
-								listTitle: ordb.dict.messages['core.errors'] + ':',
-								listItems: errors,
-								listContainerStyle: 'alert alert-danger'
-							}));
-						}
-						if (warnings.length > 0) {
-							$container.append(Handlebars.templates['commons-ul']({
-								listTitle: ordb.dict.messages['core.warnings'] + ':',
-								listItems: warnings,
-								listContainerStyle: 'alert alert-warning'
-							}));
 						}
 					});
+				}
+
+				var deck = undefined;
+				if (_.isUndefined(warlordId)) {
+					view.$el.find('.mg-container').empty();
+				} else {
+					deck = new ordb.model.PrivateDeck({
+						type: 'base',
+						warlordId: warlordId,
+						members: pdms,
+						configCsQuantity: 3
+					}, {
+						parse: true
+					});
+					view.membersGroupsView.render(deck.getMembers(), {
+						readOnly: false
+					});
+				}
+
+				if (errors.length == 0) {
+					view.$el.find('#editDeckButton').removeClass('disabled').click(function() {
+						userDeckEditView.render({
+							deck: deck
+						});
+						var warlord = ordb.dict.findCard(deck.get('warlordId'));
+						ordb.router.navigate('new/' + warlord.id + '-' + warlord.techName);
+					});
+				} else {
+					view.$el.find('#editDeckButton').addClass('disabled').off('click');
+				}
+
+				var $container = view.$el.find('.problems-container').empty();
+				if (errors.length > 0) {
+					$container.append(Handlebars.templates['commons-ul']({
+						listTitle: ordb.dict.messages['core.errors'] + ':',
+						listItems: errors,
+						listContainerStyle: 'alert alert-danger'
+					}));
+				}
+				if (warnings.length > 0) {
+					$container.append(Handlebars.templates['commons-ul']({
+						listTitle: ordb.dict.messages['core.warnings'] + ':',
+						listItems: warnings,
+						listContainerStyle: 'alert alert-warning'
+					}));
+				}
+			});
 		}
 	});
 

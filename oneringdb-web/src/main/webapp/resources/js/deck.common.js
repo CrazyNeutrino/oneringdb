@@ -373,6 +373,65 @@ ordb.deck = ordb.deck || {};
 			$('.navbar a').off('click');
 		}
 	});
+	
+	_deck.DeckHeroesView = Backbone.View.extend({
+		className: 'deck-heroes-view',
+		heroes: new Backbone.Collection(),
+		
+		/**
+		 * @memberOf DeckHeroesView
+		 */
+		initialize: function(options) {
+			if (!options || !options.deck) {
+				throw "Deck is undefined";
+			}
+			this.deck = options.deck;
+			this.config = options.config;
+
+			// Listen to quantity change event on each member separately.
+			this.deck.getMembers().each(function(member) {
+				if (member.isHero()) {
+					this.listenTo(member, 'change:quantity', function(member, quantity, options) {
+						if (member.isSelected()) {
+							this.heroes.add(member);
+						} else {
+							this.heroes.remove(member);
+						}
+						this.render();
+					});
+				}
+			}, this);
+		},
+
+		render: function() {
+			var template = Handlebars.templates['deck-heroes-view']({
+				heroes: heroes.toJSON()
+			});
+			this.$el.html(template);
+
+			var $popovers = this.$el.find('a[data-card-id]').popover({
+				html: true,
+				trigger: 'hover',
+				placement: 'auto right',
+				template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
+						+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
+				content: function() {
+					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
+				}
+			});
+			var view = this;
+			this.$el.find('a[data-card-id]').click(function() {
+				$popovers.popover('hide');
+				_deck.showDeckMemberModal(members.findWhere({
+					cardId: $(this).data('card-id')
+				}), {
+					readOnly: view.config.get('readOnly')
+				});
+			});
+
+			return this;
+		}
+	});
 
 	_deck.MembersGroupsView = Backbone.View.extend({
 		className: 'members-groups-view',
@@ -384,7 +443,7 @@ ordb.deck = ordb.deck || {};
 		},
 
 		/**
-		 * @memberOf MemberGroupsView
+		 * @memberOf MembersGroupsView
 		 */
 		initialize: function(options) {
 			if (!options || !options.deck) {
@@ -398,13 +457,13 @@ ordb.deck = ordb.deck || {};
 			});
 
 			// Listen to group/sort key change event;
-			this.keys.on('change', this.render, this);
+			this.listenTo(this.keys, 'change', this.render);
 			// Listen to quantity change event on each member separately.
-			this.deck.get('members').each(function(member) {
-				member.on('change:quantity', this.render, this);
+			this.deck.getMembers().each(function(member) {
+				this.listenTo(member, 'change:quantity', this.render);
 			}, this);
 			// Listen to batch quantity change event on all members.
-			this.deck.get('members').on('batchChange:quantity', this.render, this);
+			this.listenTo(this.deck.getMembers(), 'batchChange:quantity', this.render);
 		},
 
 		render: function() {
@@ -471,21 +530,21 @@ ordb.deck = ordb.deck || {};
 			this.deck = options.deck;
 			this.config = options.config;
 
-			this.config.on('change:layout', this.render, this);
-			this.deck.get('filteredMembers').on('reset', this.render, this);
+			this.listenTo(this.config, 'change:layout', this.render);
+			this.listenTo(this.deck.getFilteredMembers(), 'reset', this.render);
 
 			// Listen to quantity change event on each member separately.
-			this.deck.get('members').each(function(member) {
-				member.on('change:quantity', function(member, quantity, options) {
+			this.deck.getMembers().each(function(member) {
+				this.listenTo(member, 'change:quantity', function(member, quantity, options) {
 					var $members = this.$el.find('.members-list-item, .members-grid-item');
 					var $buttons = $members.filter('[data-card-id="' + member.get('cardId') + '"]').find('.btn-group .btn');
 					var quantity = '[data-quantity="' + member.get('quantity') + '"]';
 					$buttons.filter(quantity).addClass('active').siblings().removeClass('active');
-				}, this	);
+				});
 			}, this);
 			
 			// Listen to batch quantity change event on all members.
-			this.deck.get('members').on('batchChange:quantity', this.render, this);
+			this.listenTo(this.deck.getMembers(), 'batchChange:quantity', this.render);
 		},
 
 		render: function() {

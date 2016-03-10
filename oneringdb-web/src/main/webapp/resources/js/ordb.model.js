@@ -29,6 +29,18 @@ ordb.model = ordb.model || {};
 			response.card = _.clone(ordb.dict.findCard(parseInt(response.cardId)));
 			response.fixedMaxQuantity = response.card.type === 'hero';
 			return response;
+		},
+		getQuantity: function() {
+			return this.get('quantity');
+		},
+		getCard: function() {
+			return this.get('card');
+		},
+		isHero: function() {
+			return this.getCard().type == 'hero';
+		},
+		isSelected: function() {
+			return this.getQuantity() > 0;
 		}
 	});
 
@@ -148,7 +160,7 @@ ordb.model = ordb.model || {};
 
 	_model.DeckComment = Backbone.Model.extend({
 		/**
-		 * @memberOf DeckCOmment
+		 * @memberOf DeckComment
 		 */
 		initialize: function(attributes, options) {
 			if (options) {
@@ -190,10 +202,8 @@ ordb.model = ordb.model || {};
 			attributes.type = attributes.type || 'base';
 		},
 		parse: function(response) {
-			response.createDateMillis = moment.tz(response.createDate, ordb.static.timezone)
-					.valueOf();
-			response.modifyDateMillis = moment.tz(response.modifyDate, ordb.static.timezone)
-					.valueOf();
+			response.createDateMillis = moment.tz(response.createDate, ordb.static.timezone).valueOf();
+			response.modifyDateMillis = moment.tz(response.modifyDate, ordb.static.timezone).valueOf();
 			response.members = new _model.DeckMembers(response.members, {
 				parse: true,
 				comparator: ordb.util.buildMembersDefaultComparator()
@@ -232,6 +242,9 @@ ordb.model = ordb.model || {};
 				});
 			});
 			response.filteredMembers = new _model.DeckMembers();
+//			response.heroes = new _model.DeckMembers(response.members.filter(function(member) {
+//				return member.get('card').type == 'hero' && member.get('quantity') > 0;
+//			}));
 
 			return response;
 		},
@@ -251,6 +264,15 @@ ordb.model = ordb.model || {};
 			}
 			return json;
 		},
+		
+		getMembers: function() {
+			return this.get('members');
+		},
+		
+		getFilteredMembers: function() {
+			return this.get('filteredMembers');
+		},
+		
 		validate: function(attributes, options) {
 			var name = $.trim(attributes.name);
 			if (name.length == 0) {
@@ -289,7 +311,6 @@ ordb.model = ordb.model || {};
 			delete json.filteredMembers;
 			delete json.createDate;
 			delete json.modifyDate;
-			delete json.warlord;
 			delete json.snapshots;
 			// delete json.relatedSnapshots;
 			delete json.links;
