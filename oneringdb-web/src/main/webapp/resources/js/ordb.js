@@ -5,14 +5,14 @@ ordb.app = ordb.app || {};
 ordb.static = ordb.static || {};
 ordb.static.timezone = jstz.determine().name();
 ordb.static.format = {
-	en : {
-		timestamp : "dddd, MMMM Do YYYY, h:mm:ss a"
+	en: {
+		timestamp: "dddd, MMMM Do YYYY, h:mm:ss a"
 	},
-	pl : {
-		timestamp : "dddd, Do MMMM YYYY, HH:mm:ss"
+	pl: {
+		timestamp: "dddd, Do MMMM YYYY, HH:mm:ss"
 	},
-	de : {
-		timestamp : "dddd, Do MMMM YYYY, HH:mm:ss"
+	de: {
+		timestamp: "dddd, Do MMMM YYYY, HH:mm:ss"
 	}
 };
 
@@ -23,15 +23,12 @@ ordb.dict = ordb.dict || {};
 (function(_dict) {
 
 	_dict.triggerWords = {
-		de : [ 'Reise Aktion', 'Aktion', 'Erzwungen', 'Reaktion', 'Reise',
-				'Schatten', 'Wenn aufgedeckt' ],
-		en : [ 'Travel Action', 'Action', 'Forced', 'Response', 'Shadow',
-				'Travel', 'When Revealed' ],
-		pl : [ 'Akcja wyprawy', 'Akcja', 'Cień', 'Odpowiedź', 'Podróż',
-				'Po odkryciu', 'Wymuszony', ]
+		de: [ 'Reise Aktion', 'Aktion', 'Erzwungen', 'Reaktion', 'Reise', 'Schatten', 'Wenn aufgedeckt' ],
+		en: [ 'Travel Action', 'Action', 'Forced', 'Response', 'Shadow', 'Travel', 'When Revealed' ],
+		pl: [ 'Akcja wyprawy', 'Akcja', 'Cień', 'Odpowiedź', 'Podróż', 'Po odkryciu', 'Wymuszony', ]
 	};
-	_dict.iconWords = [ 'Willpower', 'Threat', 'Attack', 'Defense',
-			'Leadership', 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship' ];
+	_dict.iconWords = [ 'Willpower', 'Threat', 'Attack', 'Defense', 'Leadership', 'Tactics', 'Lore', 'Spirit',
+			'Baggins', 'Fellowship' ];
 
 	var IDX_CARD_BY_ID = "card#id";
 	var IDX_CARD_BY_TECH_NAME = "card#techName";
@@ -56,24 +53,19 @@ ordb.dict = ordb.dict || {};
 		indexes[IDX_CARD_BY_NAME] = _.indexBy(_dict.cards, function(card) {
 			return card.name;
 		});
-		indexes[IDX_CARD_SET_BY_ID] = _.indexBy(_dict.cardSets, function(
-				cardSet) {
+		indexes[IDX_CARD_SET_BY_ID] = _.indexBy(_dict.cardSets, function(cardSet) {
 			return cardSet.id;
 		});
-		indexes[IDX_CARD_TYPE_BY_TECH_NAME] = _.indexBy(_dict.cardTypes,
-				function(cardType) {
-					return cardType.techName;
-				});
-		indexes[IDX_CARD_BY_SET_NO_CARD_NO] = _.indexBy(_dict.cards, function(
-				card) {
+		indexes[IDX_CARD_TYPE_BY_TECH_NAME] = _.indexBy(_dict.cardTypes, function(cardType) {
+			return cardType.techName;
+		});
+		indexes[IDX_CARD_BY_SET_NO_CARD_NO] = _.indexBy(_dict.cards, function(card) {
 			return _dict.findCardSet(card.crstId).number + '#' + card.number;
 		});
-		indexes[IDX_ENCOUNTER_SET_BY_ID] = _.indexBy(_dict.encounterSets,
-				function(encounterSet) {
-					return encounterSet.id;
-				});
-		indexes[IDX_SPHERE_BY_TECH_NAME] = _.indexBy(_dict.spheres, function(
-				sphere) {
+		indexes[IDX_ENCOUNTER_SET_BY_ID] = _.indexBy(_dict.encounterSets, function(encounterSet) {
+			return encounterSet.id;
+		});
+		indexes[IDX_SPHERE_BY_TECH_NAME] = _.indexBy(_dict.spheres, function(sphere) {
 			return sphere.techName;
 		});
 
@@ -96,43 +88,41 @@ ordb.dict = ordb.dict || {};
 			}
 
 			switch (card.type) {
-			case 'hero':
-			case 'ally':
-			case 'attachment':
-			case 'event':
-			case 'treasure':
-				card.playerDeck = true;
-				break;
-			case 'enemy':
-			case 'location':
-			case 'treachery':
-			case 'objective':
-			case 'objective-ally':
-			case 'objective-location':
-				card.encounterDeck = true;
-				break;
-			case 'quest':
-				card.questDeck = true;
-				break;
+				case 'hero':
+				case 'ally':
+				case 'attachment':
+				case 'event':
+				case 'treasure':
+					card.playerDeck = true;
+					break;
+				case 'enemy':
+				case 'location':
+				case 'treachery':
+				case 'objective':
+				case 'objective-ally':
+				case 'objective-location':
+					card.encounterDeck = true;
+					break;
+				case 'quest':
+					card.questDeck = true;
+					break;
 			}
 
 			card.hasAttrs = _.isNumber(card.threatCost) || _.isNumber(card.resourceCost)
-					|| _.isNumber(card.engagementCost) || _.isNumber(card.willpower)
-					|| _.isNumber(card.threat) || _.isNumber(card.attack)
-					|| _.isNumber(card.defense) || _.isNumber(card.hitPoints);
+					|| _.isNumber(card.engagementCost) || _.isNumber(card.willpower) || _.isNumber(card.threat)
+					|| _.isNumber(card.attack) || _.isNumber(card.defense) || _.isNumber(card.hitPoints);
 
 		});
 
 		var techNames = [ 'hero', 'ally', 'attachment', 'event', 'treasure' ];
-		_dict.playerDeckCardTypes = _.filter(_dict.cardTypes,
-				function(cardType) {
-					return techNames.indexOf(cardType.techName) > -1;
-				});
+		_dict.playerDeckCardTypes = _.filter(_dict.cardTypes, function(cardType) {
+			return techNames.indexOf(cardType.techName) > -1;
+		});
 
 		_dict.playerDeckCards = _.where(_dict.cards, {
 			playerDeck: true
 		});
-		
+
 		var end = new Date().getTime();
 		console.log(end - start);
 	};
@@ -179,20 +169,19 @@ ordb.dict = ordb.dict || {};
 
 	_dict.buildCardSetTree = function() {
 		var tree = {
-			nodes : []
+			nodes: []
 		};
 		var cycleNode = undefined;
 
 		_.each(_.sortBy(_dict.cardSets, 'sequence'), function(cardSet) {
 			var nodes;
 			if (cardSet.cycleTechName) {
-				if (_.isUndefined(cycleNode)
-						|| cycleNode.techName !== cardSet.cycleTechName) {
+				if (_.isUndefined(cycleNode) || cycleNode.techName !== cardSet.cycleTechName) {
 					cycleNode = {
-						type : 'cycle',
-						name : cardSet.cycleName,
-						techName : cardSet.cycleTechName,
-						nodes : []
+						type: 'cycle',
+						name: cardSet.cycleName,
+						techName: cardSet.cycleTechName,
+						nodes: []
 					};
 					tree.nodes.push(cycleNode);
 				}
@@ -202,9 +191,9 @@ ordb.dict = ordb.dict || {};
 			}
 
 			nodes.push({
-				type : 'set',
-				name : cardSet.name,
-				techName : cardSet.techName
+				type: 'set',
+				name: cardSet.name,
+				techName: cardSet.techName
 			});
 		});
 		return tree;
@@ -217,15 +206,14 @@ ordb.dict = ordb.dict || {};
 		_.each(_dict.buildCardSetTree().nodes, function(node) {
 			if (node.type == 'set') {
 				tree = {
-					nodes : []
+					nodes: []
 				};
 				trees.push(tree);
 				tree.nodes.push(node);
 			} else if (node.type == 'cycle') {
-				if (node.techName == 'the-hobbit'
-						|| node.techName == 'the-lord-of-the-rings') {
+				if (node.techName == 'the-hobbit' || node.techName == 'the-lord-of-the-rings') {
 					tree = {
-						nodes : []
+						nodes: []
 					};
 					trees.push(tree);
 				}
@@ -243,10 +231,10 @@ ordb.dict = ordb.dict || {};
 ordb.filter = ordb.filter || {};
 
 (function(_filter) {
-	
-	_filter.CARD_ATTRS = ['type', 'sphere', 'techName', 'number', 'quantity', 'name', 'traits', 'keywords', 'text', 
-	                      'threatCost', 'resourceCost', 'willpower', 'threat', 'attack', 'defense', 'hitPoints', 
-	                      'setTechName', 'enstTechName'];
+
+	_filter.CARD_ATTRS = [ 'type', 'sphere', 'techName', 'number', 'quantity', 'name', 'traits', 'keywords', 'text',
+			'threatCost', 'resourceCost', 'willpower', 'threat', 'attack', 'defense', 'hitPoints', 'setTechName',
+			'enstTechName' ];
 
 	_filter.FD_TYPE_SET = 'set';
 	_filter.FD_TYPE_SIMPLE = 'simple';
@@ -254,115 +242,115 @@ ordb.filter = ordb.filter || {};
 	_filter.FD_TYPE_RANGE_STAT = 'range-stat';
 
 	_filter.fds = [ {
-		key : 'setTechName',
-		queryStringKey : 'set',
-		type : _filter.FD_TYPE_SET
+		key: 'setTechName',
+		queryStringKey: 'set',
+		type: _filter.FD_TYPE_SET
 	}, {
-		key : 'enstTechName',
-		queryStringKey : 'eset',
-		type : _filter.FD_TYPE_SET
+		key: 'enstTechName',
+		queryStringKey: 'eset',
+		type: _filter.FD_TYPE_SET
 	}, {
-		key : 'type',
-		queryStringKey : 'type',
-		type : _filter.FD_TYPE_SET
+		key: 'type',
+		queryStringKey: 'type',
+		type: _filter.FD_TYPE_SET
 	}, {
-		key : 'sphere',
-		queryStringKey : 'sphere',
-		type : _filter.FD_TYPE_SET
+		key: 'sphere',
+		queryStringKey: 'sphere',
+		type: _filter.FD_TYPE_SET
 	}, {
-		key : 'primaryFaction',
-		queryStringKey : 'primaryFaction',
-		type : _filter.FD_TYPE_SET
+		key: 'primaryFaction',
+		queryStringKey: 'primaryFaction',
+		type: _filter.FD_TYPE_SET
 	}, {
-		key : 'secondaryFaction',
-		queryStringKey : 'secondaryFaction',
-		type : _filter.FD_TYPE_SET
+		key: 'secondaryFaction',
+		queryStringKey: 'secondaryFaction',
+		type: _filter.FD_TYPE_SET
 	}, {
-		key : 'quantity',
-		queryStringKey : 'quantity',
-		type : _filter.FD_TYPE_SET,
-		parseInteger : true
+		key: 'quantity',
+		queryStringKey: 'quantity',
+		type: _filter.FD_TYPE_SET,
+		parseInteger: true
 	}, {
-		key : 'techName',
-		queryStringKey : 'name',
-		type : _filter.FD_TYPE_SIMPLE,
-		oper : 'isnocase'
+		key: 'techName',
+		queryStringKey: 'name',
+		type: _filter.FD_TYPE_SIMPLE,
+		oper: 'isnocase'
 	}, {
-		key : 'traits',
-		queryStringKey : 'traits',
-		type : _filter.FD_TYPE_SIMPLE,
-		oper : 'likenocase'
+		key: 'traits',
+		queryStringKey: 'traits',
+		type: _filter.FD_TYPE_SIMPLE,
+		oper: 'likenocase'
 	}, {
-		key : 'keywords',
-		queryStringKey : 'keywords',
-		type : _filter.FD_TYPE_SIMPLE,
-		oper : 'likenocase'
+		key: 'keywords',
+		queryStringKey: 'keywords',
+		type: _filter.FD_TYPE_SIMPLE,
+		oper: 'likenocase'
 	}, {
-		key : 'text',
-		queryStringKey : 'text',
-		type : _filter.FD_TYPE_SIMPLE,
-		oper : 'likenocase'
+		key: 'text',
+		queryStringKey: 'text',
+		type: _filter.FD_TYPE_SIMPLE,
+		oper: 'likenocase'
 	}, {
-		key : 'threatCost',
-		queryStringKey : 'tc',
-		type : _filter.FD_TYPE_RANGE_STAT
+		key: 'threatCost',
+		queryStringKey: 'tc',
+		type: _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'resourceCost',
-		queryStringKey : 'rc',
-		type : _filter.FD_TYPE_RANGE_STAT
+		key: 'resourceCost',
+		queryStringKey: 'rc',
+		type: _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'engagementCost',
-		queryStringKey : 'ec',
-		type : _filter.FD_TYPE_RANGE_STAT
+		key: 'engagementCost',
+		queryStringKey: 'ec',
+		type: _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'wilpower',
-		queryStringKey : 'wilpower',
-		type : _filter.FD_TYPE_RANGE_STAT
+		key: 'wilpower',
+		queryStringKey: 'wilpower',
+		type: _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'threat',
-		queryStringKey : 'threat',
-		type : _filter.FD_TYPE_RANGE_STAT
+		key: 'threat',
+		queryStringKey: 'threat',
+		type: _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'attack',
-		queryStringKey : 'attack',
-		type : _filter.FD_TYPE_RANGE_STAT
+		key: 'attack',
+		queryStringKey: 'attack',
+		type: _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'defense',
-		queryStringKey : 'defense',
-		type : _filter.FD_TYPE_RANGE_STAT
+		key: 'defense',
+		queryStringKey: 'defense',
+		type: _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'hitPoints',
-		queryStringKey : 'hp',
-		type : _filter.FD_TYPE_RANGE_STAT
+		key: 'hitPoints',
+		queryStringKey: 'hp',
+		type: _filter.FD_TYPE_RANGE_STAT
 	}, {
-		key : 'createDateMin',
-		queryStringKey : 'createDateMin',
-		type : _filter.FD_TYPE_SIMPLE
+		key: 'createDateMin',
+		queryStringKey: 'createDateMin',
+		type: _filter.FD_TYPE_SIMPLE
 	}, {
-		key : 'createDateMax',
-		queryStringKey : 'createDateMax',
-		type : _filter.FD_TYPE_SIMPLE
+		key: 'createDateMax',
+		queryStringKey: 'createDateMax',
+		type: _filter.FD_TYPE_SIMPLE
 	}, {
-		key : 'modifyDateMin',
-		queryStringKey : 'modifyDateMin',
-		type : _filter.FD_TYPE_SIMPLE
+		key: 'modifyDateMin',
+		queryStringKey: 'modifyDateMin',
+		type: _filter.FD_TYPE_SIMPLE
 	}, {
-		key : 'modifyDateMax',
-		queryStringKey : 'modifyDateMax',
-		type : _filter.FD_TYPE_SIMPLE
+		key: 'modifyDateMax',
+		queryStringKey: 'modifyDateMax',
+		type: _filter.FD_TYPE_SIMPLE
 	}, {
-		key : 'publishDateMin',
-		queryStringKey : 'publishDateMin',
-		type : _filter.FD_TYPE_SIMPLE
+		key: 'publishDateMin',
+		queryStringKey: 'publishDateMin',
+		type: _filter.FD_TYPE_SIMPLE
 	}, {
-		key : 'publishDateMax',
-		queryStringKey : 'publishDateMax',
-		type : _filter.FD_TYPE_SIMPLE
+		key: 'publishDateMax',
+		queryStringKey: 'publishDateMax',
+		type: _filter.FD_TYPE_SIMPLE
 	}, {
-		key : 'username',
-		queryStringKey : 'username',
-		type : _filter.FD_TYPE_SIMPLE,
-		oper : 'isnocase'
+		key: 'username',
+		queryStringKey: 'username',
+		type: _filter.FD_TYPE_SIMPLE,
+		oper: 'isnocase'
 	} ];
 
 	/**
@@ -373,22 +361,18 @@ ordb.filter = ordb.filter || {};
 		_.each(_filter.fds, function(fd) {
 			var value = filter[fd.key];
 			if (value) {
-				if (fd.type == _filter.FD_TYPE_SET && _.isArray(value)
-						&& !_.isEmpty(value)) {
+				if (fd.type == _filter.FD_TYPE_SET && _.isArray(value) && !_.isEmpty(value)) {
 					parts.push(fd.queryStringKey + '=' + value.join());
-				} else if (fd.type == _filter.FD_TYPE_SIMPLE
-						&& !_.isEmpty(value)) {
+				} else if (fd.type == _filter.FD_TYPE_SIMPLE && !_.isEmpty(value)) {
 					parts.push(fd.queryStringKey + '=' + value);
-				} else if (fd.type == _filter.FD_TYPE_RANGE && _.isArray(value)
-						&& !_.isEmpty(value)) {
+				} else if (fd.type == _filter.FD_TYPE_RANGE && _.isArray(value) && !_.isEmpty(value)) {
 					var hasNonEmptyValue = _.some(value, function(v) {
 						return !_.isUndefined(v) && v !== '';
 					});
 					if (hasNonEmptyValue) {
 						parts.push(fd.queryStringKey + '=' + value.join());
 					}
-				} else if (fd.type == _filter.FD_TYPE_RANGE_STAT
-						&& _.isArray(value) && !_.isEmpty(value)) {
+				} else if (fd.type == _filter.FD_TYPE_RANGE_STAT && _.isArray(value) && !_.isEmpty(value)) {
 					if (value[2] === false) {
 						parts.push(fd.queryStringKey + '=' + value.join());
 					}
@@ -462,8 +446,7 @@ ordb.ui = ordb.ui || {};
 	 * @memberOf _ui
 	 */
 	_ui.toCardUrl = function(input) {
-		return '/' + ordb.static.language + '/card/'
-				+ _ui.toCardRelativeUrl(input);
+		return '/' + ordb.static.language + '/card/' + _ui.toCardRelativeUrl(input);
 	};
 
 	_ui.toCardRelativeUrl = function(input) {
@@ -474,13 +457,12 @@ ordb.ui = ordb.ui || {};
 			card = input;
 		}
 
-		return s.pad(card.setNumber, 3, '0') + '-' + card.setTechName + '/'
-				+ s.pad(card.number, 3, '0') + '-' + card.techName;
+		return s.pad(card.setNumber, 3, '0') + '-' + card.setTechName + '/' + s.pad(card.number, 3, '0') + '-'
+				+ card.techName;
 	};
 
 	_ui.toPublicDeckUrl = function(options) {
-		return '/' + ordb.static.language + '/public/deck/' + options.id
-				+ '-' + ordb.util.toTechName(options.name);
+		return '/' + ordb.static.language + '/public/deck/' + options.id + '-' + ordb.util.toTechName(options.name);
 	};
 
 	_ui.toUserDeckUrl = function(options) {
@@ -496,23 +478,23 @@ ordb.ui = ordb.ui || {};
 	};
 
 	_ui.toSearchLinkSphere = function(card) {
-		return '<a href="/' + ordb.static.language + '/card/search?sphere='
-				+ card.sphere + '">' + card.sphereDisplay + '</a>';
+		return '<a href="/' + ordb.static.language + '/card/search?sphere=' + card.sphere + '">' + card.sphereDisplay
+				+ '</a>';
 	};
 
 	_ui.toSearchLinkType = function(card) {
-		return '<a href="/' + ordb.static.language + '/card/search?type='
-				+ card.type + '">' + card.typeDisplay + '</a>';
+		return '<a href="/' + ordb.static.language + '/card/search?type=' + card.type + '">' + card.typeDisplay
+				+ '</a>';
 	};
 
 	_ui.toSearchLinkSetName = function(card) {
-		return '<a href="/' + ordb.static.language + '/card/search?set='
-				+ card.setTechName + '">' + card.setName + '</a>';
+		return '<a href="/' + ordb.static.language + '/card/search?set=' + card.setTechName + '">' + card.setName
+				+ '</a>';
 	};
 
 	_ui.toSearchLinkEncounterSetName = function(card) {
-		return '<a href="/' + ordb.static.language + '/card/search?eset='
-				+ card.enstTechName + '">' + card.enstName + '</a>';
+		return '<a href="/' + ordb.static.language + '/card/search?eset=' + card.enstTechName + '">' + card.enstName
+				+ '</a>';
 	};
 
 	_ui.toSearchLinkTraits = function(card) {
@@ -520,8 +502,7 @@ ordb.ui = ordb.ui || {};
 		var traits = card.traits.split('. ');
 		_.each(traits, function(trait, index) {
 			trait = s.trim(trait.replace('.', ''));
-			result += '<a href="/' + ordb.static.language
-					+ '/card/search?traits=' + trait + '">' + trait + '.</a>';
+			result += '<a href="/' + ordb.static.language + '/card/search?traits=' + trait + '">' + trait + '.</a>';
 			if (index < traits.length - 1) {
 				result += ' ';
 			}
@@ -533,52 +514,8 @@ ordb.ui = ordb.ui || {};
 		if (_.isUndefined(techName)) {
 			techName = name;
 		}
-		return '<a href="/' + ordb.static.language + '/card/search?traits='
-				+ techName + '">' + name + '</a>';
+		return '<a href="/' + ordb.static.language + '/card/search?traits=' + techName + '">' + name + '</a>';
 	};
-
-	// _ui.toSearchLinkKeyword = function(card, options) {
-	// return '<a href="/' + ordb.static.language
-	// + '/card/search?faction=' + card.faction + '">' + card.factionDisplay +
-	// '</a>';
-	// };
-
-	// _ui.test1 = function() {
-	// var start = new Date().getTime();
-	// var input = 'Attach to a hero. Restricted.\nAttached hero gains +2
-	// [Willpower].\nIf attached hero is Aragorn, he also gains a [Spirit]
-	// resource icon.';
-	// var iconWords = ['Willpower', 'Threat', 'Attack', 'Defense',
-	// 'Leadership',
-	// 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
-	// var regexp = new RegExp('(' + iconWords.join('|') + ')', 'g');
-	// var output;
-	// _.each(_.range(1, 100000), function(i) {
-	// output = input.replace(regexp, '<icon class="$1">');
-	// });
-	//		
-	// var end = new Date().getTime();
-	// console.log(end - start + ' ' + out);
-	// };
-	//	
-	// _ui.test2 = function() {
-	// var start = new Date().getTime();
-	// var input = 'Attach to a hero. Restricted.\nAttached hero gains +2
-	// [Willpower].\nIf attached hero is Aragorn, he also gains a [Spirit]
-	// resource icon.';
-	// var iconWords = ['Willpower', 'Threat', 'Attack', 'Defense',
-	// 'Leadership',
-	// 'Tactics', 'Lore', 'Spirit', 'Baggins', 'Fellowship'];
-	// var output;
-	// _.each(_.range(1, 100000), function(i) {
-	// _.each(iconWords, function(word) {
-	// oiutput = input.replace(word, '<icon class="$1">');
-	// });
-	// });
-	//		
-	// var end = new Date().getTime();
-	// console.log(end - start + ' ' + out);
-	// };
 
 	_ui.toHtmlText = function(input) {
 		if (_.isUndefined(input)) {
@@ -588,27 +525,23 @@ ordb.ui = ordb.ui || {};
 		var output = input;
 
 		// icons
-		var iconWordsRegExp = new RegExp('\\[('
-				+ ordb.dict.iconWords.join('|') + ')\\]', 'g');
+		var iconWordsRegExp = new RegExp('\\[(' + ordb.dict.iconWords.join('|') + ')\\]', 'g');
 		output = output.replace(iconWordsRegExp, function(g0, g1) {
 			return '<i class="db-icon db-icon-' + g1.toLowerCase() + '"></i>'
 		});
 
 		// traits
-		output = output.replace(/\[t(?: ([^\[\]]+))?\]([^\[]+)\[\/t\]/g,
-				function(g0, g1, g2) {
-					return '<i><strong>' + _ui.toSearchLinkTrait(g2, g1)
-							+ '</strong></i>';
-				});
+		var traitRegExp = /\[t(?: ([^\[\]]+))?\]([^\[]+)\[\/t\]/g;
+		output = output.replace(traitRegExp, function(g0, g1, g2) {
+			return '<i><strong>' + _ui.toSearchLinkTrait(g2, g1) + '</strong></i>';
+		});
 
 		// trigger words
 		var triggerWords = ordb.dict.triggerWords[ordb.static.language];
 		if (ordb.static.language !== 'en') {
-			triggerWords = triggerWords
-					.concat(ordb.dict.triggerWords['en']);
+			triggerWords = triggerWords.concat(ordb.dict.triggerWords['en']);
 		}
-		var triggerWordsRegExp = new RegExp(
-				'(' + triggerWords.join('|') + ':)', 'g');
+		var triggerWordsRegExp = new RegExp('(' + triggerWords.join('|') + ':)', 'g');
 		output = output.replace(triggerWordsRegExp, '<strong>$1</strong>');
 
 		// italics
@@ -622,8 +555,7 @@ ordb.ui = ordb.ui || {};
 		output = pStart + output.replace(/\n/g, pEnd + pStart) + pEnd;
 
 		// victory
-		var victoryRegExp = new RegExp(pStart
-				+ '((?:Victory|Zwycięstwo|Sieg) [0-9]+\.)' + pEnd);
+		var victoryRegExp = new RegExp(pStart + '((?:Victory|Zwycięstwo|Sieg) [0-9]+\.)' + pEnd);
 		output = output.replace(victoryRegExp, pStartVictory + '$1' + pEnd);
 
 		return output;
@@ -643,122 +575,65 @@ ordb.ui = ordb.ui || {};
 	};
 
 	_ui.colors = {
-		factions : {
-			'astra-militarum' : {
-				bg : '#3C3C3C',
-				fg : '#FFF'
+		factions: {
+			'astra-militarum': {
+				bg: '#3C3C3C',
+				fg: '#FFF'
 			},
-			chaos : {
-				bg : '#EA5400',
-				fg : '#FFF'
+			chaos: {
+				bg: '#EA5400',
+				fg: '#FFF'
 			},
-			'dark-eldar' : {
-				bg : '#AF4D9D',
-				fg : '#000'
+			'dark-eldar': {
+				bg: '#AF4D9D',
+				fg: '#000'
 			},
-			eldar : {
-				bg : '#EADA67',
-				fg : '#000'
+			eldar: {
+				bg: '#EADA67',
+				fg: '#000'
 			},
-			ork : {
-				bg : '#407424',
-				fg : '#FFF'
+			ork: {
+				bg: '#407424',
+				fg: '#FFF'
 			},
-			'space-marines' : {
-				bg : '#095DAD',
-				fg : '#FFF'
+			'space-marines': {
+				bg: '#095DAD',
+				fg: '#FFF'
 			},
-			tau : {
-				bg : '#4CD0DC'
+			tau: {
+				bg: '#4CD0DC'
 			},
-			tyranid : {
-				bg : '#A32618',
-				fg : '#FFF'
+			tyranid: {
+				bg: '#A32618',
+				fg: '#FFF'
 			},
-			necron : {
-				bg : '#57D8A9',
-				fg : '#000'
+			necron: {
+				bg: '#57D8A9',
+				fg: '#000'
 			},
-			neutral : {
-				bg : '#BBB',
-				fg : '#000'
+			neutral: {
+				bg: '#BBB',
+				fg: '#000'
 			}
 		},
-		types : {
-			army : {
-				bg : '#ED2626'
+		types: {
+			army: {
+				bg: '#ED2626'
 			},
-			attachment : {
-				bg : '#419441'
+			attachment: {
+				bg: '#419441'
 			},
-			event : {
-				bg : '#F0AD36'
+			event: {
+				bg: '#F0AD36'
 			},
-			support : {
-				bg : '#3B84CC'
+			support: {
+				bg: '#3B84CC'
 			},
-			synapse : {
-				bg : '#B848A3'
+			synapse: {
+				bg: '#B848A3'
 			}
 		}
 	};
-
-	// _ui.factionColors['astra-militarum'] = {
-	// bg: '#3C3C3C',
-	// fg: '#FFF'
-	// };
-	// _ui.factionColors['chaos'] = {
-	// bg: '#EA5400',
-	// fg: '#FFF'
-	// };
-	// _ui.factionColors['dark-eldar'] = {
-	// bg: '#AF4D9D',
-	// fg: '#000'
-	// };
-	// _ui.factionColors['eldar'] = {
-	// bg: '#EADA67',
-	// fg: '#000'
-	// };
-	// _ui.factionColors['ork'] = {
-	// bg: '#407424',
-	// fg: '#FFF'
-	// };
-	// _ui.factionColors['space-marines'] = {
-	// bg: '#095DAD',
-	// fg: '#FFF'
-	// };
-	// _ui.factionColors['tau'] = {
-	// bg: '#4CD0DC'
-	// };
-	// _ui.factionColors['tyranid'] = {
-	// bg: '#A32618',
-	// fg: '#FFF'
-	// };
-	// _ui.factionColors['necron'] = {
-	// bg: '#57D8A9',
-	// fg: '#000'
-	// };
-	// _ui.factionColors['neutral'] = {
-	// bg: '#BBB',
-	// fg: '#000'
-	// };
-
-	// _ui.typeColors = [];
-	// _ui.typeColors['army'] = {
-	// bg: '#ED2626'
-	// };
-	// _ui.typeColors['attachment'] = {
-	// bg: '#419441'
-	// };
-	// _ui.typeColors['support'] = {
-	// bg: '#3B84CC'
-	// };
-	// _ui.typeColors['event'] = {
-	// bg: '#F0AD36'
-	// };
-	// _ui.typeColors['synapse'] = {
-	// bg: '#B848A3'
-	// };
 
 	_ui.writeAttr = function(name, value) {
 		return name + '="' + value + '"';
@@ -780,7 +655,7 @@ ordb.ui = ordb.ui || {};
 
 	_ui.writeCardImgElem = function(imageBase, attrs) {
 		return '<img ' + _ui.writeAttrs($.extend({
-			src : _ui.toCardImage(imageBase)
+			src: _ui.toCardImage(imageBase)
 		}, attrs)) + ' />';
 	};
 
@@ -792,68 +667,79 @@ ordb.ui = ordb.ui || {};
 		//
 		// create suggestion engine
 		//
+
+		options = options || {};
+
+		var sourceCards = ordb.dict.cards;
+		if (options.playerDeckOnly) {
+			sourceCards = ordb.dict.playerDeckCards;
+		}
 		var cards = new Bloodhound({
-			datumTokenizer : Bloodhound.tokenizers.obj.whitespace('name'),
-			queryTokenizer : Bloodhound.tokenizers.whitespace,
-			local : $.map(ordb.dict.cards, function(card) {
+			datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+			queryTokenizer: Bloodhound.tokenizers.whitespace,
+			local: $.map(sourceCards, function(card) {
 				return {
-					name : card.name,
-					card : card
+					name: card.name,
+					card: card
 				};
 			})
 		});
 
 		var traits = new Bloodhound({
-			datumTokenizer : Bloodhound.tokenizers.obj.whitespace('description'),
-			queryTokenizer : Bloodhound.tokenizers.whitespace,
-			local : ordb.dict.traits
+			datumTokenizer: Bloodhound.tokenizers.obj.whitespace('description'),
+			queryTokenizer: Bloodhound.tokenizers.whitespace,
+			local: ordb.dict.traits
 		});
 
 		var keywords = new Bloodhound({
-			datumTokenizer : Bloodhound.tokenizers.obj.whitespace('description'),
-			queryTokenizer : Bloodhound.tokenizers.whitespace,
-			local : ordb.dict.keywords
+			datumTokenizer: Bloodhound.tokenizers.obj.whitespace('description'),
+			queryTokenizer: Bloodhound.tokenizers.whitespace,
+			local: ordb.dict.keywords
 		});
 
 		cards.initialize();
 		traits.initialize();
 		keywords.initialize();
-		
+
 		//
 		// build typeahed object
 		//
-		var $typeahead = $(options.selector).typeahead({
-			hint : true,
-			highlight : true,
-			minLength : 1
-		}, {
-			name : 'cards',
-			displayKey : 'name',
-			source : cards.ttAdapter(),
-			templates : {
-				suggestion : Handlebars.compile('{{name}}&nbsp;<span class="tt-no-highlight">{{card.setName}} | {{card.sphereDisplay}} | {{card.typeDisplay}} | {{card.traits}}</span>'),
-				header : '<div class="tt-multi-header">' + ordb.dict.messages['core.card']+ '</div>'
-			}
-		}, {
-			name : 'traits',
-			displayKey : 'description',
-			source : traits.ttAdapter(),
-			templates : {
-				header : '<div class="tt-multi-header">' + ordb.dict.messages['core.trait'] + '</div>'
-			}
-		}, {
-			name : 'keywords',
-			displayKey : 'description',
-			source : keywords.ttAdapter(),
-			templates : {
-				header : '<div class="tt-multi-header">' + ordb.dict.messages['core.keyword'] + '</div>'
-			}
-		});
-		
+		var $typeahead = $(options.selector).typeahead(
+				{
+					hint: true,
+					highlight: true,
+					minLength: 1
+				},
+				{
+					name: 'cards',
+					displayKey: 'name',
+					source: cards.ttAdapter(),
+					templates: {
+						suggestion: Handlebars.compile('{{name}}&nbsp;<span class="tt-no-highlight">'
+								+ '{{card.setName}} | {{card.sphereDisplay}} '
+								+ '| {{card.typeDisplay}} | {{card.traits}}</span>'),
+						header: '<div class="tt-multi-header">' + ordb.dict.messages['core.card'] + '</div>'
+					}
+				}, {
+					name: 'traits',
+					displayKey: 'description',
+					source: traits.ttAdapter(),
+					templates: {
+						header: '<div class="tt-multi-header">' + ordb.dict.messages['core.trait'] + '</div>'
+					}
+				}, {
+					name: 'keywords',
+					displayKey: 'description',
+					source: keywords.ttAdapter(),
+					templates: {
+						header: '<div class="tt-multi-header">' + ordb.dict.messages['core.keyword'] + '</div>'
+					}
+				});
+
 		//
 		// put values from filter object into input
 		//
-		var $input = $(options.selector);		
+		var $input = $(options.selector);
 		if (filter.has('traits')) {
 			$input.val(filter.get('traits'))
 		} else if (filter.has('keywords')) {
@@ -883,7 +769,8 @@ ordb.ui = ordb.ui || {};
 						obj['keywords'] = suggestion.description;
 					}
 				} else if (text) {
-					if (!(filter.has('techName') || filter.has('traits') || filter.has('keywords') || filter.has('text'))) {
+					if (!(filter.has('techName') || filter.has('traits') || filter.has('keywords') || filter
+							.has('text'))) {
 						obj['text'] = text;
 					}
 				} else {
@@ -929,7 +816,7 @@ ordb.ui = ordb.ui || {};
 		$('#textFilter .btn').click(function() {
 			filter.trigger('change', filter);
 		});
-		
+
 		return $typeahead;
 	};
 
@@ -951,11 +838,11 @@ ordb.ui = ordb.ui || {};
 		css = css || {};
 		if (css.backgroundColor) {
 			$('#wrapper').css({
-				backgroundColor : css.backgroundColor
+				backgroundColor: css.backgroundColor
 			});
 		} else {
 			$('#wrapper').css({
-				backgroundColor : ''
+				backgroundColor: ''
 			});
 		}
 	};
@@ -1006,7 +893,7 @@ ordb.deck = ordb.deck || {};
 			var member = {
 				cardId: card.id,
 				quantity: 0,
-				availableQuantity : _.isNumber(card.quantity) ? card.quantity : 3
+				availableQuantity: _.isNumber(card.quantity) ? card.quantity : 3
 			};
 			playerDeckMembers.push(member);
 		});
@@ -1017,8 +904,7 @@ ordb.deck = ordb.deck || {};
 	// predicate for cards from regular decks (on alignment circle)
 	//
 	_deck.buildRegularDeckCardPredicate = function(warlord) {
-		var alliedDeckFactions = _.pluck(_deck
-				.getAlliedDeckFactions(warlord.id), 'techName');
+		var alliedDeckFactions = _.pluck(_deck.getAlliedDeckFactions(warlord.id), 'techName');
 
 		return function(card) {
 			// invalid type
@@ -1076,8 +962,7 @@ ordb.deck = ordb.deck || {};
 	_deck.buildCommonCardPredicate = function() {
 		return function(card) {
 			// valid type and not in signature squad and not loyal
-			return _deck.isValidDeckCardType(card.type)
-					&& _.isUndefined(card.warlordId) && card.loyal === false;
+			return _deck.isValidDeckCardType(card.type) && _.isUndefined(card.warlordId) && card.loyal === false;
 		};
 	};
 
@@ -1089,8 +974,7 @@ ordb.deck = ordb.deck || {};
 			// valid type and has given trait
 			var outcome = _deck.isValidDeckCardType(card.type);
 			if (outcome && card.traitEn) {
-				outcome = _.indexOf(card.traitEn.trim().toLowerCase().split(
-						/ *\. */), trait) >= 0;
+				outcome = _.indexOf(card.traitEn.trim().toLowerCase().split(/ *\. */), trait) >= 0;
 			} else {
 				outcome = false;
 			}
@@ -1099,14 +983,11 @@ ordb.deck = ordb.deck || {};
 	};
 
 	_deck.buildRegularDeckFactionPredicate = function(warlord) {
-		var circleFactions = _.filter(ordb.dict.factions,
-				function(faction) {
-					return faction.techName != 'neutral'
-							&& faction.techName != 'necron'
-							&& faction.techName != 'tyranid';
-				});
+		var circleFactions = _.filter(ordb.dict.factions, function(faction) {
+			return faction.techName != 'neutral' && faction.techName != 'necron' && faction.techName != 'tyranid';
+		});
 		var faction = _.findWhere(ordb.dict.factions, {
-			techName : warlord.faction
+			techName: warlord.faction
 		});
 
 		return function(faction) {
@@ -1131,8 +1012,7 @@ ordb.deck = ordb.deck || {};
 
 	_deck.RegularDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
-			return _.filter(ordb.dict.factions, _deck
-					.buildRegularDeckFactionPredicate(warlord));
+			return _.filter(ordb.dict.factions, _deck.buildRegularDeckFactionPredicate(warlord));
 		};
 
 		this.getValidDeckFactions = function() {
@@ -1140,8 +1020,7 @@ ordb.deck = ordb.deck || {};
 		};
 
 		this.filterValidDeckCards = function(cards) {
-			return _
-					.filter(cards, _deck.buildRegularDeckCardPredicate(warlord));
+			return _.filter(cards, _deck.buildRegularDeckCardPredicate(warlord));
 		};
 	};
 
@@ -1152,14 +1031,12 @@ ordb.deck = ordb.deck || {};
 
 		this.getValidDeckFactions = function() {
 			return _.filter(ordb.dict.factions, function(faction) {
-				return faction.techName == 'tyranid'
-						|| faction.techName == 'neutral';
+				return faction.techName == 'tyranid' || faction.techName == 'neutral';
 			});
 		};
 
 		this.filterValidDeckCards = function(cards) {
-			var warlordFaction = _deck
-					.buildWarlordFactionCardPredicate(warlord);
+			var warlordFaction = _deck.buildWarlordFactionCardPredicate(warlord);
 			var neutralNonArmy = function(card) {
 				return card.faction == 'neutral' && card.type != 'army';
 			};
@@ -1181,8 +1058,7 @@ ordb.deck = ordb.deck || {};
 		};
 
 		this.filterValidDeckCards = function(cards) {
-			var warlordFaction = _deck
-					.buildWarlordFactionCardPredicate(warlord);
+			var warlordFaction = _deck.buildWarlordFactionCardPredicate(warlord);
 			var common = _deck.buildCommonCardPredicate(warlord);
 			var nonTyranidArmy = function(card) {
 				return card.faction != 'tyranid' && card.type == 'army';
@@ -1191,22 +1067,20 @@ ordb.deck = ordb.deck || {};
 				return card.faction == 'neutral';
 			}
 			return _.filter(cards, function(card) {
-				return warlordFaction(card) || neutral(card)
-						|| nonTyranidArmy(card) && common(card);
+				return warlordFaction(card) || neutral(card) || nonTyranidArmy(card) && common(card);
 			});
 		};
 	};
 
 	_deck.CommanderStarblazeDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
-			return _.filter(ordb.dict.factions, _deck
-					.buildRegularDeckFactionPredicate(warlord));
+			return _.filter(ordb.dict.factions, _deck.buildRegularDeckFactionPredicate(warlord));
 		};
 
 		this.getValidDeckFactions = function() {
 			var filtered = this.getAlliedDeckFactions();
 			filtered.push(_.findWhere(ordb.dict.factions, {
-				techName : 'astra-militarum'
+				techName: 'astra-militarum'
 			}));
 			return filtered;
 		};
@@ -1215,8 +1089,7 @@ ordb.deck = ordb.deck || {};
 			var standard = _deck.buildRegularDeckCardPredicate(warlord);
 			var common = _deck.buildCommonCardPredicate();
 			return _.filter(cards, function(card) {
-				return standard(card)
-						|| (common(card) && card.faction == 'astra-militarum');
+				return standard(card) || (common(card) && card.faction == 'astra-militarum');
 			});
 		};
 
@@ -1224,14 +1097,13 @@ ordb.deck = ordb.deck || {};
 
 	_deck.GorzodDeckHelper = function(warlord) {
 		this.getAlliedDeckFactions = function() {
-			return _.filter(ordb.dict.factions, _deck
-					.buildRegularDeckFactionPredicate(warlord));
+			return _.filter(ordb.dict.factions, _deck.buildRegularDeckFactionPredicate(warlord));
 		};
 
 		this.getValidDeckFactions = function() {
 			var filtered = this.getAlliedDeckFactions();
 			filtered.push(_.findWhere(ordb.dict.factions, {
-				techName : 'space-marines'
+				techName: 'space-marines'
 			}));
 			return filtered;
 		};
@@ -1240,13 +1112,9 @@ ordb.deck = ordb.deck || {};
 			var standard = _deck.buildRegularDeckCardPredicate(warlord);
 			var common = _deck.buildCommonCardPredicate();
 			var vehicle = _deck.buildTraitCardPredicate("vehicle");
-			return _
-					.filter(
-							cards,
-							function(card) {
-								return standard(card)
-										|| (common(card) && vehicle(card) && card.faction == 'space-marines');
-							});
+			return _.filter(cards, function(card) {
+				return standard(card) || (common(card) && vehicle(card) && card.faction == 'space-marines');
+			});
 		};
 	};
 

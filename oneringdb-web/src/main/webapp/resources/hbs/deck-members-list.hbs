@@ -10,8 +10,8 @@
 				</div>				
 			</div>
 			<div class="col-xs-12 col-sm-7">
-				<div class="type-col text-center"><span>{{loc 'card.type'}}</span></div>
 				<div class="sphere-col text-center"><span>{{loc 'card.sphere'}}</span></div>
+				<div class="type-col text-center"><span>{{loc 'card.type'}}</span></div>
 				<div class="attr-col text-center">
 					<span data-toggle="tooltip" data-placement="top" title="{{loc 'card.cost'}}">{{loc 'card.cost.sh'}}</span>
 				</div>
@@ -47,17 +47,16 @@
 			{{#with card}}
 			<div class="col-xs-12 col-sm-5">				
 				<div class="name-col">
-					<a data-card-id="{{id}}" data-image-base="{{imageBase}}" style="cursor: pointer;">{{name}}</a>
-					<br />
-					<span class="secondary-text">{{searchLinkSetName this}}{{#if card.traits}}&nbsp;|&nbsp;{{searchLinkTraits this}}{{/if}}</span>
+					<div class="name"><a data-card-id="{{id}}" data-image-base="{{imageBase}}" style="cursor: pointer;">{{name}}</a></div>
+					<div class="set"><span class="secondary-text">{{searchLinkSetName this}}</span></div>
 				</div>				
 			</div>
 			<div class="col-xs-12 col-sm-7 .attrs">
-				<div class="type-col text-center">
-					<i style="font-size: 24px;" class="db-icon db-icon-{{type}}"></i>
+				<div class="sphere-col text-center bg-{{sphere}}">
+					<i class="db-icon db-icon-{{sphere}}"></i>
 				</div>
-				<div class="sphere-col text-center">
-					<i style="font-size: 24px;" class="db-icon db-icon-{{sphere}}"></i>
+				<div class="type-col text-center">
+					<i class="db-icon db-icon-{{type}}"></i>
 				</div>
 				<div class="attr-col text-center">
 					{{#smartIf threatCost}}<span class="attr-threat-cost">{{escapeAttrX threatCost}}</span>{{/smartIf}}

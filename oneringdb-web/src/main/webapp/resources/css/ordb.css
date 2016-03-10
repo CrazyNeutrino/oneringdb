@@ -10,6 +10,11 @@
   	   url(#{resource['fonts/glyphicons-halflings-regular.svg']}.svg#glyphicons_halflingsregular) format('svg');
 }
 
+@font-face {
+  font-family: 'Ring Bearer';
+  src: url(#{resource['fonts/ring-bearer.ttf']});
+}
+
 html,body {	height: 100%; }
 body {overflow-y: scroll; }
 
@@ -165,9 +170,9 @@ footer.footer > .container > p:first-child {
     top: -1px;
 }
 
-.modal.modal-member .card {
+/* .modal.modal-member .card {
 	width: 350px;
-}
+} */
 
 .tournament-group {
 	display: inline-block;
@@ -282,23 +287,23 @@ footer.footer > .container > p:first-child {
  *
  */
 
-.mg-container .mg ul {
+.members-groups-view .mg ul {
 	list-style: none;
 	margin: 5px 0px;
 	padding: 0px;
 }
 
-.mg-container .mg .db-icon {
+.members-groups-view .mg .db-icon {
 	margin: 0px 2px;	
 }
 
-.mg-container .mg .mg-title {
+.members-groups-view .mg .mg-title {
 	font-weight: bold;
 }
 
 .mg-control-group,.mg-control-sort { margin-bottom: 5px; }
 .mg-control-group div:first-child, .mg-control-sort div:first-child { padding-right: 0px; }
-.mg .cq-icon:before { margin: 0em .2em }
+/* .mg .db-icon:before { margin: 0em .2em } */
 
 .deck-container .mg {
 	margin-bottom: 15px;
@@ -601,7 +606,7 @@ label.required:after {
 	padding-top: 10px;
 }
 
-.members-container .secondary-text {
+.members-list-view .secondary-text {
 	font-size: 0.8em;
 	color: #777;
 }
@@ -634,7 +639,7 @@ label.required:after {
 	padding: 0px 10px;
 } */
 
-.draw-container > a > img {
+.draw-ctr > a > img {
 	margin: 0px 5px 5px 0px;
 }
 
@@ -744,6 +749,9 @@ table.table-with-btn > tbody > tr > td {
 	cursor: pointer;
 }
 
+/*
+ * deck members list
+ */
 .members-list-header { border-bottom: 2px solid #ddd; font-weight: bold; }
 .members-list-item { padding: 2px 0px; }
 .members-list-item:nth-child(even) { background-color: #f9f9f9; }
@@ -752,14 +760,14 @@ table.table-with-btn > tbody > tr > td {
 .members-list-item > div > div > div { display: table; }
 .members-list-header > div > div > div > div,
 .members-list-item > div > div > div > div { display: table-cell; }
-.members-list-header .type-col,
-.members-list-item .type-col { width: 2em; }
-.members-list-header .sphere-col,
-.members-list-item .sphere-col { width: 2em; }
-.members-list-header .attr-col,
-.members-list-item .attr-col { width: 2.5em; }
-.members-list-item .type-col,
-.members-list-item .sphere-col { font-size: 1.8em; }
+
+.members-list-item .name-col .set { line-height: 1em; }
+.members-list-header .sphere-col { width: 2.7em; }
+.members-list-item .sphere-col { width: 1.5em; font-size: 1.8em; border-radius: 2px; }
+.members-list-header .type-col { width: 3.6em; }
+.members-list-item .type-col { width: 2em; font-size: 1.8em; }
+.members-list-header .attr-col { width: 3em; }
+.members-list-item .attr-col { width: 2.5em; } 
 .members-list-item .attr-col { font-size: 1.2em; font-weight: bold; }
 
 .deck-list-filter-container .filter-group,

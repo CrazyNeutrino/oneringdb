@@ -9,7 +9,7 @@ ordb.deck = ordb.deck || {};
 			options.data = options.data.replace(/%5B%5D/g, '');
 		}
 	});
-	
+
 	/**
 	 * @memberOf _deck
 	 */
@@ -45,8 +45,8 @@ ordb.deck = ordb.deck || {};
 				messages: messages
 			}));
 
-			options.$target.prepend($template);			
-						
+			options.$target.prepend($template);
+
 			var hasDangerKind = _.some(messages, function(message) {
 				return message.kind == 'danger';
 			});
@@ -211,15 +211,17 @@ ordb.deck = ordb.deck || {};
 			button: options.button
 		}));
 		new _deck.DeckDescriptionView({
-			el : $modal.find('.deck-description-view')
+			el: $modal.find('.deck-description-view')
 		}).render(deck, {
-			publish : options.publish
+			publish: options.publish
 		});
 
 		if (options.button.clickHandler) {
-			$modal.find('#' + options.button.id).click(function() {
-				options.button.clickHandler($modal, $modal.find('#deckName').val().trim(), $modal.find('#deckDescription').val().trim());
-			});
+			$modal.find('#' + options.button.id).click(
+					function() {
+						options.button.clickHandler($modal, $modal.find('#deckName').val().trim(), $modal.find(
+								'#deckDescription').val().trim());
+					});
 		}
 
 		$modal.modal();
@@ -286,18 +288,18 @@ ordb.deck = ordb.deck || {};
 			}
 		});
 	};
-	
+
 	_deck.MembersFilter = Backbone.Model.extend({
 		isEmpty: function() {
 			return _.isEmpty(this.toJSON());
 		},
-		
+
 		/**
-		 * @memberOf _deck.MembersFilter
+		 * @memberOf MembersFilter
 		 */
 		filter: function(members) {
 			console.log('membersFilter.filter: ' + members.length);
-			
+
 			var cardsFilter = new ordb.card.CardsFilter();
 			var cardsFilterAttrs = {
 				sphere: this.get('sphere'),
@@ -307,25 +309,26 @@ ordb.deck = ordb.deck || {};
 			_.each(ordb.filter.CARD_ATTRS, function(attr) {
 				cardsFilterAttrs[attr] = this.get(attr);
 			}, this);
-			cardsFilter.set(cardsFilterAttrs);					
+			cardsFilter.set(cardsFilterAttrs);
 
 			var cards = _.pluck(members.toJSON(), 'card');
 			var ids = _.pluck(cardsFilter.filter(cards), 'id');
 
 			var quantities = this.get('quantity');
 			var filteredMembers = members.filter(function(member) {
-				return (!quantities || _.contains(quantities, member.get('quantity'))) && _.contains(ids, member.get('card').id);
+				return (!quantities || _.contains(quantities, member.get('quantity')))
+						&& _.contains(ids, member.get('card').id);
 			});
-			
+
 			return filteredMembers;
 		}
 	});
 
 	_deck.PageView = Backbone.View.extend({
 		el: '.content',
-		
+
 		/**
-		 * @memberOf _deck.PageView
+		 * @memberOf PageView
 		 */
 		renderMessages: function(options) {
 			_deck.renderMessages({
@@ -378,15 +381,21 @@ ordb.deck = ordb.deck || {};
 		}
 	});
 
-	_deck.MemberGroupsView = Backbone.View.extend({
-		el: '.mg-container',
+	_deck.MembersGroupsView = Backbone.View.extend({
+		className: 'members-groups-view',
 		
 		/**
-		 * @memberOf _deck.MemberGroupsView
+		 * @memberOf MemberGroupsView
 		 */
-		render: function(members, options) {
-			options = options || {};
-
+		initialize: function(options) {
+			if (!options || !options.deck) {
+				throw "Deck is undefined";
+			}
+			this.deck = options.deck;
+			this.readOnly = options.readOnly || true;
+		},
+		
+		render: function() {
 			var view = this;
 			if (_.isUndefined(view.groupKey)) {
 				view.groupKey = 'typeDisplay';
@@ -394,7 +403,8 @@ ordb.deck = ordb.deck || {};
 			if (_.isUndefined(view.sortKey)) {
 				view.sortKey = 'name';
 			}
-
+			
+			var members = this.deck.get('members');
 			var groups = ordb.util.membersGroupBy(members, view.groupKey, view.sortKey);
 
 			view.$el.html(Handlebars.templates['members-groups']({
@@ -417,11 +427,8 @@ ordb.deck = ordb.deck || {};
 			var $popovers = view.$el.find('a[data-card-id]').popover({
 				html: true,
 				trigger: 'hover',
-				template: '<div class="popover popover-card" role="tooltip">'
-							+ '<div class="arrow"></div>'
-							+ '<h3 class="popover-title"></h3>'
-							+ '<div class="popover-content"></div>'
-						+ '</div>',
+				template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
+						+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
 				content: function() {
 					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
 				}
@@ -431,26 +438,44 @@ ordb.deck = ordb.deck || {};
 				$popovers.popover('hide');
 				_deck.showDeckMemberModal(members.findWhere({
 					cardId: $(this).data('card-id')
-				}), options);
+				}), {
+					readOnly: this.readOnly
+				});
 			});
+			
+			return this;
 		}
 	});
-	
+
 	_deck.MembersListView = Backbone.View.extend({
-		el: '.members-container',
+		className: 'members-list-view',
 		
 		/**
-		 * @memberOf _deck.MembersListView
+		 * @memberOf MembersListView
 		 */
-		render: function(members, options) {
+		initialize: function(options) {
+			if (!options || !options.deck) {
+				throw "Deck is undefined";
+			}
+			this.deck = options.deck;
+			this.config = options.config;
+			
+			this.deck.get('filteredMembers').on('reset', this.render, this);
+			this.config.on('change:layout', this.render, this);
+		},
+		
+		render: function() {
+			var layout = this.config.get('layout');
+			var members = this.deck.get('filteredMembers');
+			
 			var templateName = undefined;
-			if (options.layout === 'grid-2') {
+			if (layout === 'grid-2') {
 				templateName = 'deck-members-grid-2';
-			} else if (options.layout === 'grid-3') {
+			} else if (layout === 'grid-3') {
 				templateName = 'deck-members-grid-3';
-			} else if (options.layout === 'grid-4') {
+			} else if (layout === 'grid-4') {
 				templateName = 'deck-members-grid-4';
-			} else if (options.layout === 'grid-6') {
+			} else if (layout === 'grid-6') {
 				templateName = 'deck-members-grid-6';
 			} else {
 				// list layout is the default
@@ -459,7 +484,7 @@ ordb.deck = ordb.deck || {};
 
 			var template = Handlebars.templates[templateName]({
 				members: members.toJSON(),
-				readOnly: options.readOnly
+				readOnly: this.readOnly
 			});
 			this.$el.html(template);
 
@@ -488,14 +513,12 @@ ordb.deck = ordb.deck || {};
 			var $popovers = this.$el.find('a[data-card-id]').popover({
 				html: true,
 				trigger: 'hover',
-				placement: 'auto right',	
-				template: '<div class="popover popover-card" role="tooltip">'
-							+ '<div class="arrow"></div>'
-							+ '<h3 class="popover-title"></h3>'
-							+ '<div class="popover-content"></div>'
-						+ '</div>',
+				placement: 'auto right',
+				template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
+						+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
 				content: function() {
-					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
+					return Handlebars.templates['card-text-content'](ordb.dict
+							.findCard($(this).data('card-id')));
 				}
 			});
 
@@ -503,62 +526,74 @@ ordb.deck = ordb.deck || {};
 				$popovers.popover('hide');
 				_deck.showDeckMemberModal(members.findWhere({
 					cardId: $(this).data('card-id')
-				}), options);
+				}), {
+					readOnly: this.readOnly
+				});
 			});
+			
+			return this;
 		}
 	});
 
 	_deck.DeckDescriptionView = Backbone.View.extend({
-		el: '.deck-description-view',
+		className: 'deck-description-view',
+		events: {
+			'keyup #deckName': 'onDeckNameKeyUp',
+			'keyup #deckDescription': 'onDeckDescriptionKeyUp'
+		},
 		
 		/**
-		 * @memberOf _deck.DeckDescriptionView
+		 * @memberOf DeckDescriptionView
 		 */
-		render: function(deck, options) {
+		initialize: function(options) {
+			if (!options || !options.deck) {
+				throw 'Deck is undefined';
+			}
+			this.deck = options.deck;
+			this.markdown = new Markdown.getSanitizingConverter();
+		},
+
+		render: function(options) {
 			var options = options || {};
 			var view = this;
 
 			var template = Handlebars.templates['deck-description-view']({
-				deck: deck.toJSON(),
+				deck: this.deck.toJSON(),
 				publish: options.publish
 			});
-			view.$el.html(template);						
-			
-			var tournamentType = deck.get('tournamentType');
+			view.$el.html(template);
+
+			var tournamentType = this.deck.get('tournamentType');
 			if (tournamentType) {
 				view.$el.find('.btn[data-tournament-type="' + tournamentType + '"]').addClass('active');
 			}
-			var tournamentPlace = deck.get('tournamentPlace');
+			var tournamentPlace = this.deck.get('tournamentPlace');
 			if (tournamentPlace) {
 				view.$el.find('.btn[data-tournament-place="' + tournamentPlace + '"]').addClass('active');
 			}
-			
+
 			view.$el.find('[data-toggle="tooltip"]').tooltip({
 				container: 'body',
 				trigger: 'hover'
 			});
 			
-			//
-			// event handlers
-			//
-			var markdown = new Markdown.getSanitizingConverter();
-			view.$el.find('#deckName').on('keyup', function() {
-				view.$el.find('#deckNamePreview').empty().html(markdown.makeHtml($(this).val()));
-			});
-			view.$el.find('#deckDescription').on('keyup', function() {
-				view.$el.find('#deckDescriptionPreview').empty().html(markdown.makeHtml($(this).val()));
-			});
-			view.$el.find('.tournament-group .btn-group > .btn').click(function(event) {
-				$(this).toggleClass('active').siblings().removeClass('active');
-			});
+			return this;
+		},
+		
+		onDeckNameKeyUp: function(e) {
+			this.$el.find('#deckNamePreview').empty().html(this.markdown.makeHtml($(e.currentTarget).val()));
+		},
+		
+		onDeckDescriptionKeyUp: function(e) {
+			this.$el.find('#deckDescriptionPreview').empty().html(this.markdown.makeHtml($(e.currentTarget).val()));
 		}
 	});
 
 	_deck.DeckCommentsView = Backbone.View.extend({
 		el: '.deck-comments-view',
-		
+
 		/**
-		 * @memberOf _deck.DeckCommentsView
+		 * @memberOf DeckCommentsView
 		 */
 		render: function(deck, parentView) {
 			var view = this;
@@ -577,20 +612,20 @@ ordb.deck = ordb.deck || {};
 			deck.get('comments').each(function(comment) {
 				addComment(comment, $template.find('ul'));
 			});
-			
+
 			view.$el.html($template);
 
-			view.$el.find('#deckCommentPostButton').click(function() {				
+			view.$el.find('#deckCommentPostButton').click(function() {
 				var attributes = {
 					value: view.$el.find('#deckCommentTextarea').val()
 				};
-				
+
 				var deckComment = new ordb.model.DeckComment();
 				deckComment.listenToOnce(deckComment, 'invalid', function(dc) {
 					parentView.messages = _deck.buildErrorMessage({
 						message: dc.validationError
 					});
-					parentView.renderMessages();					
+					parentView.renderMessages();
 				});
 				deckComment.owner = deck.get('comments').owner;
 				deckComment.save(attributes, {
@@ -608,10 +643,10 @@ ordb.deck = ordb.deck || {};
 							error: response.responseJSON,
 							message: 'error.deck.oper.saveComment'
 						});
-						parentView.renderMessages();						
+						parentView.renderMessages();
 					}
 				});
-			});			
+			});
 		}
 	});
 
@@ -622,25 +657,31 @@ ordb.deck = ordb.deck || {};
 			this.state = new Backbone.Model({
 				advanced: false
 			});
-		},		
+		},
 		buildFilterFromUI: function() {
 			var filter = {};
-			filter.primaryFaction = this.$el.find('.btn-group-filter.filter-faction.primary .btn.active').map(function() {
-				return $(this).data('faction');
-			}).get();
-			filter.secondaryFaction = this.$el.find('.btn-group-filter.filter-faction.secondary .btn.active').map(function() {
-				return $(this).data('faction');
-			}).get();
-			filter.tournamentType = this.$el.find('.btn-group-filter.filter-tournament-type .btn.active').map(function() {
-				return $(this).data('tournament-type');
-			}).get();
-			filter.tournamentPlace = this.$el.find('.btn-group-filter.filter-tournament-place .btn.active').map(function() {
-				return $(this).data('tournament-place');
-			}).get();
-			filter.warlordTechName = this.$el.find('#warlordFilter li[data-node-type="warlord"] > input[type="checkbox"]:checked').map(function() {
+			filter.primaryFaction = this.$el.find('.btn-group-filter.filter-faction.primary .btn.active').map(
+					function() {
+						return $(this).data('faction');
+					}).get();
+			filter.secondaryFaction = this.$el.find('.btn-group-filter.filter-faction.secondary .btn.active').map(
+					function() {
+						return $(this).data('faction');
+					}).get();
+			filter.tournamentType = this.$el.find('.btn-group-filter.filter-tournament-type .btn.active').map(
+					function() {
+						return $(this).data('tournament-type');
+					}).get();
+			filter.tournamentPlace = this.$el.find('.btn-group-filter.filter-tournament-place .btn.active').map(
+					function() {
+						return $(this).data('tournament-place');
+					}).get();
+			filter.warlordTechName = this.$el.find(
+					'#warlordFilter li[data-node-type="warlord"] > input[type="checkbox"]:checked').map(function() {
 				return $(this).val();
 			}).get();
-			filter.setTechName = this.$el.find('#cardSetFilter li[data-node-type="set"] > input[type="checkbox"]:checked').map(function() {
+			filter.setTechName = this.$el.find(
+					'#cardSetFilter li[data-node-type="set"] > input[type="checkbox"]:checked').map(function() {
 				return $(this).val();
 			}).get();
 			filter.setMatchMode = this.$el.find('#setMatchMode input[type="radio"]:checked').val();
@@ -651,7 +692,7 @@ ordb.deck = ordb.deck || {};
 			filter.createDateMax = this.$el.find('#createDateFilter input:eq(1)').val();
 			filter.modifyDateMin = this.$el.find('#modifyDateFilter input:eq(0)').val();
 			filter.modifyDateMax = this.$el.find('#modifyDateFilter input:eq(1)').val();
-			
+
 			var $publishDateFilter = this.$el.find('#publishDateFilter');
 			filter.publishDateMin = $publishDateFilter.find('input:eq(0)').val();
 			filter.publishDateMax = $publishDateFilter.find('input:eq(1)').val();
@@ -659,7 +700,7 @@ ordb.deck = ordb.deck || {};
 			filter.username = this.$el.find('#usernameFilter input').val();
 
 			filter.order = this.$el.find('.deck-sort-container .sort-control').map(function() {
-				return  $(this).val();
+				return $(this).val();
 			}).get();
 
 			_.each(Object.keys(filter), function(key) {
@@ -737,13 +778,13 @@ ordb.deck = ordb.deck || {};
 				});
 			}
 		},
-		
+
 		/**
-		 * @memberOf _deck.DeckListFilterView
+		 * @memberOf DeckListFilterView
 		 */
 		render: function(options) {
 			var view = this;
-			
+
 			options = options || {};
 			options.filter = options.filter || {};
 
@@ -771,7 +812,7 @@ ordb.deck = ordb.deck || {};
 					advanced: true,
 					searchClickHandler: options.searchClickHandler
 				});
-				view.applyFilterToUI(filter);				
+				view.applyFilterToUI(filter);
 			});
 			view.$el.find('#lessButton').click(function() {
 				var filter = view.buildFilterFromUI();
@@ -784,7 +825,7 @@ ordb.deck = ordb.deck || {};
 			view.$el.find('#clearButton').click(function() {
 				view.$el.find('.btn-group-filter.filter-faction .btn').removeClass('active');
 				view.$el.find('input[type="text"]').val('');
-				view.$el.find('input[type="checkbox"]').prop('checked', '');				
+				view.$el.find('input[type="checkbox"]').prop('checked', '');
 				view.$el.find('select').prop('selectedIndex', 0)
 			});
 
@@ -792,10 +833,12 @@ ordb.deck = ordb.deck || {};
 				tree: ordb.dict.buildCardSetTree()
 			});
 			view.$el.find('#cardSetFilter').html(cardSetFilterTemplate);
-			view.$el.find('#cardSetFilter li[data-node-type="cycle"] > input[type="checkbox"]').click(function() {
-				var $this = $(this);
-				$this.siblings().filter('ul').find('li[data-node-type="set"] > input[type="checkbox"]').prop('checked', $this.prop('checked'));
-			});
+			view.$el.find('#cardSetFilter li[data-node-type="cycle"] > input[type="checkbox"]').click(
+					function() {
+						var $this = $(this);
+						$this.siblings().filter('ul').find('li[data-node-type="set"] > input[type="checkbox"]').prop(
+								'checked', $this.prop('checked'));
+					});
 
 			var warlordFilterTemplate = Handlebars.templates['commons-ul-tree']({
 				tree: ordb.dict.buildWarlordTree()
@@ -828,12 +871,12 @@ ordb.deck = ordb.deck || {};
 			// // date range filter
 			// //
 			// view.$el.find('.btn-group-date-range .btn').click(function() {
-			// 	var $this = $(this);				
-			// 	$(this).toggleClass('active').siblings().removeClass('active');
-			// 	if ($this.hasClass('active')) {
-			// 		var range = $this.data('date-range');
-			// 		var filter = $this.closest('.date-range-filter');
-			// 	}
+			// var $this = $(this);
+			// $(this).toggleClass('active').siblings().removeClass('active');
+			// if ($this.hasClass('active')) {
+			// var range = $this.data('date-range');
+			// var filter = $this.closest('.date-range-filter');
+			// }
 			// });
 
 			if (options.searchClickHandler) {
@@ -855,7 +898,7 @@ ordb.deck = ordb.deck || {};
 		el: '.deck-list-data-container',
 
 		/**
-		 * @memberOf _deck.DeckListDataView
+		 * @memberOf DeckListDataView
 		 */
 		render: function(decks, options) {
 			var view = this;
@@ -921,73 +964,73 @@ ordb.deck = ordb.deck || {};
 				});
 				delete membersByCost['-1'];
 				delete membersByCost['undefined'];
-				
+
 				var sortedKeys = _.sortBy(Object.keys(membersByCost), function(key) {
 					return parseInt(key);
 				});
 				var dataByCost = [];
 				_.each(sortedKeys, function(key) {
-					dataByCost.push([parseInt(key), _.reduce(membersByCost[key], function(count, member) {
+					dataByCost.push([ parseInt(key), _.reduce(membersByCost[key], function(count, member) {
 						return count + member.quantity;
-					}, 0)]);
+					}, 0) ]);
 				});
-				
+
 				var colors = [];
 				var base = Highcharts.getOptions().colors[0];
-				
+
 				for (var i = 0; i < 11; i++) {
-		            colors.push(Highcharts.Color(base).brighten((-i) / 20).get());
-		        }
-				
+					colors.push(Highcharts.Color(base).brighten((-i) / 20).get());
+				}
+
 				$(this).highcharts({
-			        chart: {
-			            type: 'column',
-			            spacingBottom: 0,
-			            spacingTop: 0,
-			            spacingLeft: 0,
-			            spacingRight: 0,
-			        },
-			        title: {
-			        	text: ordb.dict.messages['core.cardsByCost'],
-			            style: {
-			            	fontSize: '12px'
-			            }
-			        },
-			        xAxis: {
-			            title: {
-			            	text: null
-			            },
-			        	categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-			        	min: 0,
-			        	max: 10
-			        },
-			        yAxis: {
-			            title: {
-			                text: null
-			            },
-			            min: 0,
-			            max: 26,
-			            tickInterval: 2
-			        },
-			        plotOptions: {
-			        	column: {
-			        		colorByPoint: true,
-			        		colors: colors
-			        	},
-			        	series: {
-			                animation: false
-			            }
-			        },
-			        series: [{
-			        	name: ordb.dict.messages['core.numberOfCards'],
-			        	data: dataByCost,
-			        	showInLegend: false,
-				        pointWidth: 14
-			        }],
-			        credits: false
-			    });
+					chart: {
+						type: 'column',
+						spacingBottom: 0,
+						spacingTop: 0,
+						spacingLeft: 0,
+						spacingRight: 0,
+					},
+					title: {
+						text: ordb.dict.messages['core.cardsByCost'],
+						style: {
+							fontSize: '12px'
+						}
+					},
+					xAxis: {
+						title: {
+							text: null
+						},
+						categories: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
+						min: 0,
+						max: 10
+					},
+					yAxis: {
+						title: {
+							text: null
+						},
+						min: 0,
+						max: 26,
+						tickInterval: 2
+					},
+					plotOptions: {
+						column: {
+							colorByPoint: true,
+							colors: colors
+						},
+						series: {
+							animation: false
+						}
+					},
+					series: [ {
+						name: ordb.dict.messages['core.numberOfCards'],
+						data: dataByCost,
+						showInLegend: false,
+						pointWidth: 14
+					} ],
+					credits: false
+				});
 			});
-			
+
 			//
 			// factions chart
 			//
@@ -1014,7 +1057,7 @@ ordb.deck = ordb.deck || {};
 				});
 				_.each(sortedKeys, function(key) {
 					dataByFaction.push({
-						name: ordb.dict.findFaction(key).name, 
+						name: ordb.dict.findFaction(key).name,
 						y: _.reduce(membersByFaction[key], function(count, member) {
 							return count + member.quantity;
 						}, 0),
@@ -1023,47 +1066,44 @@ ordb.deck = ordb.deck || {};
 				});
 
 				$(this).highcharts({
-			        chart: {
-			            plotBackgroundColor: null,
-			            plotBorderWidth: null,
-			            plotShadow: false,
-			            type: 'pie',
-			            spacing: 0
-			        },
-			        title: {
-			            text: ordb.dict.messages['core.cardsByFaction'],
-			            style: {
-			            	fontSize: '12px'
-			            }
-			        },
-			        tooltip: {
-			            pointFormat: '{series.name}: <b>{point.y}</b>'
-			        },
-			        plotOptions: {
-			            pie: {
-			            	size:'100%',
-			                allowPointSelect: false,
-			                cursor: 'pointer',
-			                dataLabels: {
-			                    enabled: false,
-			                    format: '{point.name}'/*,
-			                    style: {
-			                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-			                    }*/
-			                },
-			                borderWidth: 0
-			            },
-			            series: {
-			                animation: false
-			            }
-			        },
-			        series: [{
-			            name: ordb.dict.messages['core.numberOfCards'],
-			            colorByPoint: true,
-			            data: dataByFaction
-			        }],
-			        credits: false
-			    });
+					chart: {
+						plotBackgroundColor: null,
+						plotBorderWidth: null,
+						plotShadow: false,
+						type: 'pie',
+						spacing: 0
+					},
+					title: {
+						text: ordb.dict.messages['core.cardsByFaction'],
+						style: {
+							fontSize: '12px'
+						}
+					},
+					tooltip: {
+						pointFormat: '{series.name}: <b>{point.y}</b>'
+					},
+					plotOptions: {
+						pie: {
+							size: '100%',
+							allowPointSelect: false,
+							cursor: 'pointer',
+							dataLabels: {
+								enabled: false,
+								format: '{point.name}'
+							},
+							borderWidth: 0
+						},
+						series: {
+							animation: false
+						}
+					},
+					series: [ {
+						name: ordb.dict.messages['core.numberOfCards'],
+						colorByPoint: true,
+						data: dataByFaction
+					} ],
+					credits: false
+				});
 			});
 
 			//
@@ -1081,13 +1121,13 @@ ordb.deck = ordb.deck || {};
 				});
 
 				var dataByType = [];
-				var order = ['army', 'attachment', 'support', 'event', 'synapse'];
+				var order = [ 'army', 'attachment', 'support', 'event', 'synapse' ];
 				var sortedKeys = _.sortBy(Object.keys(membersByType), function(key) {
 					return order.indexOf(key);
 				});
 				_.each(sortedKeys, function(key) {
 					dataByType.push({
-						name: ordb.dict.findCardType(key).name, 
+						name: ordb.dict.findCardType(key).name,
 						y: _.reduce(membersByType[key], function(count, member) {
 							return count + member.quantity;
 						}, 0),
@@ -1096,49 +1136,51 @@ ordb.deck = ordb.deck || {};
 				});
 
 				$(this).highcharts({
-			        chart: {
-			            plotBackgroundColor: null,
-			            plotBorderWidth: null,
-			            plotShadow: false,
-			            type: 'pie',
-			            spacing: 0
-			        },
-			        title: {
-			            text: ordb.dict.messages['core.cardsByType'],
-			            style: {
-			            	fontSize: '12px'
-			            }
-			        },
-			        tooltip: {
-			            pointFormat: '{series.name}: <b>{point.y}</b>'
-			        },
-			        plotOptions: {
-			            pie: {
-			            	size:'100%',
-			                allowPointSelect: false,
-			                cursor: 'pointer',
-			                dataLabels: {
-			                    enabled: false,
-			                    format: '{point.name}'/*,
-			                    style: {
-			                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-			                    }*/
-			                },
-			                borderWidth: 0
-			            },
-			            series: {
-			                animation: false
-			            }
-			        },
-			        series: [{
-			            name: ordb.dict.messages['core.numberOfCards'],
-			            colorByPoint: true,
-			            data: dataByType
-			        }],
-			        credits: false
-			    });
+					chart: {
+						plotBackgroundColor: null,
+						plotBorderWidth: null,
+						plotShadow: false,
+						type: 'pie',
+						spacing: 0
+					},
+					title: {
+						text: ordb.dict.messages['core.cardsByType'],
+						style: {
+							fontSize: '12px'
+						}
+					},
+					tooltip: {
+						pointFormat: '{series.name}: <b>{point.y}</b>'
+					},
+					plotOptions: {
+						pie: {
+							size: '100%',
+							allowPointSelect: false,
+							cursor: 'pointer',
+							dataLabels: {
+								enabled: false,
+								format: '{point.name}'/*
+														 * , style: { color:
+														 * (Highcharts.theme &&
+														 * Highcharts.theme.contrastTextColor) ||
+														 * 'black' }
+														 */
+							},
+							borderWidth: 0
+						},
+						series: {
+							animation: false
+						}
+					},
+					series: [ {
+						name: ordb.dict.messages['core.numberOfCards'],
+						colorByPoint: true,
+						data: dataByType
+					} ],
+					credits: false
+				});
 			});
-			
+
 			//
 			// click handlers
 			//
@@ -1161,87 +1203,77 @@ ordb.deck = ordb.deck || {};
 		}
 	});
 
-	_deck.createTypeahead = function(members, view) {
-		// constructs the suggestion engine
-		var cards = new Bloodhound({
-			datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-			queryTokenizer: Bloodhound.tokenizers.whitespace,
-			local: $.map(members, function(member) {
-				return {
-					name: member.card.name,
-					card: member.card
-				};
-			})
-		});
+	_deck.DeckDrawView = Backbone.View.extend({
+		className: 'deck-draw-view',
+		events: {
+			'click .btn-group.draw-group .btn.draw-hand': 'onDrawHandClick',
+			'click .btn-group.draw-group .btn.draw-deck': 'onDrawDeckClick',
+			'click .btn-group.draw-group .btn.draw-some': 'onDrawSomeClick'
+		},
+		
+		onDrawHandClick: function(e) {
+			this.shuffle();
+			this.draw(6);
+		},
 
-		var traits = new Bloodhound({
-			datumTokenizer: Bloodhound.tokenizers.obj.whitespace('description'),
-			queryTokenizer: Bloodhound.tokenizers.whitespace,
-			local: ordb.dict.traits
-		});
-
-		var keywords = new Bloodhound({
-			datumTokenizer: Bloodhound.tokenizers.obj.whitespace('description'),
-			queryTokenizer: Bloodhound.tokenizers.whitespace,
-			local: ordb.dict.keywords
-		});
-
-		cards.initialize();
-		traits.initialize();
-		keywords.initialize();
-
-		var $typeahead = $('#search').typeahead({
-			hint: true,
-			highlight: true,
-			minLength: 1
-		}, {
-			name: 'cards',
-			displayKey: 'name',
-			source: cards.ttAdapter(),
-			templates: {
-				suggestion: Handlebars.compile('{{name}}&nbsp;<span class="tt-no-highlight">{{card.setName}} | {{card.factionDisplay}} | {{card.typeDisplay}} | {{card.trait}}</span>'),
-				header: '<div class="tt-multi-header">' + ordb.dict.messages['core.card'] + '</div>'
+		onDrawDeckClick: function(e) {
+			if (this.cards.length == 0 || this.cards.length == this.drawnCards.length) {
+				this.shuffle();
 			}
-		}, {
-			name: 'traits',
-			displayKey: 'description',
-			source: traits.ttAdapter(),
-			templates: {
-				header: '<div class="tt-multi-header">' + ordb.dict.messages['core.trait'] + '</div>'
-			}
-		}, {
-			name: 'keywords',
-			displayKey: 'description',
-			source: keywords.ttAdapter(),
-			templates: {
-				header: '<div class="tt-multi-header">' + ordb.dict.messages['core.keyword'] + '</div>'
-			}
-		});
+			this.draw(this.cards.length);
+		},
 
-		$typeahead.on('typeahead:selected', function($event, suggestion, dataset) {
-			console.log('selected' + $event);
-			view.searchbar = {
-				suggestion: suggestion,
-				dataset: dataset
-			};
-		}).on('typeahead:autocompleted', function($event, suggestion, dataset) {
-			console.log('autocompleted' + $event);
-			view.searchbar = {
-				suggestion: suggestion,
-				dataset: dataset
-			};
-		}).on('typeahead:closed', function($event) {
-			console.log('closed' + $event);
-			view.searchbar.text = $('#search').typeahead('val');
-		}).on('typeahead:opened', function($event) {
-			console.log('opened' + $event);
-			view.searchbar = {};
-		}).on('keyup', function($event) {
-			if ($event.keyCode == 13) {
-				$('#search').typeahead('close');
-				//				filter();
+		onDrawSomeClick: function(e) {
+			if (this.cards.length == 0) {
+				this.shuffle();
 			}
-		});
-	};
+			this.draw(parseInt($(e.currentTarget).text()));
+		},
+
+		/**
+		 * @memberOf DeckDrawView
+		 */
+		initialize: function(options) {
+			if (!options || !options.deck) {
+				throw 'Deck is undefined';
+			}
+			this.deck = options.deck;
+			this.cards = [];
+			this.drawnCards = [];
+		},
+
+		render: function() {
+			this.$el.html(Handlebars.templates['deck-draw-view']({
+				cards: this.drawnCards
+			}));
+			this.$el.find('a[data-card-id]').popover({
+				html: true,
+				trigger: 'hover',
+				placement: 'auto right',
+				template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
+						+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
+				content: function() {
+					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
+				}
+			});
+			
+			return this;
+		},
+		
+		shuffle: function() {
+			this.cards = ordb.util.membersShuffle(this.deck.get('members').filter(function(member) {
+				return member.get('card').type != 'hero' && _.isNumber(member.get('quantity'))
+			}));
+			this.drawnCards = [];
+		},
+
+		draw: function(quantity) {
+			var drawn = this.drawnCards.length;
+			var remaining = this.cards.length - drawn;
+			var newDrawnCards = this.cards.slice(drawn, drawn + Math.min(remaining, quantity));
+			[].push.apply(this.drawnCards, newDrawnCards);
+			this.render();
+		},
+	});
 
 })(ordb.deck);

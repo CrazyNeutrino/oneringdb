@@ -9,10 +9,10 @@
 					<div class="col-xs-9">
 						<div class="btn-group btn-group-xs">
 							<label class="btn btn-default" data-group-key="typeDisplay">{{loc 'card.type'}}</label>
+							<label class="btn btn-default" data-group-key="sphereDisplay">{{loc 'card.sphere'}}</label>
+							<label class="btn btn-default" data-group-key="resourceCost">{{loc 'card.cost'}}</label>
 							<label class="btn btn-default" data-group-key="memberQuantity">{{loc 'card.quantity'}}</label>
 							<label class="btn btn-default" data-group-key="setName">{{loc 'card.set'}}</label>
-							<label class="btn btn-default" data-group-key="factionDisplay">{{loc 'card.faction'}}</label>
-							<label class="btn btn-default" data-group-key="cost">{{loc 'card.cost'}}</label>
 						</div>
 					</div>
 				</div>
@@ -23,8 +23,8 @@
 					<div class="col-xs-9">
 						<div class="btn-group btn-group-xs">
 							<label class="btn btn-default" data-sort-key="name">{{loc 'card.name'}}</label>
+							<label class="btn btn-default" data-sort-key="resourceCost">{{loc 'card.cost'}}</label>
 							<label class="btn btn-default" data-sort-key="memberQuantity">{{loc 'card.quantity'}}</label>
-							<label class="btn btn-default" data-sort-key="cost">{{loc 'card.cost'}}</label>
 						</div>
 					</div>
 				</div>
@@ -38,8 +38,8 @@
 			<ul>
 				{{#each members}}
 				<li>
-					{{quantity}}x<i class="db-icon db-icon-{{card.type}} fg-{{card.sphere}}"></i>
-					<a data-image-base="{{card.imageBase}}" data-card-id="{{card.id}}" 
+					{{quantity}}x<i class="db-icon db-icon-{{card.type}} fg-{{card.sphere}}"></i><a 
+						data-image-base="{{card.imageBase}}" data-card-id="{{card.id}}" 
 						style="cursor: pointer;">{{card.name}}</a>
 				</li>
 				{{/each}}

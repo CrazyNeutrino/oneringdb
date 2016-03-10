@@ -13,8 +13,8 @@ ordb.util = ordb.util || {};
 		var json;
 		if (_.isArray(data)) {
 			json = [];
-			_.each(data, function(inputItem) {
-				json.push(inputItem.toJSON());
+			_.each(data, function(dataItem) {
+				json.push(dataItem.toJSON());
 			});
 		} else {
 			json = data.toJSON();
@@ -31,7 +31,7 @@ ordb.util = ordb.util || {};
 		}
 
 		members = members.filter(function(member) {
-			return member.get('quantity') > 0;
+			return member.get('quantity') > 0 && member.get('card').type != 'hero';
 		});
 
 		if (sortKey) {
@@ -54,9 +54,9 @@ ordb.util = ordb.util || {};
 				title = 'X';
 			}
 			return {
-				title : title,
-				members : _util.toJSON(members),
-				quantity : _.reduce(members, function(totalQuantity, member) {
+				title: title,
+				members: _util.toJSON(members),
+				quantity: _.reduce(members, function(totalQuantity, member) {
 					return totalQuantity + member.get('quantity');
 				}, 0)
 
@@ -65,8 +65,7 @@ ordb.util = ordb.util || {};
 
 		var groups = [];
 		_.each(Object.keys(membersHash), function(key) {
-			groups.push((groupFactory || defaultGroupFactory)(key,
-					membersHash[key]));
+			groups.push((groupFactory || defaultGroupFactory)(key, membersHash[key]));
 		});
 		groups = groups.sort(function(one, two) {
 			return one.title.localeCompare(two.title);
@@ -91,10 +90,9 @@ ordb.util = ordb.util || {};
 		}
 		keys.push('name');
 
-		var stringKeys = [ 'name', 'type', 'typeDisplay', 'faction',
-				'factionDisplay' ];
-		var numberKeys = [ 'memberQuantity', 'quantity', 'cost', 'shield',
-				'comamnd', 'attack', 'hitPoints' ];
+		var stringKeys = [ 'name', 'type', 'typeDisplay', 'sphere', 'sphereDisplay' ];
+		var numberKeys = [ 'memberQuantity', 'quantity', 'threatCost', 'resourceCost', 'engagementCost',
+		                   'willpower', 'threat', 'attack', 'defense', 'hitPoints' ];
 
 		var sorter = function(one, two) {
 			var result = 0;
@@ -121,8 +119,7 @@ ordb.util = ordb.util || {};
 				if (stringKeys.indexOf(property) > -1) {
 					result = oneValue.localeCompare(twoValue);
 				} else if (numberKeys.indexOf(property) > -1) {
-					result = (oneValue == twoValue ? 0
-							: (oneValue < twoValue ? -1 : 1));
+					result = (oneValue == twoValue ? 0 : (oneValue < twoValue ? -1 : 1));
 				}
 
 				if (result != 0) {
@@ -140,15 +137,15 @@ ordb.util = ordb.util || {};
 	};
 
 	_util.membersShuffle = function(members) {
-		var arr = [];
-		_.each(members.toJSON(), function(member) {
+		var cards = [];
+		_.each(_util.toJSON(members), function(member) {
 			_.times(member.quantity, function(index) {
-				arr.push(member.card);
+				cards.push(member.card);
 			});
 		});
-		return _.shuffle(arr);
+		return _.shuffle(cards);
 	};
-	
+
 	_util.buildCardResolver = function() {
 		return function(input) {
 			if (input instanceof ordb.model.Card) {
@@ -191,7 +188,7 @@ ordb.util = ordb.util || {};
 	_util.buildCardsComparator = function(keys, options) {
 		var options = options || {};
 		var resolver = options.resolver || _util.buildCardResolver();
-		
+
 		var validKeys = [];
 		_.each(keys, function(key) {
 			if (key && key !== 'none' && key !== 'default') {
@@ -202,8 +199,8 @@ ordb.util = ordb.util || {};
 		validKeys.push('number');
 
 		var stringKeys = [ 'name', 'type', 'typeDisplay', 'sphere', 'sphereDisplay', 'setName' ];
-		var numberKeys = [ 'memberQuantity', 'quantity', 'threatCost', 'engagementCost', 'resourceCost',
-		                   'willpower', 'threat', 'attack', 'defense', 'hitPoints', 'setNumber', 'number' ];
+		var numberKeys = [ 'memberQuantity', 'quantity', 'threatCost', 'engagementCost', 'resourceCost', 'willpower',
+				'threat', 'attack', 'defense', 'hitPoints', 'setNumber', 'number' ];
 
 		return function(one, two) {
 			var result = 0;
@@ -250,10 +247,10 @@ ordb.util = ordb.util || {};
 			return result;
 		};
 	};
-	
+
 	_util.buildSortKeys = function($input) {
 		var sortKeys = [];
-		
+
 		$input.each(function() {
 			var value = $(this).val();
 			if (value) {
@@ -280,10 +277,9 @@ ordb.util = ordb.util || {};
 		options = options || {};
 
 		var p = {
-			total : options.total,
-			pageNumber : _.isNumber(options.pageNumber) ? options.pageNumber
-					: 0,
-			pageSize : _.isNumber(options.pageSize) ? options.pageSize : 40,
+			total: options.total,
+			pageNumber: _.isNumber(options.pageNumber) ? options.pageNumber : 0,
+			pageSize: _.isNumber(options.pageSize) ? options.pageSize : 40,
 		};
 
 		p.pages = new Array(Math.ceil(p.total / p.pageSize));
@@ -293,16 +289,16 @@ ordb.util = ordb.util || {};
 
 		_.each(_.range(0, p.pages.length), function(number) {
 			p.pages[number] = {
-				number : number,
-				label : "" + (number + 1),
-				active : number == p.pageNumber
+				number: number,
+				label: "" + (number + 1),
+				active: number == p.pageNumber
 			};
 		});
 		p.prevPage = p.pageNumber > 0 ? {
-			number : p.pageNumber - 1
+			number: p.pageNumber - 1
 		} : undefined;
 		p.nextPage = p.pageNumber < p.pages.length - 1 ? {
-			number : p.pageNumber + 1
+			number: p.pageNumber + 1
 		} : undefined;
 
 		p.pageStartIndex = p.pageNumber * p.pageSize;
@@ -322,31 +318,32 @@ ordb.util = ordb.util || {};
 		var includeQDAttrs = options.includeQDAttrs || true;
 
 		var sortItems = [];
-		_.each([ [ 'name', 'card.name' ], [ 'number', 'card.number' ],
-				[ 'sphereDisplay', 'card.sphere' ],
-				[ 'typeDisplay', 'card.type' ],
-				[ 'threatCost', 'card.threatCost.sh' ],
-				[ 'engagementCost', 'card.engagementCost.sh' ],
-				[ 'resourceCost', 'card.resourceCost.sh' ],
-				[ 'willpower', 'card.willpower' ], [ 'threat', 'card.threat' ],
-				[ 'attack', 'card.attack' ], [ 'defense', 'card.defense' ],
-				[ 'hitPoints', 'card.hp.sh' ], [ 'setName', 'core.setName' ],
-				[ 'setNumber', 'core.setNumber' ] ],
-				function(item) {
-					if (includePDAttrs == false
-							&& pdAttrs.indexOf(item[0]) > -1
-							|| includeEDAttrs == false
-							&& edAttrs.indexOf(item[0]) > -1
-							|| includeQDAttrs == false
-							&& qdAttrs.indexOf(item[0]) > -1) {
-						return;
-					}
+		_.each([ 
+			 [ 'name', 'card.name' ], 
+			 [ 'number', 'card.number' ], 
+			 [ 'sphereDisplay', 'card.sphere' ],
+			 [ 'typeDisplay', 'card.type' ], 
+			 [ 'threatCost', 'card.threatCost.sh' ],
+			 [ 'engagementCost', 'card.engagementCost.sh' ], 
+			 [ 'resourceCost', 'card.resourceCost.sh' ], 
+			 [ 'willpower', 'card.willpower' ], 
+			 [ 'threat', 'card.threat' ], 
+			 [ 'attack', 'card.attack' ],
+			 [ 'defense', 'card.defense' ], 
+			 [ 'hitPoints', 'card.hp.sh' ], 
+			 [ 'setName', 'core.setName' ],
+			 [ 'setNumber', 'core.setNumber' ] 
+			 ], function(item) {
+			if (includePDAttrs == false && pdAttrs.indexOf(item[0]) > -1 || includeEDAttrs == false
+					&& edAttrs.indexOf(item[0]) > -1 || includeQDAttrs == false && qdAttrs.indexOf(item[0]) > -1) {
+				return;
+			}
 
-					sortItems.push({
-						value : item[0],
-						label : ordb.dict.messages[item[1]]
-					})
-				});
+			sortItems.push({
+				value: item[0],
+				label: ordb.dict.messages[item[1]]
+			})
+		});
 
 		return sortItems;
 	};

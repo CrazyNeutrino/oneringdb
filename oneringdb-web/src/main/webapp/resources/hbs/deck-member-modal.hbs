@@ -1,10 +1,6 @@
 <div class="modal modal-member">
 	<div class="modal-dialog">
 		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{loc 'core.close'}}</span></button>
-				<h4 class="modal-title">{{member.card.name}}</h4>
-			</div>
 			<div class="modal-body">
 				<div class="btn-group btn-group-qty" style="display: table; margin-bottom: 10px; margin-left: auto; margin-right: auto;">
 					{{#for 0 member.availableQuantity 1}}
@@ -12,10 +8,10 @@
 					{{/for}}
 				</div>
 				<div class="row">
-					<div class="col-xs-12 col-md-7">
+					<div class="col-xs-12 col-md-6">
 						{{> card-text-content member.card}}
 					</div>
-					<div class="col-xs-12 col-md-5" style="text-align: center;">
+					<div class="col-xs-12 col-md-6" style="text-align: center;">
 						<img src="{{cardImagePath member.card.imageBase}}" class="card-md" />
 					</div>
 				</div>
