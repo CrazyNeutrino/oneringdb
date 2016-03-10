@@ -304,7 +304,8 @@ ordb.deck = ordb.deck || {};
 		},
 
 		config: new Backbone.Model({
-			layout: 'list'
+			layout: 'list',
+			readOnly: false
 		}),
 		membersFilter: new _deck.MembersFilter(),
 		membersSorter: new Backbone.Model(),
@@ -369,58 +370,40 @@ ordb.deck = ordb.deck || {};
 			// members groups view
 			this.groupsView = new _deck.MembersGroupsView({
 				deck: this.deck,
-				readOnly: false
+				config: this.config
 			});
+			
+			// Listen to quantity change event on each member separately.
 			this.deck.get('members').each(function(member) {
-				view.listenTo(member, 'change:quantity', function(member, quantity, options) {
-					view.deck.history.add({
+				this.listenTo(member, 'change:quantity', function(member, quantity, options) {
+					this.deck.history.add({
 						member: member,
 						quantity: quantity
 					});
-					if (options.batchChange !== true) {
-						view.groupsView.render(member.collection, {
-							readOnly: false
-						});
-						var $members = view.membersListView.$el.find('.members-list-item, .members-grid-item');
-						var $buttons = $members.filter('[data-card-id="' + member.get('cardId') + '"]').find(
-								'.btn-group-qty .btn');
-						var quantitySelector = '[data-quantity="' + member.get('quantity') + '"]';
-						$buttons.filter(quantitySelector).addClass('active').siblings().removeClass('active');
-						view.updateStats();
-					}
+					this.renderStatistics();
 				});
-			});
+			}, this);
+			
+			// Listen to quantity of core sets change event. Adjust quantities of deck
+			// cards accordingly and update deck statistics.
+			this.listenTo(this.deck, 'change:configCsQuantity', function(deck) {
+				this.deck.adjustQuantities();
+				this.renderStatistics();
+			}, this);
+			
 			this.listenTo(this.deck, 'invalid', function(deck) {
-				view.messages = [ {
+				this.messages = [ {
 					kind: 'danger',
 					title: 'core.error',
 					message: deck.validationError
 				} ];
-				view.renderMessages();
+				this.renderMessages();
 			});
-//			this.listenTo(this.config, 'change:layout', function(config) {
-//				view.membersListView.render(this.deck.get('filteredMembers'), {
-//					layout: config.get('layout'),
-//					readOnly: false
-//				});
-//			});
-//			this.listenTo(this.deck, 'change:configCsQuantity', function(deck) {
-//				deck.adjustQuantities();
-//				view.membersListView.render(this.deck.get('filteredMembers'), {
-//					layout: view.config.get('layout'),
-//					readOnly: false
-//				});
-//				view.groupsView.render(view.deck.get('members'), {
-//					readOnly: false
-//				});
-//				view.updateStats();
-//			});
 
 			// members list view
 			this.membersListView = new _deck.MembersListView({
 				deck: this.deck,
-				config: this.config,
-				readOnly: false
+				config: this.config
 			});
 
 			// deck draw view
@@ -468,16 +451,19 @@ ordb.deck = ordb.deck || {};
 			});
 			this.$el.html(template);
 			
-			// Tooltips.
+			// Enable tooltips.
 			this.$el.find('[data-toggle="tooltip"]').tooltip({
 				container: 'body',
-				trigger: 'hover'
+				trigger: 'hover',
+				delay: {
+					show: '1000'
+				}
 			});
 
 			// If there's no filter set, set the default.
 			if (this.membersFilter.isEmpty()) {
 				this.membersFilter.set({
-					type: [ 'hero' ]
+					type: [ 'ally', 'event' ]
 				}, {
 					silent: true
 				});
@@ -507,7 +493,7 @@ ordb.deck = ordb.deck || {};
 			}, this);
 			this.renderPrivateLinksList();
 			this.renderPublishedDecksList();
-			this.updateStats();
+			this.renderStatistics();
 
 //			this.listenTo(this.deck.get('snapshots'), 'add remove', this.renderPublishedDecksList);
 
@@ -798,8 +784,8 @@ ordb.deck = ordb.deck || {};
 			});
 		},
 
-		updateStats: function() {
-			var stats = this.deck.computeStats();
+		renderStatistics: function() {
+			var stats = this.deck.computeStatistics();
 			stats.resourceCost.name = ordb.dict.messages['card.cost.sh'];
 			stats.willpower.name = '<i class="db-icon db-icon-willpower"></i>';
 			stats.attack.name = '<i class="db-icon db-icon-attack"></i>';
@@ -894,15 +880,16 @@ ordb.deck = ordb.deck || {};
 		},
 
 		onSelectionFilterClick: function(e) {
+			var quantities = _.flatten($(e.currentTarget).parent().children().filter('.active').map(function() {
+				var selection = $(this).data('selection');
+				if (selection === 'not-selected') {
+					return 0;
+				} else if (selection === 'selected') {
+					return [ 1, 2, 3, 4 ];
+				}
+			}).get());
 			this.membersFilter.set({
-				quantity: _.flatten($(e.currentTarget).parent().children().filter('.active').map(function() {
-					var selection = $(this).data('selection');
-					if (selection === 'not-selected') {
-						return 0;
-					} else if (selection === 'selected') {
-						return [ 1, 2, 3, 4 ];
-					}
-				}).get())
+				quantity: quantities.length == 0 ? undefined : quantities
 			});
 		},
 

@@ -35,7 +35,7 @@
 {{#each members}}
 <div class="members-list-item row" data-card-id="{{card.id}}">
 	<div class="col-xs-4 col-md-2">
-		<div class="btn-group btn-group-qty">
+		<div class="btn-group qty-group">
 			{{#for 0 availableQuantity 1}}
 			<label class="btn btn-default" {{#smartIf ../../readOnly}}disabled="disabled"{{/smartIf}} data-quantity="{{this}}">{{this}}</label>
 			{{/for}}

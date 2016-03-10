@@ -53,7 +53,7 @@ ordb.model = ordb.model || {};
 			});
 			return total;
 		},
-		computeStats: function() {
+		computeStatistics: function() {
 			var stats = {};
 			var keys = [ 'resourceCost', 'willpower', 'attack', 'defense', 'hitPoints' ];
 
@@ -103,10 +103,11 @@ ordb.model = ordb.model || {};
 					member.set({
 						quantity: Math.min(member.get('quantity'), availableQuantity)
 					}, {
-						batchChange: true
+						silent: true
 					});
 				}
 			});
+			this.trigger('batchChange:quantity', this);
 		}
 	});
 
@@ -270,10 +271,10 @@ ordb.model = ordb.model || {};
 			}
 			return total;
 		},
-		computeStats: function() {
+		computeStatistics: function() {
 			var stats = {};
 			if (this.get('members') instanceof Backbone.Collection) {
-				stats = this.get('members').computeStats();
+				stats = this.get('members').computeStatistics();
 			}
 			return stats;
 		},
