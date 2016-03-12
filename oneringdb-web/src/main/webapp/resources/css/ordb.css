@@ -10,15 +10,40 @@
   	   url(#{resource['fonts/glyphicons-halflings-regular.svg']}.svg#glyphicons_halflingsregular) format('svg');
 }
 
+/* @font-face {
+  font-family: 'Test';
+  src: url(#{resource['fonts/BorgiaPro-Regular-webfont.eot']});
+  src: url(#{resource['fonts/BorgiaPro-Regular-webfont.eot']}?#iefix) format('embedded-opentype'), 
+  	   url(#{resource['fonts/BorgiaPro-Regular-webfont.woff']}) format('woff'),
+  	   url(#{resource['fonts/BorgiaPro-Regular-webfont.woff2']}) format('woff2'), 
+  	   url(#{resource['fonts/BorgiaPro-Regular-webfont.ttf']}) format('truetype'), 
+  	   url(#{resource['fonts/BorgiaPro-Regular-webfont.svg']}.svg#borgia_proregular) format('svg');
+} */
+
 @font-face {
   font-family: 'Ring Bearer';
   src: url(#{resource['fonts/ring-bearer.ttf']});
 }
 
-html,body {	height: 100%; }
-body {overflow-y: scroll; }
+@font-face {
+  font-family: 'Test';
+  src: url(#{resource['fonts/Fontin-Regular.otf']}) format('opentype');
+}
 
-/* table { font-size: 14px; } */
+@font-face {
+  font-family: 'Test';
+  src: url(#{resource['fonts/Fontin-Bold.otf']}) format('opentype');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Test';
+  src: url(#{resource['fonts/Fontin-Italic.otf']}) format('opentype');
+  font-style: italic;
+}
+
+html,body {	height: 100%; font-family: 'Test'}
+body {overflow-y: scroll; font-family: 'Test'}
 
 #wrapper {
 	min-height: 100%;
@@ -170,15 +195,26 @@ footer.footer > .container > p:first-child {
     top: -1px;
 }
 
-/* .modal.modal-member .card {
-	width: 350px;
-} */
-
-.tournament-group {
-	display: inline-block;
-	margin-top: 10px;
-	margin-right: 10px;
+.deck-heroes-view-ctr,
+.deck-stats-view-ctr,
+.members-groups-view-ctr {
+	margin-bottom: 10px;
 }
+
+.deck-heroes-view .heroes {
+	font-size: 1.2em;
+}
+
+.deck-heroes-view .heroes > tbody > tr > td:first-child { padding: 1px 10px 1px 0px; }
+.deck-heroes-view .heroes > tbody > tr > td:not(:first-child) { 
+	padding: 1px 5px; 
+	font-weight: bold; 
+	text-align: center;
+	white-space:nowrap;
+}
+.deck-heroes-view .heroes a.hero-name { text-decoration: none; }
+.deck-heroes-view .heroes a.hero-name:hover { text-decoration: none; }
+.deck-heroes-view .heroes div.hero-name { padding: 2px 10px 2px 8px; border-radius: 2px; }
 
 /**
  * card search
@@ -191,7 +227,7 @@ footer.footer > .container > p:first-child {
 	margin-bottom: 10px;
 }
  
-.attrs-line {
+.card.text .attrs-line {
 	font-size: 1.4em;
 	font-weight: bold;
 }
@@ -331,17 +367,17 @@ footer.footer > .container > p:first-child {
 .deck-stats-table td, .deck-stats-table thead th { padding: 0px 8px; }
 .deck-stats-table tbody th { padding: 0px 4px; }
 
-.actions-container,.members-list-filter-container,.deck-info-container {
+.actions-container,.members-list-filter-container {
 	margin-bottom: 10px;
 }
 
-.members-grid-item .btn-group.qty-group .btn,
-.members-list-item .btn-group.qty-group .btn {
+.members-grid-item .btn-group.quantity-group .btn,
+.members-list-item .btn-group.quantity-group .btn {
 	padding: 0px 4px;
 }
 
-.btn-group.qty-group .btn.active:first-child { color: white; background-color: #d9534f;	border-color: #d43f3a; }
-.btn-group.qty-group .btn.active:not(:first-child) { color: white; background-color: #5cb85c; border-color: #4cae4c; }
+.btn-group.quantity-group .btn.active:first-child { color: white; background-color: #d9534f;	border-color: #d43f3a; }
+.btn-group.quantity-group .btn.active:not(:first-child) { color: white; background-color: #5cb85c; border-color: #4cae4c; }
 .btn-group.layout-group > .btn { padding: 5px 10px 4px; }
 .btn-group.layout-group > .btn > .glyphicon { font-size: 18px; }
 
@@ -380,7 +416,7 @@ tr.highlight td {
 .members-grid.members-grid-sm .members-grid-item:not(.text) { height: 220px; }
 .members-grid.members-grid-sm .members-grid-item.text { height: 150px; }
 .members-grid .members-grid-item { padding: 0 5px; }
-.members-grid .members-grid-item .qty-group { margin-bottom: 5px; }
+.members-grid .members-grid-item .quantity-group { margin-bottom: 5px; }
 .members-grid .members-grid-item > * { display: table; }
 .members-grid .members-grid-item > table > tbody > tr > td { vertical-align: top; }
 .members-grid .members-grid-item > table > tbody > tr > td:nth-child(2) { padding-left: 5px; }

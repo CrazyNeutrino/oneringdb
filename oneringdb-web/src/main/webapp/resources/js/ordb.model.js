@@ -46,6 +46,7 @@ ordb.model = ordb.model || {};
 
 	_model.DeckMembers = Backbone.Collection.extend({
 		model: _model.DeckMember,
+		
 		/**
 		 * @memberOf DeckMembers
 		 */
@@ -56,6 +57,7 @@ ordb.model = ordb.model || {};
 			});
 			return total;
 		},
+		
 		computeTotalCost: function() {
 			var total = 0;
 			this.each(function(member) {
@@ -65,6 +67,7 @@ ordb.model = ordb.model || {};
 			});
 			return total;
 		},
+		
 		computeStatistics: function() {
 			var stats = {};
 			var keys = [ 'resourceCost', 'willpower', 'attack', 'defense', 'hitPoints' ];
@@ -105,6 +108,7 @@ ordb.model = ordb.model || {};
 
 			return stats;
 		},
+		
 		adjustQuantities: function(csQuantity) {
 			this.each(function(member) {
 				if (member.get('fixedMaxQuantity') === false) {
@@ -120,7 +124,22 @@ ordb.model = ordb.model || {};
 				}
 			});
 			this.trigger('batchChange:quantity', this);
-		}
+		},
+		
+		canChangeQuantity: function(member, quantity) {
+			if (quantity == 0 || !member.isHero()) {
+				return true;
+			}
+
+			var selected = 0;
+			return this.every(function(m) {
+				if (m.isHero() && m.isSelected()) {
+					return ++selected < 3 && m.getCard().techName != member.getCard().techName;
+				} else {
+					return true;
+				}
+			});
+		},
 	});
 
 	_model.DeckHistoryItem = Backbone.Model;
@@ -242,10 +261,6 @@ ordb.model = ordb.model || {};
 				});
 			});
 			response.filteredMembers = new _model.DeckMembers();
-//			response.heroes = new _model.DeckMembers(response.members.filter(function(member) {
-//				return member.get('card').type == 'hero' && member.get('quantity') > 0;
-//			}));
-
 			return response;
 		},
 		toJSON: function() {

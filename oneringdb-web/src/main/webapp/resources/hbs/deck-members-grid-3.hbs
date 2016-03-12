@@ -5,12 +5,13 @@
 			<tbody>
 				<tr>
 					<td>
-						<a data-card-id="{{cardId}}" data-image-base="{{card.imageBase}}" style="cursor: pointer;">
+						<a class="toggle-popover toggle-modal" data-card-id="{{cardId}}"
+							data-image-base="{{card.imageBase}}" style="cursor: pointer;">
 							<img src="{{cardImagePath card.imageBase}}" class="card-xs" />
 						</a>
 					</td>
 					<td>
-						<div class="btn-group qty-group">
+						<div class="btn-group quantity-group">
 							{{#for 0 availableQuantity 1}}
 							<label class="btn btn-default" {{#smartIf ../../readOnly}}disabled="disabled"{{/smartIf}} data-quantity="{{this}}">{{this}}</label>
 							{{/for}}

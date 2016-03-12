@@ -1,3 +1,4 @@
+
 <div class="members-list-header row">
 	<div class="col-xs-4 col-md-2">
 		<span>{{loc 'card.quantity'}}</span>
@@ -35,7 +36,7 @@
 {{#each members}}
 <div class="members-list-item row" data-card-id="{{card.id}}">
 	<div class="col-xs-4 col-md-2">
-		<div class="btn-group qty-group">
+		<div class="btn-group quantity-group">
 			{{#for 0 availableQuantity 1}}
 			<label class="btn btn-default" {{#smartIf ../../readOnly}}disabled="disabled"{{/smartIf}} data-quantity="{{this}}">{{this}}</label>
 			{{/for}}
@@ -47,7 +48,8 @@
 			{{#with card}}
 			<div class="col-xs-12 col-sm-5">				
 				<div class="name-col">
-					<div class="name"><a data-card-id="{{id}}" data-image-base="{{imageBase}}" style="cursor: pointer;">{{name}}</a></div>
+					<div class="name"><a class="toggle-popover toggle-modal" data-card-id="{{id}}" 
+						data-image-base="{{imageBase}}" style="cursor: pointer;">{{name}}</a></div>
 					<div class="set"><span class="secondary-text">{{searchLinkSetName this}}</span></div>
 				</div>				
 			</div>

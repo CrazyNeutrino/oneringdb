@@ -39,8 +39,8 @@
 				{{#each members}}
 				<li>
 					{{quantity}}x<i class="db-icon db-icon-{{card.type}} fg-{{card.sphere}}"></i><a 
-						data-image-base="{{card.imageBase}}" data-card-id="{{card.id}}" 
-						style="cursor: pointer;">{{card.name}}</a>
+						class="toggle-popover toggle-modal" data-image-base="{{card.imageBase}}" 
+						data-card-id="{{card.id}}" style="cursor: pointer;">{{card.name}}</a>
 				</li>
 				{{/each}}
 			</ul>

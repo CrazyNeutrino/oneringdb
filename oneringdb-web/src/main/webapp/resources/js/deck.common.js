@@ -89,7 +89,7 @@ ordb.deck = ordb.deck || {};
 			readOnly: options.readOnly
 		}));
 
-		var $buttons = $modal.find('.qty-group .btn');
+		var $buttons = $modal.find('.quantity-group .btn');
 		var $active = $buttons.eq(member.get('quantity')).addClass('active');
 		if (member.get('fixedQuantity') === true) {
 			$active.siblings().attr('disabled', 'disabled');
@@ -98,10 +98,12 @@ ordb.deck = ordb.deck || {};
 		if (options.readOnly === false) {
 			$buttons.click(function() {
 				var $button = $(this);
-				$button.addClass('active').siblings().removeClass('active');
-				member.set({
-					quantity: parseInt($button.text())
-				});
+				if (member.collection.canChangeQuantity(member, parseInt($button.text()))) {
+					$button.addClass('active').siblings().removeClass('active');
+					member.set({
+						quantity: parseInt($button.text())
+					});
+				}
 			});
 		}
 
@@ -316,21 +318,49 @@ ordb.deck = ordb.deck || {};
 			return filteredMembers;
 		}
 	});
-
-	_deck.PageView = Backbone.View.extend({
-		el: '.content',
-
-		/**
-		 * @memberOf PageView
-		 */
-		renderMessages: function(options) {
-			_deck.renderMessages({
-				$target: this.$el.find('.content-band .container .content'),
-				messages: this.messages
-			});
-			delete this.messages;
+	
+	/**
+	 * Base view
+	 */
+	_deck.ViewBase = Backbone.View.extend({
+		
+		events: function() {
+			return {
+				'click a': 'onViewLinkClick'
+			};
 		},
-		viewLinkClickHandler: function(event) {
+		
+		/**
+		 * @memberOf ViewBase
+		 */
+		makeCardsPopovers: function(options) {
+			return this.$popovers = this.$el.find('a.toggle-popover[data-card-id]').popover({
+				html: true,
+				trigger: 'hover',
+				placement: 'auto right',
+				template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
+						+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
+				content: function() {
+					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
+				}
+			});
+		},
+		
+		makeTooltips: function(options) {
+			return this.$tooltips = this.$el.find('[data-toggle="tooltip"]').tooltip({
+				container: 'body',
+				trigger: 'hover',
+				delay: {
+					show: '1000'
+				}
+			});
+		},
+		
+		destroyTooltips: function() {
+			this.$el.find('[data-toggle="tooltip"]').tooltip('destroy');
+		},
+		
+		onViewLinkClick: function(event) {
 			var root = ordb.static.root;
 			var href = $(event.currentTarget).attr('href');
 			if (href && href.indexOf(root) == 0 && !event.ctrlKey && !event.shiftKey) {
@@ -341,7 +371,8 @@ ordb.deck = ordb.deck || {};
 				});
 			}
 		},
-		nonViewLinkClickHandler: function(event) {
+
+		onNonViewLinkClick: function(event) {
 			var data = event.data;
 			if (data && data.deck) {
 				if (data.deck.history.length > 0) {
@@ -356,37 +387,143 @@ ordb.deck = ordb.deck || {};
 							class: 'btn-danger',
 							handler: function() {
 								window.location.href = href;
+
 							}
 						},
 						buttonNo: {}
 					};
-					showMessageModalDialog(options);
+					_deck.showMessageModalDialog(options);
 				}
 			}
 		},
+		
 		bindMenuLinkClickHandler: function() {
 			$('.navbar a').on('click', {
 				deck: this.deck
-			}, this.nonViewLinkClickHandler);
+			}, this.onNonViewLinkClick);
 		},
+
 		unbindMenuLinkClickHandler: function() {
 			$('.navbar a').off('click');
 		}
 	});
 	
-	_deck.DeckHeroesView = Backbone.View.extend({
+	_deck.PageViewBase = _deck.ViewBase.extend({
+		/**
+		 * @memberOf PageViewBase
+		 */
+		renderMessages: function(options) {
+			_deck.renderMessages({
+				$target: this.$el.find('.content-band .container .content'),
+				messages: this.messages
+			});
+			delete this.messages;
+		}
+//		viewLinkClickHandler: function(event) {
+//			var root = ordb.static.root;
+//			var href = $(event.currentTarget).attr('href');
+//			if (href && href.indexOf(root) == 0 && !event.ctrlKey && !event.shiftKey) {
+//				$(event.currentTarget).tooltip('hide');
+//				event.preventDefault();
+//				ordb.router.navigate(href.replace(ordb.static.root, ''), {
+//					trigger: true
+//				});
+//			}
+//		},
+//		nonViewLinkClickHandler: function(event) {
+//			var data = event.data;
+//			if (data && data.deck) {
+//				if (data.deck.history.length > 0) {
+//					event.preventDefault();
+//
+//					var href = this.href;
+//					var options = {
+//						titleKey: 'core.deck.aboutToLeave.title',
+//						messageKey: 'core.deck.aboutToLeave.message',
+//						buttonYes: {
+//							labelKey: 'core.yes.long' + Math.floor(Math.random() * 2),
+//							class: 'btn-danger',
+//							handler: function() {
+//								window.location.href = href;
+//							}
+//						},
+//						buttonNo: {}
+//					};
+//					showMessageModalDialog(options);
+//				}
+//			}
+//		},
+//		bindMenuLinkClickHandler: function() {
+//			$('.navbar a').on('click', {
+//				deck: this.deck
+//			}, this.nonViewLinkClickHandler);
+//		},
+//		unbindMenuLinkClickHandler: function() {
+//			$('.navbar a').off('click');
+//		}
+	});
+	
+	_deck.DeckPartialView = _deck.ViewBase.extend({
+		/**
+		 * @memberOf DeckPartialView
+		 */
+		events: function() {
+			return _.extend({
+				'click a.toggle-modal[data-card-id]': 'openDeckMemberModal'
+			}, _deck.DeckPartialView.__super__.events.call(this));
+		},
+		
+		initialize: function(options) {
+			if (!options || !options.deck) {
+				throw "Deck is undefined";
+			}
+			if (!options || !options.config) {
+				throw "Config is undefined";
+			}
+			this.deck = options.deck;
+			this.config = options.config;
+		},
+		
+		onSelectOneGroupClick: function(event) {
+			$(event.currentTarget).addClass('active').siblings().removeClass('active');
+		},
+
+		onSelectManyGroupClick: function(event) {
+			var $target = $(event.currentTarget);
+			if (event.ctrlKey) {
+				$target.addClass('active').siblings().removeClass('active');
+			} else {
+				$target.toggleClass('active');
+			}
+		},
+		
+		openDeckMemberModal: function(e) {
+			if (this.$popovers) {
+				this.$popovers.popover('hide');
+			}
+			_deck.showDeckMemberModal(this.deck.getMembers().findWhere({
+				cardId: $(e.currentTarget).data('card-id')
+			}), {
+				readOnly: this.config.get('readOnly')
+			});
+		}
+	});
+
+	_deck.DeckHeroesView = _deck.DeckPartialView.extend({
 		className: 'deck-heroes-view',
 		heroes: new Backbone.Collection(),
 		
 		/**
 		 * @memberOf DeckHeroesView
 		 */
+		events: function() {
+			return _.extend({
+				
+			}, _deck.DeckHeroesView.__super__.events.call(this));
+		},
+
 		initialize: function(options) {
-			if (!options || !options.deck) {
-				throw "Deck is undefined";
-			}
-			this.deck = options.deck;
-			this.config = options.config;
+			_deck.DeckHeroesView.__super__.initialize.call(this, options);
 
 			// Listen to quantity change event on each member separately.
 			this.deck.getMembers().each(function(member) {
@@ -405,52 +542,33 @@ ordb.deck = ordb.deck || {};
 
 		render: function() {
 			var template = Handlebars.templates['deck-heroes-view']({
-				heroes: heroes.toJSON()
+				heroes: this.heroes.toJSON()
 			});
 			this.$el.html(template);
-
-			var $popovers = this.$el.find('a[data-card-id]').popover({
-				html: true,
-				trigger: 'hover',
-				placement: 'auto right',
-				template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
-						+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
-				content: function() {
-					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
-				}
-			});
-			var view = this;
-			this.$el.find('a[data-card-id]').click(function() {
-				$popovers.popover('hide');
-				_deck.showDeckMemberModal(members.findWhere({
-					cardId: $(this).data('card-id')
-				}), {
-					readOnly: view.config.get('readOnly')
-				});
-			});
+			this.makeCardsPopovers();
 
 			return this;
 		}
 	});
 
-	_deck.MembersGroupsView = Backbone.View.extend({
+	_deck.MembersGroupsView = _deck.DeckPartialView.extend({
 		className: 'members-groups-view',
-
-		events: {
-			'click .btn-group .btn': 'onSelectOneClick',
-			'click .mg-control-group .btn-group .btn': 'onGroupByClick',
-			'click .mg-control-sort .btn-group .btn': 'onSortByClick'
-		},
-
+		
 		/**
 		 * @memberOf MembersGroupsView
 		 */
+		events: function() {
+			return _.extend({
+				'click .btn-group.select-one .btn': 'onSelectOneGroupClick',
+				'click .btn-group.select-many .btn': 'onSelectManyGroupClick',
+				'click .mg-control-group .btn-group .btn': 'onGroupByClick',
+				'click .mg-control-sort .btn-group .btn': 'onSortByClick'
+			}, _deck.MembersGroupsView.__super__.events.call(this));
+		},
+
 		initialize: function(options) {
-			if (!options || !options.deck) {
-				throw "Deck is undefined";
-			}
-			this.deck = options.deck;
-			this.config = options.config;
+			_deck.MembersGroupsView.__super__.initialize.call(this, options);
+			
 			this.keys = new Backbone.Model({
 				group: 'typeDisplay',
 				sort: 'name',
@@ -460,7 +578,9 @@ ordb.deck = ordb.deck || {};
 			this.listenTo(this.keys, 'change', this.render);
 			// Listen to quantity change event on each member separately.
 			this.deck.getMembers().each(function(member) {
-				this.listenTo(member, 'change:quantity', this.render);
+				if (!member.isHero()) {
+					this.listenTo(member, 'change:quantity', this.render);
+				}
 			}, this);
 			// Listen to batch quantity change event on all members.
 			this.listenTo(this.deck.getMembers(), 'batchChange:quantity', this.render);
@@ -469,8 +589,7 @@ ordb.deck = ordb.deck || {};
 		render: function() {
 			var groupKey = this.keys.get('group');
 			var sortKey = this.keys.get('sort');
-			var members = this.deck.get('members');
-			var groups = ordb.util.membersGroupBy(members, groupKey, sortKey);
+			var groups = ordb.util.membersGroupBy(this.deck.getMembers(), groupKey, sortKey);
 
 			this.$el.html(Handlebars.templates['members-groups']({
 				membersGroups: groups
@@ -479,35 +598,11 @@ ordb.deck = ordb.deck || {};
 			// Reflect group and sort keys on UI.
 			this.$el.find('.mg-control-group label[data-group-key="' + groupKey + '"]').addClass('active');
 			this.$el.find('.mg-control-sort label[data-sort-key="' + sortKey + '"]').addClass('active');
-
-			var $popovers = this.$el.find('a[data-card-id]').popover(
-					{
-						html: true,
-						trigger: 'hover',
-						template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
-								+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
-						content: function() {
-							return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
-						}
-					});
-
-			var view = this;
-			this.$el.find('a[data-card-id]').click(function() {
-				$popovers.popover('hide');
-				_deck.showDeckMemberModal(members.findWhere({
-					cardId: $(this).data('card-id')
-				}), {
-					readOnly: view.config.get('readOnly')
-				});
-			});
+			this.makeCardsPopovers();
 
 			return this;
 		},
-
-		onSelectOneClick: function(e) {
-			$(e.currentTarget).addClass('active').siblings().removeClass('active');
-		},
-
+		
 		onGroupByClick: function(e) {
 			this.keys.set('group', $(e.currentTarget).data('group-key'));
 		},
@@ -517,19 +612,21 @@ ordb.deck = ordb.deck || {};
 		}
 	});
 
-	_deck.MembersListView = Backbone.View.extend({
+	_deck.MembersListView = _deck.DeckPartialView.extend({
 		className: 'members-list-view',
-
+		
 		/**
 		 * @memberOf MembersListView
 		 */
+		events: function() {
+			return _.extend({
+				'click .btn-group.quantity-group .btn': 'onSelectQuantityGroupClick',
+			}, _deck.MembersListView.__super__.events.call(this));
+		},
+		
 		initialize: function(options) {
-			if (!options || !options.deck) {
-				throw "Deck is undefined";
-			}
-			this.deck = options.deck;
-			this.config = options.config;
-
+			_deck.MembersListView.__super__.initialize.call(this, options);
+			
 			this.listenTo(this.config, 'change:layout', this.render);
 			this.listenTo(this.deck.getFilteredMembers(), 'reset', this.render);
 
@@ -548,72 +645,43 @@ ordb.deck = ordb.deck || {};
 		},
 
 		render: function() {
-			var layout = this.config.get('layout');
-			var members = this.deck.get('filteredMembers');
-
-			var templateName = undefined;
-			if (layout === 'grid-2') {
-				templateName = 'deck-members-grid-2';
-			} else if (layout === 'grid-3') {
-				templateName = 'deck-members-grid-3';
-			} else if (layout === 'grid-4') {
-				templateName = 'deck-members-grid-4';
-			} else if (layout === 'grid-6') {
-				templateName = 'deck-members-grid-6';
-			} else {
-				// list layout is the default
-				templateName = 'deck-members-list';
-			}
-
-			var template = Handlebars.templates[templateName]({
-				members: members.toJSON(),
+			var layout = this.config.get('layout') || 'list';
+			var template = Handlebars.templates['deck-members-' + layout]({
+				members: this.deck.getFilteredMembers().toJSON(),
 				readOnly: this.readOnly
 			});
 			this.$el.html(template);
-
-			var $members = this.$el.find('.members-grid-item:not(:disabled), .members-list-item:not(:disabled)');
-			$members.each(function() {
-				var $member = $(this);
-				var $buttons = $member.find('.qty-group .btn');
-				var member = members.models[$members.index($member)];
-				var $active = $buttons.eq(member.get('quantity')).addClass('active');
-				if (member.get('fixedQuantity') === true) {
-					$active.siblings().attr('disabled', 'disabled');
-				}
-
-				$buttons.click(function() {
-					var $button = $(this);
-					$button.addClass('active').siblings().removeClass('active');
-					member.set({
-						quantity: parseInt($button.text())
-					});
-				});
-			});
-
-			this.$el.find('[data-toggle="tooltip"]').tooltip({
-				container: 'body'
-			});
-			var $popovers = this.$el.find('a[data-card-id]').popover({
-				html: true,
-				trigger: 'hover',
-				placement: 'auto right',
-				template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
-						+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
-				content: function() {
-					return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
-				}
-			});
-			var view = this;
-			this.$el.find('a[data-card-id]').click(function() {
-				$popovers.popover('hide');
-				_deck.showDeckMemberModal(members.findWhere({
-					cardId: $(this).data('card-id')
-				}), {
-					readOnly: view.config.get('readOnly')
-				});
-			});
+			this.applyStateToUI();
+			this.makeCardsPopovers();
+			this.makeTooltips();
 
 			return this;
+		},
+		
+		applyStateToUI: function() {
+			var view = this;
+			var $members = $('.members-list-item, .members-grid-item');
+			$members.each(function() {
+				var $member = $(this);
+				var $buttons = $member.find('.quantity-group .btn');
+				var member = view.deck.getFilteredMembers().at($members.index($member));
+				$buttons.eq(member.getQuantity()).addClass('active');
+			});
+		},
+		
+		onSelectQuantityGroupClick: function(e) {
+			var $button = $(e.currentTarget);
+			var $member = $button.closest('.members-list-item, .members-grid-item');
+			var member = this.deck.getFilteredMembers().findWhere({
+				cardId: parseInt($member.data('card-id'))
+			})
+			var quantity = parseInt($button.text());
+			if (this.deck.getFilteredMembers().canChangeQuantity(member, quantity)) {
+				this.onSelectOneGroupClick(e);
+				member.set({
+					quantity: quantity
+				});
+			}
 		}
 	});
 
@@ -672,7 +740,7 @@ ordb.deck = ordb.deck || {};
 	});
 
 	_deck.DeckCommentsView = Backbone.View.extend({
-		el: '.deck-comments-view',
+		className: 'deck-comments-view',
 
 		/**
 		 * @memberOf DeckCommentsView
@@ -729,6 +797,73 @@ ordb.deck = ordb.deck || {};
 					}
 				});
 			});
+		}
+	});
+	
+	_deck.DeckDrawView = _deck.DeckPartialView.extend({
+		className: 'deck-draw-view',
+		
+		events: function() {
+			return _.extend({
+				'click .btn-group.draw-group .btn.draw-hand': 'onDrawHandClick',
+				'click .btn-group.draw-group .btn.draw-deck': 'onDrawDeckClick',
+				'click .btn-group.draw-group .btn.draw-some': 'onDrawSomeClick'
+			}, _deck.DeckPartialView.prototype.events.call(this));
+		},
+
+		/**
+		 * @memberOf DeckDrawView
+		 */
+		initialize: function(options) {
+			_deck.DeckPartialView.prototype.initialize.call(this, options);
+			this.cards = [];
+			this.drawnCards = [];
+		},
+
+		render: function() {
+			this.destroyTooltips();
+			this.$el.html(Handlebars.templates['deck-draw-view']({
+				cards: this.drawnCards
+			}));
+
+			this.makeCardsPopovers();
+			this.makeTooltips();
+			
+			return this;
+		},
+		
+		onDrawHandClick: function(e) {
+			this.shuffle();
+			this.draw(6);
+		},
+
+		onDrawDeckClick: function(e) {
+			if (this.cards.length == 0 || this.cards.length == this.drawnCards.length) {
+				this.shuffle();
+			}
+			this.draw(this.cards.length);
+		},
+
+		onDrawSomeClick: function(e) {
+			if (this.cards.length == 0) {
+				this.shuffle();
+			}
+			this.draw(parseInt($(e.currentTarget).text()));
+		},
+
+		shuffle: function() {
+			this.cards = ordb.util.membersShuffle(this.deck.get('members').filter(function(member) {
+				return member.get('card').type != 'hero' && _.isNumber(member.get('quantity'))
+			}));
+			this.drawnCards = [];
+		},
+
+		draw: function(quantity) {
+			var drawn = this.drawnCards.length;
+			var remaining = this.cards.length - drawn;
+			var newDrawnCards = this.cards.slice(drawn, drawn + Math.min(remaining, quantity));
+			[].push.apply(this.drawnCards, newDrawnCards);
+			this.render();
 		}
 	});
 
@@ -1278,92 +1413,6 @@ ordb.deck = ordb.deck || {};
 				container: 'body'
 			});
 		}
-	});
-
-	_deck.DeckDrawView = Backbone.View.extend({
-		className: 'deck-draw-view',
-		events: {
-			'click .btn-group.draw-group .btn.draw-hand': 'onDrawHandClick',
-			'click .btn-group.draw-group .btn.draw-deck': 'onDrawDeckClick',
-			'click .btn-group.draw-group .btn.draw-some': 'onDrawSomeClick'
-		},
-
-		onDrawHandClick: function(e) {
-			this.shuffle();
-			this.draw(6);
-		},
-
-		onDrawDeckClick: function(e) {
-			if (this.cards.length == 0 || this.cards.length == this.drawnCards.length) {
-				this.shuffle();
-			}
-			this.draw(this.cards.length);
-		},
-
-		onDrawSomeClick: function(e) {
-			if (this.cards.length == 0) {
-				this.shuffle();
-			}
-			this.draw(parseInt($(e.currentTarget).text()));
-		},
-
-		/**
-		 * @memberOf DeckDrawView
-		 */
-		initialize: function(options) {
-			if (!options || !options.deck) {
-				throw 'Deck is undefined';
-			}
-			this.deck = options.deck;
-			this.cards = [];
-			this.drawnCards = [];
-		},
-
-		render: function() {
-			this.$el.find('[data-toggle="tooltip"]').tooltip('destroy');
-			this.$el.html(Handlebars.templates['deck-draw-view']({
-				cards: this.drawnCards
-			}));
-
-			// Enable popovers.
-			this.$el.find('a[data-card-id]').popover(
-					{
-						html: true,
-						trigger: 'hover',
-						placement: 'auto right',
-						template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
-								+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
-						content: function() {
-							return Handlebars.templates['card-text-content'](ordb.dict.findCard($(this).data('card-id')));
-						}
-					});
-
-			// Enable tooltips.
-			this.$el.find('[data-toggle="tooltip"]').tooltip({
-				container: 'body',
-				trigger: 'hover',
-				delay: {
-					show: '1000'
-				}
-			});
-
-			return this;
-		},
-
-		shuffle: function() {
-			this.cards = ordb.util.membersShuffle(this.deck.get('members').filter(function(member) {
-				return member.get('card').type != 'hero' && _.isNumber(member.get('quantity'))
-			}));
-			this.drawnCards = [];
-		},
-
-		draw: function(quantity) {
-			var drawn = this.drawnCards.length;
-			var remaining = this.cards.length - drawn;
-			var newDrawnCards = this.cards.slice(drawn, drawn + Math.min(remaining, quantity));
-			[].push.apply(this.drawnCards, newDrawnCards);
-			this.render();
-		},
 	});
 
 })(ordb.deck);

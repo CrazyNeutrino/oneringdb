@@ -7,16 +7,14 @@
 				{{!-- header --}}
 				
 				{{#with deck}}
-				<div class="header bg-{{warlord.faction}}">				
-					<div class="box-left">
-						<div class="db-icon db-icon-{{warlord.faction}}"></div>
-					</div>
+				<div class="header">				
 					<div class="box-center">
 						{{#if name}}
 						<h2>{{name}}</h2>
 						{{else}}
 						<h2>--&nbsp;{{loc 'core.unsavedDeck'}}&nbsp;--</h2>
 						{{/if}}
+						
 						<div style="position: relative;"> {{#if username}}{{username}} &#8226; {{/if}} 
 							<span data-toggle="tooltip" data-placement="bottom" title="{{loc 'core.created'}}: {{moment createDate}}">
 								{{~ momentFromNow createDate ~}}
@@ -67,24 +65,19 @@
 		
 						{{!-- left column --}}
 						
-						<div class="col-md-5 col-lg-5">	
+						<div class="col-md-5">	
 							<div class="actions-container">
 								{{> deck-actions this}}
 							</div>
 							
-							<div class="deck-info-container row">
-								<div class="deck-heroes-ctr col-xs-6 col-md-7">
-									<ul class="list-unstyled"></ul>
-								</div>
-								
-								<div class="deck-stats-container col-xs-6 col-md-7"></div>
-							</div>		
+							<div class="deck-heroes-view-ctr"></div>								
+							<div class="deck-stats-view-ctr "></div>
 							<div class="members-groups-view-ctr"></div>		
 						</div>
 						
 						{{!-- right column --}}
 						
-						<div class="col-md-7 col-lg-7">
+						<div class="col-md-7">
 							<ul class="nav nav-tabs lite" role="tablist" id="tabs1ul">
 								<li role="presentation" class="active">
 									<a href="#deckDeckTab" aria-controls="deck" role="tab" data-toggle="tab"

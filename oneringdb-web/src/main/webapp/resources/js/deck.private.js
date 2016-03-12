@@ -129,70 +129,9 @@ ordb.deck = ordb.deck || {};
 	};
 
 	/**
-	 * Base view
-	 */
-	_deck.ViewBase = Backbone.View.extend({
-		el: '.content',
-		onViewLinkClickHandler: function(event) {
-			var root = ordb.static.root;
-			var href = $(event.currentTarget).attr('href');
-			if (href && href.indexOf(root) == 0 && !event.ctrlKey && !event.shiftKey) {
-				$(event.currentTarget).tooltip('hide');
-				event.preventDefault();
-				ordb.router.navigate(href.replace(ordb.static.root, ''), {
-					trigger: true
-				});
-			}
-		},
-
-		onNonViewLinkClickHandler: function(event) {
-			var data = event.data;
-			if (data && data.deck) {
-				if (data.deck.history.length > 0) {
-					event.preventDefault();
-
-					var href = this.href;
-					var options = {
-						titleKey: 'core.deck.aboutToLeave.title',
-						messageKey: 'core.deck.aboutToLeave.message',
-						buttonYes: {
-							labelKey: 'core.yes.long' + Math.floor(Math.random() * 2),
-							class: 'btn-danger',
-							handler: function() {
-								window.location.href = href;
-
-							}
-						},
-						buttonNo: {}
-					};
-					_deck.showMessageModalDialog(options);
-				}
-			}
-		},
-
-		renderMessages: function(options) {
-			_deck.renderMessages({
-				$target: this.$el.find('.content-band .container .content'),
-				messages: this.messages
-			});
-			delete this.messages;
-		},
-
-		bindMenuLinkClickHandler: function() {
-			$('.navbar a').on('click', {
-				deck: this.deck
-			}, this.onNonViewLinkClickHandler);
-		},
-
-		unbindMenuLinkClickHandler: function() {
-			$('.navbar a').off('click');
-		}
-	});
-
-	/**
 	 * Deck list view
 	 */
-	_deck.UserDeckListView = _deck.ViewBase.extend({
+	_deck.UserDeckListView = _deck.PageViewBase.extend({
 		events: {
 			'click .user-deck-list-view a': 'onViewLinkClickHandler'
 		},
@@ -287,32 +226,35 @@ ordb.deck = ordb.deck || {};
 	/**
 	 * Deck edit view
 	 */
-	_deck.UserDeckEditView = _deck.ViewBase.extend({
-		events: {
-			'click .user-deck-edit-view a': 'onViewLinkClick',
-			'click .user-deck-edit-view .select-one .btn': 'onSelectOneGroupClick',
-			'click .user-deck-edit-view .select-many .btn': 'onSelectManyGroupClick',
-			'click .user-deck-edit-view .layout-group .btn': 'onLayoutClick',
-			'click .user-deck-edit-view .filter-sphere .btn': 'onSphereFilterClick',
-			'click .user-deck-edit-view .filter-card-type .btn': 'onCardTypeFilterClick',
-			'click .user-deck-edit-view .filter-selection .btn': 'onSelectionFilterClick',
-			'change .user-deck-edit-view .sort-control': 'onSortControlChange',
-			'click .user-deck-edit-view .btn.deck-save': 'onDeckSaveClick',
-			'click .user-deck-edit-view .btn.deck-save-copy': 'onDeckSaveCopyClick',
-			'click .user-deck-edit-view .btn.deck-delete': 'onDeckDeleteClick',
-			'click .user-deck-edit-view .btn.deck-publish': 'onDeckPublishClick',
-		},
-
+	_deck.UserDeckEditView = _deck.PageViewBase.extend({
+		el: '.content',
 		config: new Backbone.Model({
 			layout: 'list',
 			readOnly: false
 		}),
 		membersFilter: new _deck.MembersFilter(),
 		membersSorter: new Backbone.Model(),
-
+		
 		/**
 		 * @memberOf UserDeckEditView
 		 */
+		events: function() {
+			return _.extend({
+				/*'click .user-deck-edit-view a': 'onViewLinkClick',*/
+				'click .user-deck-edit-view .select-one .btn': 'onSelectOneGroupClick',
+				'click .user-deck-edit-view .select-many .btn': 'onSelectManyGroupClick',
+				'click .user-deck-edit-view .layout-group .btn': 'onLayoutClick',
+				'click .user-deck-edit-view .filter-sphere .btn': 'onSphereFilterClick',
+				'click .user-deck-edit-view .filter-card-type .btn': 'onCardTypeFilterClick',
+				'click .user-deck-edit-view .filter-selection .btn': 'onSelectionFilterClick',
+				'change .user-deck-edit-view .sort-control': 'onSortControlChange',
+				'click .user-deck-edit-view .btn.deck-save': 'onDeckSaveClick',
+				'click .user-deck-edit-view .btn.deck-save-copy': 'onDeckSaveCopyClick',
+				'click .user-deck-edit-view .btn.deck-delete': 'onDeckDeleteClick',
+				'click .user-deck-edit-view .btn.deck-publish': 'onDeckPublishClick'
+			}, _deck.PageViewBase.prototype.events.call(this));
+		},
+
 		initialize: function(options) {
 			var view = this;
 
@@ -362,29 +304,20 @@ ordb.deck = ordb.deck || {};
 				});
 			}
 
+			var partialViewOptions = {
+				deck: this.deck,
+				config: this.config
+			};
 			// heroes view
-			this.heroesView = new _deck.DeckHeroesView({
-				deck: this.deck,
-				config: this.config
-			});
+			this.heroesView = new _deck.DeckHeroesView(partialViewOptions);
 			// members groups view
-			this.membersGroupsView = new _deck.MembersGroupsView({
-				deck: this.deck,
-				config: this.config
-			});
+			this.membersGroupsView = new _deck.MembersGroupsView(partialViewOptions);
 			// members list view
-			this.membersListView = new _deck.MembersListView({
-				deck: this.deck,
-				config: this.config
-			});
+			this.membersListView = new _deck.MembersListView(partialViewOptions);
 			// description view
-			this.deckDescriptionView = new _deck.DeckDescriptionView({
-				deck: this.deck
-			});
+			this.deckDescriptionView = new _deck.DeckDescriptionView(partialViewOptions);
 			// deck draw view
-			this.deckDrawView = new _deck.DeckDrawView({
-				deck: this.deck
-			});
+			this.deckDrawView = new _deck.DeckDrawView(partialViewOptions);
 			
 			// Listen to quantity change event on each member separately.
 			this.deck.getMembers().each(function(member) {
@@ -416,6 +349,8 @@ ordb.deck = ordb.deck || {};
 			// bind handlers for filter change, sort change
 			this.listenTo(this.membersFilter, 'change', this.filterMembers);
 			this.listenTo(this.membersSorter, 'change', this.sortMembers);
+			
+			this.bindMenuLinkClickHandler();
 		},
 
 		render: function() {
@@ -452,20 +387,13 @@ ordb.deck = ordb.deck || {};
 				})
 			});
 			this.$el.html(template);
-			
-			// Enable tooltips.
-			this.$el.find('[data-toggle="tooltip"]').tooltip({
-				container: 'body',
-				trigger: 'hover',
-				delay: {
-					show: '1000'
-				}
-			});
+			this.makeTooltips();
 
 			// If there's no filter set, set the default.
 			if (this.membersFilter.isEmpty()) {
 				this.membersFilter.set({
-					type: [ 'ally', 'event' ]
+					type: [ 'hero', 'treasure' ],
+					sphere: [ 'lore', 'spirit' ]
 				}, {
 					silent: true
 				});
@@ -477,7 +405,10 @@ ordb.deck = ordb.deck || {};
 
 			// Render sub views.
 			this.renderMessages();
-			var svItems = [ {
+			var svItems = [{
+				ctr: '.deck-heroes-view-ctr',
+				sv: this.heroesView
+			}, {
 				ctr: '.members-groups-view-ctr',
 				sv: this.membersGroupsView
 			}, {
@@ -583,16 +514,12 @@ ordb.deck = ordb.deck || {};
 		},
 		
 		filterMembers: function() {
-			console.log('filterMembers');
-
 			var filteredMembers = this.membersFilter.filter(this.deck.getMembers());
 			this.deck.getFilteredMembers().comparator = this.buildMembersComparator(this.membersSorter.get('keys'));
 			this.deck.getFilteredMembers().reset(filteredMembers);
 		},
 
 		sortMembers: function() {
-			console.log('sortMembers');
-
 			this.deck.getFilteredMembers().comparator = this.buildMembersComparator(this.membersSorter.get('keys'));
 			this.deck.getFilteredMembers().sort();
 			this.deck.getFilteredMembers().trigger('reset', this.deck.getFilteredMembers());
@@ -609,7 +536,7 @@ ordb.deck = ordb.deck || {};
 			});
 			this.$el.find('.filter-group.filter-sphere .btn').each(function() {
 				var $this = $(this);
-				if (_.contains(filter.faction, $this.data('sphere'))) {
+				if (_.contains(filter.sphere, $this.data('sphere'))) {
 					$this.addClass('active');
 				}
 			});
@@ -797,8 +724,8 @@ ordb.deck = ordb.deck || {};
 			var template = Handlebars.templates['deck-stats-table']({
 				stats: stats
 			});
-			this.$el.find('.deck-stats-container').html(template);
-			this.$el.find('.deck-stats-container [data-toggle="tooltip"]').tooltip({
+			this.$el.find('.deck-stats-view-ctr').html(template);
+			this.$el.find('.deck-stats-view-ctr [data-toggle="tooltip"]').tooltip({
 				container: 'body',
 				trigger: 'hover click'
 			});
@@ -979,7 +906,7 @@ ordb.deck = ordb.deck || {};
 		}
 	});
 
-	_deck.UserDeckImportView = _deck.ViewBase.extend({
+	_deck.UserDeckImportView = _deck.PageViewBase.extend({
 		events: {
 			'click .user-deck-import-view a': 'viewLinkClickHandler'
 		},

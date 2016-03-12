@@ -14,7 +14,7 @@
 </div>
 <div class="draw-ctr">
 	{{#each cards ~}}
-	<a data-card-id="{{id}}" data-image-base="{{imageBase}}" style="cursor: pointer;">
+	<a data-card-id="{{id}}" class="toggle-popover" data-image-base="{{imageBase}}" style="cursor: pointer;">
 		<img src="{{cardImagePath imageBase}}" class="card-xs" />
 	</a>
 	{{/each ~}}

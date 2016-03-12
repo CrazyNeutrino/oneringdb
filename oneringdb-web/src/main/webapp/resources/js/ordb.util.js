@@ -167,19 +167,17 @@ ordb.util = ordb.util || {};
 	_util.buildMembersDefaultComparator = function() {
 		return function(one, two) {
 			var result = 0;
-			var cardOne = one.get('card');
-			var cardTwo = two.get('card');
 
-			if (cardOne.type == 'hero') {
+			if (one.isHero()) {
 				result = -1;
-			} else if (cardTwo.type == 'hero') {
+			} else if (two.isHero()) {
 				result = 1;
 			} else {
 				result = 0;
 			}
 
 			if (result == 0) {
-				result = cardOne.name.localeCompare(cardTwo.name);
+				result = one.getCard().name.localeCompare(two.getCard());
 			}
 			return result;
 		};

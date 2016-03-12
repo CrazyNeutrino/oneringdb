@@ -535,7 +535,11 @@ ordb.ui = ordb.ui || {};
 		output = output.replace(traitRegExp, function(g0, g1, g2) {
 			return '<i><strong>' + _ui.toSearchLinkTrait(g2, g1) + '</strong></i>';
 		});
-
+		
+		// shadow
+		var shadowRegExp = new RegExp('((?:Shadow|Schattern|Cień): )(\.+)', 'g');
+		output = output.replace(shadowRegExp, '<i><strong>$1</strong>$2</i>');
+		
 		// trigger words
 		var triggerWords = ordb.dict.triggerWords[ordb.static.language];
 		if (ordb.static.language !== 'en') {
