@@ -9,6 +9,7 @@ import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -28,7 +29,6 @@ import org.hibernate.annotations.Type;
 import org.meb.oneringdb.db.converter.DeckTypeConverter;
 import org.meb.oneringdb.db.converter.TournamentPlaceConverter;
 import org.meb.oneringdb.db.converter.TournamentTypeConverter;
-import org.meb.oneringdb.db.model.loc.Card;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,7 +44,7 @@ import lombok.ToString;
 @Access(AccessType.FIELD)
 public class Deck {
 
-	private Integer configCsQuantity;
+	private Integer coreSetQuantity;
 
 	private String name;
 	private String description;
@@ -63,29 +63,11 @@ public class Deck {
 	@Column(name = "type_code")
 	private DeckType type;
 
-	@Column(name = "comp_crst_bitmap")
-	private Long crstBitmap;
-
-	@Column(name = "comp_cards_qty")
-	private Integer cardsQuantity;
-
-	@Column(name = "comp_arm_cards_qty")
-	private Integer armyCardsQuantity;
-
-	@Column(name = "comp_att_cards_qty")
-	private Integer attachmentCardsQuantity;
-
-	@Column(name = "comp_evt_cards_qty")
-	private Integer eventCardsQuantity;
-
 	@Convert(converter = TournamentTypeConverter.class)
 	private TournamentType tournamentType;
 
 	@Convert(converter = TournamentPlaceConverter.class)
 	private TournamentPlace tournamentPlace;
-
-	@Column(name = "comp_sup_cards_qty")
-	private Integer supportCardsQuantity;
 
 	@ManyToOne
 	@JoinColumn(name = "snapshot_base_id")
@@ -93,10 +75,6 @@ public class Deck {
 
 	@Type(type = "org.hibernate.type.YesNoType")
 	private Boolean snapshotPublic;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "warlord_id")
-	private Card warlord;
 
 	@OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<DeckMember> deckMembers = new HashSet<>();
@@ -109,12 +87,12 @@ public class Deck {
 	@OrderBy("createDate ASC")
 	private Set<DeckComment> deckComments = new HashSet<>();
 
-	@OneToMany(mappedBy = "snapshotBase"/*
-										 * , cascade = CascadeType.ALL,
-										 * orphanRemoval = true
-										 */)
+	@OneToMany(mappedBy = "snapshotBase")
 	@OrderBy("createDate DESC")
 	private Set<Deck> snapshots = new HashSet<Deck>();
+	
+	@Embedded
+	private DeckComp comp;
 
 	@Transient
 	private Set<Deck> relatedSnapshots = new HashSet<Deck>();

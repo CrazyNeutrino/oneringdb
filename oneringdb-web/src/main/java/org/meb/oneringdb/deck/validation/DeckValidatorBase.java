@@ -39,7 +39,7 @@ public abstract class DeckValidatorBase implements DeckValidator {
 	}
 
 	protected void validateDeck(Deck deck) throws DeckException {
-		Integer csQuantity = deck.getConfigCsQuantity();
+		Integer csQuantity = deck.getCoreSetQuantity();
 		if (csQuantity == null || csQuantity < 1 || csQuantity > 3) {
 			DeckException de = buildDeckException(deck, "error.deck.deck.invalidCsQuantity");
 			de.setErrorCoreParameter(1, String.valueOf(csQuantity));
@@ -66,7 +66,7 @@ public abstract class DeckValidatorBase implements DeckValidator {
 		/*
 		 * check each member quantity
 		 */
-		Integer csQuantity = deck.getConfigCsQuantity();
+		Integer coreSetQuantity = deck.getCoreSetQuantity();
 		int totalQuantity = 0;
 		for (DeckMember deckMember : deck.getDeckMembers()) {
 			Card card = deckMember.getCard();
@@ -74,7 +74,7 @@ public abstract class DeckValidatorBase implements DeckValidator {
 			if (card.getType() == CardType.HERO) {
 				maxQuantity = 1;
 			} else {
-				maxQuantity = Math.min(3, csQuantity * card.getQuantity());
+				maxQuantity = Math.min(3, coreSetQuantity * card.getQuantity());
 			}
 			Integer quantity = deckMember.getQuantity();
 			if (quantity == null || quantity < 1 || quantity > maxQuantity) {

@@ -14,6 +14,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meb.oneringdb.db.model.Deck;
+import org.meb.oneringdb.db.model.DeckComp_;
 import org.meb.oneringdb.db.model.DeckType;
 import org.meb.oneringdb.db.model.Deck_;
 import org.meb.oneringdb.db.model.User;
@@ -81,7 +82,7 @@ public class DeckDao extends JpaDaoAbstract<Deck, DeckQuery> {
 		Long crstBitmap = query.getCrstBitmap();
 		if (crstBitmap != null) {
 			ParameterExpression<Long> crstBitmapParameter = cb.parameter(Long.class, "crstBitmap");
-			crstBitmapPath = root.get(Deck_.crstBitmap);
+			crstBitmapPath = root.get(Deck_.comp).get(DeckComp_.crstBitmap0);
 			if ("exact".equals(query.getCrstMatchMode())) {
 				predicates.add(cb.equal(crstBitmapPath, crstBitmap));
 			} else {
@@ -92,7 +93,7 @@ public class DeckDao extends JpaDaoAbstract<Deck, DeckQuery> {
 		}
 		if (Boolean.TRUE.equals(query.getCrstSkipCoreSetOnly())) {
 			if (crstBitmap == null) {
-				crstBitmapPath = root.get(Deck_.crstBitmap);
+				crstBitmapPath = root.get(Deck_.comp).get(DeckComp_.crstBitmap0);
 			}
 			predicates.add(cb.notEqual(crstBitmapPath, 1L));
 		}

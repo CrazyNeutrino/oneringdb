@@ -224,7 +224,7 @@ ordb.card = ordb.card || {};
 			view.cardsFilter.listenTo(view.cardsFilter, 'change', function(cardsFilter, options) {
 				var keys = ordb.util.buildSortKeys($('.sort-control'));
 				view.filteredCards.comparator = ordb.util.buildCardsComparator(keys);
-				view.filteredCards.reset(cardsFilter.filter.call(cardsFilter, ordb.dict.cards));
+				view.filteredCards.reset(cardsFilter.filter(ordb.dict.getCards()));
 				var queryString = ordb.filter.filterToQueryString(cardsFilter.toJSON());
 				if (queryString && queryString.length > 0) {
 					queryString = '?' + queryString;
@@ -234,7 +234,7 @@ ordb.card = ordb.card || {};
 				ordb.router.navigate('search' + queryString);
 			});
 
-			if (view.cardsFilter.isNotEmpty()) {
+			if (!view.cardsFilter.isEmpty()) {
 				view.cardsFilter.trigger('change', view.cardsFilter, {
 					ga: false
 				});

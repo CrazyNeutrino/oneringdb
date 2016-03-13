@@ -27,14 +27,14 @@ ordb.model = ordb.model || {};
 		 */
 		parse: function(response) {
 			response.card = _.clone(ordb.dict.findCard(parseInt(response.cardId)));
-			response.fixedMaxQuantity = response.card.type === 'hero';
+			response.maxQuantityFixed = response.card.type == 'hero';
 			return response;
-		},
-		getQuantity: function() {
-			return this.get('quantity');
 		},
 		getCard: function() {
 			return this.get('card');
+		},
+		getQuantity: function() {
+			return this.get('quantity');
 		},
 		isHero: function() {
 			return this.getCard().type == 'hero';
@@ -50,22 +50,19 @@ ordb.model = ordb.model || {};
 		/**
 		 * @memberOf DeckMembers
 		 */
+		initialize: function(options) {
+		},
+		
 		computeTotalQuantity: function() {
-			var total = 0;
-			this.each(function(member) {
-				total += member.get('quantity');
-			});
-			return total;
+			return this.reduce(function(total, member) {
+				return total += member.isHero() ? 0 : member.getQuantity(); 
+			}, 0);
 		},
 		
 		computeTotalCost: function() {
-			var total = 0;
-			this.each(function(member) {
-				if (member.get('card').type != 'hero') {
-					total += member.get('quantity') * member.get('card').resourceCost;
-				}
-			});
-			return total;
+			return this.reduce(function(total, member) {
+				return total += member.isHero() ? 0 : member.getQuantity() * member.getCard().resourceCost; 
+			}, 0);
 		},
 		
 		computeStatistics: function() {
@@ -109,19 +106,23 @@ ordb.model = ordb.model || {};
 			return stats;
 		},
 		
-		adjustQuantities: function(csQuantity) {
+		adjustQuantities: function(coreSetQuantity) {
 			this.each(function(member) {
-				if (member.get('fixedMaxQuantity') === false) {
-					var availableQuantity = Math.min(3, member.get('card').quantity * csQuantity);
-					member.set({
-						availableQuantity: availableQuantity
-					});
-					member.set({
-						quantity: Math.min(member.get('quantity'), availableQuantity)
-					}, {
-						silent: true
-					});
+				var quantities;
+				if (member.get('maxQuantityFixed') === true) {
+					quantities = {
+						maxQuantity: member.getCard().quantity
+					};
+				} else {
+					var maxQuantity = Math.min(3, member.getCard().quantity * coreSetQuantity);
+					quantities = {
+							maxQuantity: maxQuantity,
+							quantity: Math.min(member.getQuantity(), maxQuantity)
+						};
 				}
+				member.set(quantities, {
+					silent: true
+				});
 			});
 			this.trigger('batchChange:quantity', this);
 		},
@@ -140,6 +141,35 @@ ordb.model = ordb.model || {};
 				}
 			});
 		},
+		
+		fillMissingMembers: function() {
+			var index = this.indexByCardId();
+			var members = [];
+			_.each(ordb.dict.getPlayerDeckCards(), function(card) {
+				if (!index[card.id]) {
+					members.push(new _model.DeckMember({
+						cardId: card.id,
+						quantity: 0,
+						maxQuantity: card.quantity
+					}, {
+						parse: true
+					}));
+				}
+			});
+			this.add(members);
+		},
+		
+		indexByCardId: function() {
+			return this.indexBy(function(member) {
+				return member.getCard().id;
+			})
+		},
+		
+		indexByCardType: function() {
+			return this.indexBy(function(member) {
+				return member.getCard().type;
+			})
+		}
 	});
 
 	_model.DeckHistoryItem = Backbone.Model;
@@ -213,13 +243,17 @@ ordb.model = ordb.model || {};
 	});
 
 	_model.Deck = Backbone.Model.extend({
+		members: new _model.DeckMembers(),
+		filteredMembers: new _model.DeckMembers(),
 		history: new _model.DeckHistory(),
+		
 		/**
 		 * @memberOf Deck
 		 */
 		initialize: function(attributes) {
 			attributes.type = attributes.type || 'base';
 		},
+		
 		parse: function(response) {
 			response.createDateMillis = moment.tz(response.createDate, ordb.static.timezone).valueOf();
 			response.modifyDateMillis = moment.tz(response.modifyDate, ordb.static.timezone).valueOf();
@@ -227,6 +261,7 @@ ordb.model = ordb.model || {};
 				parse: true,
 				comparator: ordb.util.buildMembersDefaultComparator()
 			});
+			response.members.adjustQuantities(response.coreSetQuantity);
 			response.links = new _model.DeckLinks(response.links, {
 				parse: true,
 				owner: this
@@ -245,24 +280,10 @@ ordb.model = ordb.model || {};
 			}).on('remove', function(comment) {
 				comment.owner = undefined;
 			});
-			response.members.each(function(member) {
-				var cardQuantity = member.get('card').quantity;
-				var availableQuantity;
-				if (member.get('fixedMaxQuantity') === true) {
-					availableQuantity = cardQuantity;
-				} else {
-					if (_.isUndefined(response.configCsQuantity)) {
-						response.configCsQuantity = 3;
-					}
-					availableQuantity = Math.min(3, cardQuantity * response.configCsQuantity);
-				}
-				member.set({
-					availableQuantity: availableQuantity
-				});
-			});
 			response.filteredMembers = new _model.DeckMembers();
 			return response;
 		},
+		
 		toJSON: function() {
 			var json = _model.Deck.__super__.toJSON.apply(this, arguments);
 			if (json.members instanceof Backbone.Collection) {
@@ -294,32 +315,27 @@ ordb.model = ordb.model || {};
 				return 'error.deck.name.empty';
 			}
 		},
-		computeTotalQuantity: function() {
-			var total = 0;
-			if (this.get('members') instanceof Backbone.Collection) {
-				total = this.get('members').computeTotalQuantity();
-			}
-			return total;
+		
+		computeMembersTotalQuantity: function() {
+			return this.getMembers().computeTotalQuantity();
 		},
-		computeTotalCost: function() {
-			var total = 0;
-			if (this.get('members') instanceof Backbone.Collection) {
-				total = this.get('members').computeTotalCost();
-			}
-			return total;
+		
+		computeMembersTotalCost: function() {
+			return this.getMembers().computeTotalCost();
 		},
-		computeStatistics: function() {
-			var stats = {};
-			if (this.get('members') instanceof Backbone.Collection) {
-				stats = this.get('members').computeStatistics();
-			}
-			return stats;
+		
+		computeMembersStatistics: function() {
+			return this.getMembers().computeStatistics();
 		},
-		adjustQuantities: function() {
-			if (this.get('members') instanceof Backbone.Collection) {
-				this.get('members').adjustQuantities(this.get('configCsQuantity'));
-			}
+		
+		adjustMembersQuantities: function() {
+			this.getMembers().adjustQuantities(this.get('coreSetQuantity'));
 		},
+		
+		fillMissingMembers: function() {
+			this.getMembers().fillMissingMembers();
+		},
+		
 		getBackupJson: function() {
 			var json = this.toJSON();
 			delete json.techName;
@@ -334,9 +350,9 @@ ordb.model = ordb.model || {};
 			json.members = [];
 			_.each(members, function(member) {
 				if (member.quantity && member.quantity > 0) {
-					delete member.availableQuantity;
+					delete member.maxQuantity;
 					delete member.fixedQuantity;
-					delete member.fixedMaxQuantity;
+					delete member.maxQuantityFixed;
 					delete member.card;
 					json.members.push(member);
 				}
@@ -419,8 +435,8 @@ ordb.model = ordb.model || {};
 					_.each(sourceJson.members, function(member) {
 						delete member.card;
 						delete member.fixedQuantity;
-						delete member.fixedMaxQuantity;
-						delete member.availableQuantity;
+						delete member.maxQuantityFixed;
+						delete member.maxQuantity;
 					});
 				}
 				target = new _model.PrivateDeck(sourceJson);

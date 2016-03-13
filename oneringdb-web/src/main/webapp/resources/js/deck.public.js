@@ -47,7 +47,7 @@ $(function() {
 			this.markClickHandler('/deck/public/' + deckId + '/superb/' + value);
 		},
 		updateStats: function() {
-			var stats = this.deck.computeStats();
+			var stats = this.deck.computeMembersStatistics();
 			stats.cost.name = 'card.cost.sh';
 			stats.shield.name = 'card.shieldIcons.sh';
 			stats.command.name = 'card.commandIcons.sh';
@@ -193,7 +193,7 @@ $(function() {
 				view.membersListView.listenTo(view.deck.get('filteredMembers'), 'reset', function(filteredMembers) {
 					this.render(filteredMembers, {
 						layout: view.config.get('layout'),
-						readOnly: true
+						membersReadOnly: true
 					});
 				});
 				view.groupsView = new ordb.deck.MemberGroupsView({
@@ -202,7 +202,7 @@ $(function() {
 				view.listenTo(view.config, 'change:layout', function(config) {
 					view.membersListView.render(view.deck.get('filteredMembers'), {
 						layout: config.get('layout'),
-						readOnly: true
+						membersReadOnly: true
 					});
 				});
 				view.listenTo(view.config, 'change:filter', function(config) {
@@ -392,7 +392,7 @@ $(function() {
 				});
 
 				view.groupsView.render(view.deck.get('members'), {
-					readOnly: true
+					membersReadOnly: true
 				});
 				filter();
 

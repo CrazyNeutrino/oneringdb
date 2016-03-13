@@ -30,14 +30,13 @@ public class JsonDeck {
 
 	private Long id;
 	private String techName;
-	private Long warlordId;
 	private String name;
 	private String description;
 	private String username;
 	private Boolean userContributor;
 	private Date createDate;
 	private Date modifyDate;
-	private Integer configCsQuantity;
+	private Integer coreSetQuantity;
 
 	private List<JsonDeckMember> members = new ArrayList<>();
 	private List<JsonDeckLink> links = new ArrayList<>();
@@ -63,7 +62,6 @@ public class JsonDeck {
 
 	public JsonDeck build(Deck deck) {
 		id = deck.getId();
-		warlordId = deck.getWarlord().getId();
 		name = deck.getName();
 		if (name != null) {
 			techName = Utils.toTechName(name);
@@ -71,12 +69,10 @@ public class JsonDeck {
 		description = deck.getDescription();
 		createDate = deck.getCreateDate();
 		modifyDate = deck.getModifyDate();
-		configCsQuantity = deck.getConfigCsQuantity();
+		coreSetQuantity = deck.getCoreSetQuantity();
 		if (deck.getSnapshotBase() != null) {
 			snapshotBaseId = deck.getSnapshotBase().getId();
 		}
-		// snapshotVersion = deck.getSnapshotVersion();
-		// snapshotLatest = deck.getSnapshotLatest();
 		snapshotPublic = deck.getSnapshotPublic();
 		type = deck.getType().toString().toLowerCase();
 		username = deck.getUser().getUsername();
@@ -139,8 +135,7 @@ public class JsonDeck {
 		deck.setDescription(description);
 		deck.setCreateDate(createDate);
 		deck.setModifyDate(modifyDate);
-		deck.setConfigCsQuantity(configCsQuantity);
-		deck.setWarlord(new Card(warlordId));
+		deck.setCoreSetQuantity(coreSetQuantity);
 		deck.setTournamentType(new TournamentTypeConverter().convertToEntityAttribute(tournamentType));
 		deck.setTournamentPlace(new TournamentPlaceConverter().convertToEntityAttribute(tournamentPlace));
 

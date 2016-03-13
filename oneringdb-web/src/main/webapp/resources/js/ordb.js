@@ -21,7 +21,7 @@ ordb.static.format = {
 //
 ordb.dict = ordb.dict || {};
 (function(_dict) {
-
+	
 	_dict.triggerWords = {
 		de: [ 'Reise Aktion', 'Aktion', 'Erzwungen', 'Reaktion', 'Reise', 'Schatten', 'Wenn aufgedeckt' ],
 		en: [ 'Travel Action', 'Action', 'Forced', 'Response', 'Shadow', 'Travel', 'When Revealed' ],
@@ -39,6 +39,12 @@ ordb.dict = ordb.dict || {};
 	var IDX_ENCOUNTER_SET_BY_ID = "encounterSet#id";
 	var IDX_SPHERE_BY_TECH_NAME = "sphere#techName";
 	var indexes = {};
+	
+	var playerDeckCardTypes = [];
+	
+	var playerDeckCards = [];
+	var encounterDeckCards = [];
+	var questDeckCards = [];
 
 	/**
 	 * @memberOf _dict
@@ -94,6 +100,7 @@ ordb.dict = ordb.dict || {};
 				case 'event':
 				case 'treasure':
 					card.playerDeck = true;
+					playerDeckCards.push(card);
 					break;
 				case 'enemy':
 				case 'location':
@@ -102,9 +109,11 @@ ordb.dict = ordb.dict || {};
 				case 'objective-ally':
 				case 'objective-location':
 					card.encounterDeck = true;
+					encounterDeckCards.push(card);
 					break;
 				case 'quest':
 					card.questDeck = true;
+					questDeckCards.push(card);
 					break;
 			}
 
@@ -115,40 +124,62 @@ ordb.dict = ordb.dict || {};
 		});
 
 		var techNames = [ 'hero', 'ally', 'attachment', 'event', 'treasure' ];
-		_dict.playerDeckCardTypes = _.filter(_dict.cardTypes, function(cardType) {
+		playerDeckCardTypes = _.filter(_dict.cardTypes, function(cardType) {
 			return techNames.indexOf(cardType.techName) > -1;
 		});
-
-		_dict.playerDeckCards = _.where(_dict.cards, {
-			playerDeck: true
-		});
-
+		
 		var end = new Date().getTime();
 		console.log(end - start);
 	};
+	
+	_dict.getCards = function() {
+		return _dict.cards;
+	};
+	
+	_dict.getPlayerDeckCardTypes = function() {
+		return playerDeckCardTypes;
+	};
+
+	_dict.getPlayerDeckCards = function() {
+		return playerDeckCards;
+	};
+	
+	_dict.getEncounterDeckCards = function() {
+		return encounterDeckCards;
+	};
+	
+	_dict.getQuestDeckCards = function() {
+		return questDeckCards;
+	};
 
 	_dict.findCardSet = function(id) {
-		return indexes[IDX_CARD_SET_BY_ID][id];
+		return _.clone(indexes[IDX_CARD_SET_BY_ID][id]);
 	};
 
 	_dict.findEncounterSet = function(id) {
-		return indexes[IDX_ENCOUNTER_SET_BY_ID][id];
+		return _.clone(indexes[IDX_ENCOUNTER_SET_BY_ID][id]);
 	};
 
 	_dict.findCard = function(idOrTechName) {
+		var tmp;
 		if (_.isNumber(idOrTechName)) {
-			return indexes[IDX_CARD_BY_ID][parseInt(idOrTechName)];
+			tmp = indexes[IDX_CARD_BY_ID][parseInt(idOrTechName)];
 		} else {
-			return indexes[IDX_CARD_BY_TECH_NAME][idOrTechName];
+			tmp = indexes[IDX_CARD_BY_TECH_NAME][idOrTechName];
 		}
+		return _.clone(tmp);
 	};
 
 	_dict.findCardByName = function(name) {
-		return indexes[IDX_CARD_BY_NAME][name];
+		return _.clone(indexes[IDX_CARD_BY_NAME][name]);
+	};
+	
+	_dict.findCardByNumber = function(setNumber, cardNumber) {
+		return _.clone(indexes[IDX_CARD_BY_SET_NO_CARD_NO][setNumber + '#' + cardNumber]);
 	};
 
 	_dict.findCardType = function(techName) {
-		return indexes[IDX_CARD_TYPE_BY_TECH_NAME][techName];
+		return _.clone(indexes[IDX_CARD_TYPE_BY_TECH_NAME][techName]);
 	};
 
 	_dict.getCardTypes = function() {
@@ -156,15 +187,11 @@ ordb.dict = ordb.dict || {};
 	};
 
 	_dict.findFaction = function(techName) {
-		return indexes[IDX_FACTION_BY_TECH_NAME][techName];
+		return _.clone(indexes[IDX_FACTION_BY_TECH_NAME][techName]);
 	};
 
 	_dict.getFactions = function() {
 		return _.clone(indexes[IDX_FACTION_BY_TECH_NAME]);
-	};
-
-	_dict.findCardByNumber = function(setNumber, cardNumber) {
-		return indexes[IDX_CARD_BY_SET_NO_CARD_NO][setNumber + '#' + cardNumber];
 	};
 
 	_dict.buildCardSetTree = function() {
@@ -674,9 +701,9 @@ ordb.ui = ordb.ui || {};
 
 		options = options || {};
 
-		var sourceCards = ordb.dict.cards;
+		var sourceCards = ordb.dict.getCards();
 		if (options.playerDeckOnly) {
-			sourceCards = ordb.dict.playerDeckCards;
+			sourceCards = ordb.dict.getPlayerDeckCards();
 		}
 		var cards = new Bloodhound({
 			datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
@@ -882,22 +909,14 @@ ordb.deck = ordb.deck || {};
 		return deckHelper;
 	}
 
-	_deck.getPlayerDeckCardTypes = function() {
-		return consuest.dict.playerDeckCardTypes;
-	};
-
-	_deck.getPlayerDeckCards = function() {
-		return ordb.dict.playerDeckCards;
-	};
-
 	_deck.getPlayerDeckMembers = function() {
-		var playerDeckCards = _deck.getPlayerDeckCards();
+		var playerDeckCards = ordb.dict.getPlayerDeckCards();
 		var playerDeckMembers = [];
 		_.each(playerDeckCards, function(card) {
 			var member = {
 				cardId: card.id,
 				quantity: 0,
-				availableQuantity: _.isNumber(card.quantity) ? card.quantity : 3
+				maxQuantity: _.isNumber(card.quantity) ? card.quantity : 3
 			};
 			playerDeckMembers.push(member);
 		});

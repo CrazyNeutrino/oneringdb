@@ -12,8 +12,8 @@
 					</td>
 					<td>
 						<div class="btn-group quantity-group">
-							{{#for 0 availableQuantity 1}}
-							<label class="btn btn-default" {{#smartIf ../../readOnly}}disabled="disabled"{{/smartIf}} data-quantity="{{this}}">{{this}}</label>
+							{{#for 0 maxQuantity 1}}
+							<label class="btn btn-default" {{#smartIf ../../membersReadOnly}}disabled="disabled"{{/smartIf}} data-quantity="{{this}}">{{this}}</label>
 							{{/for}}
 						</div>
 						<div style="line-height: 1;">

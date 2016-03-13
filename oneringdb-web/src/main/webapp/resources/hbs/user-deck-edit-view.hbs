@@ -1,3 +1,10 @@
+{{#unless deck ~}}
+<div class="content-band">
+	<div class="container" style="text-align: center; font-size: 20px; margin-top: 20px;">
+		Loading data...
+	</div>
+</div>
+{{else}}
 <div class="user-deck-edit-view">
 	<div class="deck user-deck">
 	
@@ -263,3 +270,4 @@
 		
 	</div>
 </div>
+{{/unless}}

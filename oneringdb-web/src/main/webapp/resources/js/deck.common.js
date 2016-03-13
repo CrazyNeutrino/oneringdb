@@ -86,7 +86,7 @@ ordb.deck = ordb.deck || {};
 		}
 		$modal = $(Handlebars.templates['deck-member-modal']({
 			member: member.toJSON(),
-			readOnly: options.readOnly
+			membersReadOnly: options.membersReadOnly
 		}));
 
 		var $buttons = $modal.find('.quantity-group .btn');
@@ -95,7 +95,7 @@ ordb.deck = ordb.deck || {};
 			$active.siblings().attr('disabled', 'disabled');
 		}
 
-		if (options.readOnly === false) {
+		if (options.membersReadOnly === false) {
 			$buttons.click(function() {
 				var $button = $(this);
 				if (member.collection.canChangeQuantity(member, parseInt($button.text()))) {
@@ -504,30 +504,35 @@ ordb.deck = ordb.deck || {};
 			_deck.showDeckMemberModal(this.deck.getMembers().findWhere({
 				cardId: $(e.currentTarget).data('card-id')
 			}), {
-				readOnly: this.config.get('readOnly')
+				membersReadOnly: this.config.get('membersReadOnly')
 			});
 		}
 	});
 
 	_deck.DeckHeroesView = _deck.DeckPartialView.extend({
 		className: 'deck-heroes-view',
-		heroes: new Backbone.Collection(),
 		
 		/**
 		 * @memberOf DeckHeroesView
 		 */
 		events: function() {
 			return _.extend({
-				
+				// no op at the moment
 			}, _deck.DeckHeroesView.__super__.events.call(this));
 		},
 
 		initialize: function(options) {
 			_deck.DeckHeroesView.__super__.initialize.call(this, options);
 
+			this.heroes = new Backbone.Collection();
+			
 			// Listen to quantity change event on each member separately.
 			this.deck.getMembers().each(function(member) {
 				if (member.isHero()) {
+					if (member.isSelected()) {
+						this.heroes.add(member);
+					}
+					
 					this.listenTo(member, 'change:quantity', function(member, quantity, options) {
 						if (member.isSelected()) {
 							this.heroes.add(member);
@@ -627,7 +632,7 @@ ordb.deck = ordb.deck || {};
 		initialize: function(options) {
 			_deck.MembersListView.__super__.initialize.call(this, options);
 			
-			this.listenTo(this.config, 'change:layout', this.render);
+			this.listenTo(this.config, 'change:membersLayout', this.render);
 			this.listenTo(this.deck.getFilteredMembers(), 'reset', this.render);
 
 			// Listen to quantity change event on each member separately.
@@ -645,10 +650,10 @@ ordb.deck = ordb.deck || {};
 		},
 
 		render: function() {
-			var layout = this.config.get('layout') || 'list';
-			var template = Handlebars.templates['deck-members-' + layout]({
+			var membersLayout = this.config.get('membersLayout') || 'list';
+			var template = Handlebars.templates['deck-members-' + membersLayout]({
 				members: this.deck.getFilteredMembers().toJSON(),
-				readOnly: this.readOnly
+				membersReadOnly: this.config.get('membersReadOnly')
 			});
 			this.$el.html(template);
 			this.applyStateToUI();
@@ -1118,7 +1123,7 @@ ordb.deck = ordb.deck || {};
 
 			var deckWrappers = [];
 			decks.each(function(deck) {
-				var stats = deck.computeStats();
+				var stats = deck.computeMembersStats();
 				stats.cost.name = 'card.cost.sh';
 				stats.shield.name = 'card.shieldIcons.sh';
 				stats.command.name = 'card.commandIcons.sh';
@@ -1128,8 +1133,8 @@ ordb.deck = ordb.deck || {};
 				deckWrappers.push({
 					deck: deck.toJSON(),
 					membersGroups: ordb.util.membersGroupBy(deck.get('members'), 'typeDisplay', 'name'),
-					totalQuantity: deck.computeTotalQuantity.call(deck),
-					totalCost: deck.computeTotalCost.call(deck),
+					totalQuantity: deck.computeMembersTotalQuantity.call(deck),
+					totalCost: deck.computeMembersTotalCost.call(deck),
 					stats: stats,
 					published: deck.get('snapshotBaseId') && deck.get('snapshotPublic') === true
 				});

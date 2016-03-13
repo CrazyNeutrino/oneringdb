@@ -228,12 +228,6 @@ ordb.deck = ordb.deck || {};
 	 */
 	_deck.UserDeckEditView = _deck.PageViewBase.extend({
 		el: '.content',
-		config: new Backbone.Model({
-			layout: 'list',
-			readOnly: false
-		}),
-		membersFilter: new _deck.MembersFilter(),
-		membersSorter: new Backbone.Model(),
 		
 		/**
 		 * @memberOf UserDeckEditView
@@ -257,7 +251,16 @@ ordb.deck = ordb.deck || {};
 
 		initialize: function(options) {
 			var view = this;
+			
+			this.config = new Backbone.Model({
+				membersLayout: 'list',
+				membersReadOnly: false
+			});
+			this.membersFilter = new _deck.MembersFilter();
+			this.membersSorter = new Backbone.Model();
 
+			_.bindAll(this, 'initializeSubviews', 'render');
+			
 			if (options.deck) {
 				// Deck data is available: via deck list view or via deck import view. Fetch its
 				// detail data. Render appropriate views on success.
@@ -275,15 +278,23 @@ ordb.deck = ordb.deck || {};
 						view.renderPrivateLinksList.call(view);
 					}
 				});
+				this.deck.fillMissingMembers();	// probably not neeeded
+				this.deck.adjustMembersQuantities();		// probably not neeeded
+				this.initializeSubviews();
 			} else if (options.deckId) {
 				// Deck data is not available. Fetch it. Render whole view on success. Render error
 				// message on error.
 				this.deck = new ordb.model.PrivateDeck({
 					id: options.deckId
 				});
+				this.deck.set('loading', {});
 				this.deck.fetch({
 					success: function(deck, response, options) {
-						view.render.call(view);
+						deck.fillMissingMembers();
+						deck.adjustMembersQuantities();
+						view.initializeSubviews();
+						view.deck.unset('loading');
+						view.render();
 					},
 					error: function(deck, response, options) {
 						view.messages = _deck.buildErrorMessage({
@@ -298,12 +309,34 @@ ordb.deck = ordb.deck || {};
 				this.deck = new ordb.model.PrivateDeck({
 					type: 'base',
 					members: _deck.getPlayerDeckMembers(),
-					configCsQuantity: 3
+					coreSetQuantity: 3,
+					name: _.reduce(_.range(10), function(memo, index) {
+						return memo + String.fromCharCode(_.random(65, 90));
+					}, 'deck_')
 				}, {
 					parse: true
 				});
+				
+				this.initializeSubviews();
 			}
 
+			this.listenTo(this.deck, 'invalid', function(deck) {
+				this.messages = [ {
+					kind: 'danger',
+					title: 'core.error',
+					message: deck.validationError
+				} ];
+				this.renderMessages();
+			});
+
+			// bind handlers for filter change, sort change
+			this.listenTo(this.membersFilter, 'change', this.filterMembers);
+			this.listenTo(this.membersSorter, 'change', this.sortMembers);
+			
+			this.bindMenuLinkClickHandler();
+		},
+		
+		initializeSubviews: function() {
 			var partialViewOptions = {
 				deck: this.deck,
 				config: this.config
@@ -332,28 +365,19 @@ ordb.deck = ordb.deck || {};
 			
 			// Listen to quantity of core sets change event. Adjust quantities of deck
 			// cards accordingly and update deck statistics.
-			this.listenTo(this.deck, 'change:configCsQuantity', function(deck) {
-				this.deck.adjustQuantities();
+			this.listenTo(this.deck, 'change:coreSetQuantity', function(deck) {
+				this.deck.adjustMembersQuantities();
 				this.renderStatistics();
 			}, this);
-			
-			this.listenTo(this.deck, 'invalid', function(deck) {
-				this.messages = [ {
-					kind: 'danger',
-					title: 'core.error',
-					message: deck.validationError
-				} ];
-				this.renderMessages();
-			});
-
-			// bind handlers for filter change, sort change
-			this.listenTo(this.membersFilter, 'change', this.filterMembers);
-			this.listenTo(this.membersSorter, 'change', this.sortMembers);
-			
-			this.bindMenuLinkClickHandler();
 		},
 
 		render: function() {
+			
+			if (this.deck.get('loading')) {
+				this.$el.html(Handlebars.templates['user-deck-edit-view']());
+				return this;
+			}
+			
 			ordb.ui.adjustWrapperStyle();
 
 			// Render this view.
@@ -379,7 +403,7 @@ ordb.deck = ordb.deck || {};
 				},
 				filterItems: {
 					spheres: ordb.dict.spheres,
-					cardTypes: ordb.dict.playerDeckCardTypes
+					cardTypes: ordb.dict.getPlayerDeckCardTypes()
 				},
 				sortItems: ordb.util.buildCardSortItems({
 					includeEDAttrs: false,
@@ -391,10 +415,17 @@ ordb.deck = ordb.deck || {};
 
 			// If there's no filter set, set the default.
 			if (this.membersFilter.isEmpty()) {
-				this.membersFilter.set({
-					type: [ 'hero', 'treasure' ],
-					sphere: [ 'lore', 'spirit' ]
-				}, {
+				var filter;
+				if (this.deck.get('id')) {
+					filter = {
+						quantity: [ 1, 2, 3 ]
+					}
+				} else {
+					filter = {
+						type: [ 'hero' ]
+					}
+				}
+				this.membersFilter.set(filter, {
 					silent: true
 				});
 			}
@@ -478,12 +509,12 @@ ordb.deck = ordb.deck || {};
 
 			$configTrigger.on('shown.bs.popover', function() {
 				var $configContent = view.$el.find('#configContent');
-				var $configCsQuantityRadios = $configContent.find('input[name="csQuantity"]');
-				$configCsQuantityRadios.filter('[value="' + view.deck.get('configCsQuantity') + '"]').prop('checked', true);
+				var $coreSetQuantityRadios = $configContent.find('input[name="csQuantity"]');
+				$coreSetQuantityRadios.filter('[value="' + view.deck.get('coreSetQuantity') + '"]').prop('checked', true);
 				$configContent.find('#configApply').click(function() {
 					$configTrigger.popover('hide');
 					view.deck.set({
-						configCsQuantity: parseInt($configCsQuantityRadios.filter(':checked').val())
+						coreSetQuantity: parseInt($coreSetQuantityRadios.filter(':checked').val())
 					});
 				});
 				$configContent.find('#configCancel').click(function() {
@@ -548,7 +579,7 @@ ordb.deck = ordb.deck || {};
 			});
 			this.$el.find('.filter-group.filter-selection .btn').each(function() {
 				var $this = $(this);
-				if (_.contains(filter.quantity, $this.data('selection') == 'non-selected' ? 0 : 1)) {
+				if (_.contains(filter.quantity, $this.data('selection') == 'not-selected' ? 0 : 1)) {
 					$this.addClass('active');
 				}
 			});
@@ -714,7 +745,7 @@ ordb.deck = ordb.deck || {};
 		},
 
 		renderStatistics: function() {
-			var stats = this.deck.computeStatistics();
+			var stats = this.deck.computeMembersStatistics();
 			stats.resourceCost.name = ordb.dict.messages['card.cost.sh'];
 			stats.willpower.name = '<i class="db-icon db-icon-willpower"></i>';
 			stats.attack.name = '<i class="db-icon db-icon-attack"></i>';
@@ -846,6 +877,7 @@ ordb.deck = ordb.deck || {};
 					view.messages = _deck.buildSuccessMessage({
 						message: 'ok.deck.oper.save'
 					});
+					view.initializeSubviews();
 					view.render();
 				},
 				error: function(deck, response, options) {
@@ -940,10 +972,10 @@ ordb.deck = ordb.deck || {};
 				var cleanName = function(name) {
 					return s(name.toLowerCase()).clean().slugify().value();
 				};
-				var index = _.indexBy(ordb.dict.cards, function(card) {
+				var index = _.indexBy(ordb.dict.getCards(), function(card) {
 					return cleanName(card.name);
 				});
-				var indexEn = _.indexBy(ordb.dict.cards, function(card) {
+				var indexEn = _.indexBy(ordb.dict.getCards(), function(card) {
 					return cleanName(card.nameEn);
 				});
 				var pattern = /(?:([1-4])x?)?([^\(\)]+)(?:\((.+)\))?/;
@@ -1023,12 +1055,12 @@ ordb.deck = ordb.deck || {};
 						type: 'base',
 						warlordId: warlordId,
 						members: pdms,
-						configCsQuantity: 3
+						coreSetQuantity: 3
 					}, {
 						parse: true
 					});
 					view.membersGroupsView.render(deck.getMembers(), {
-						readOnly: false
+						membersReadOnly: false
 					});
 				}
 
@@ -1097,10 +1129,11 @@ $(function() {
 				deckId = parseInt(deckId);
 			}
 			options = {
-				deckdId: deckId,
-				deck: userDeckListView.decks.findWhere({
-					id: deckId
-				})
+				deckId: deckId,
+				deck: undefined
+//				deck: userDeckListView.decks.findWhere({
+//					id: deckId
+//				})
 			};
 		}
 

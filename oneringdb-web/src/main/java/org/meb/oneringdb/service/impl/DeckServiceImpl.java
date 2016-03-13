@@ -38,6 +38,7 @@ import org.meb.oneringdb.db.dao.DeckMemberDao;
 import org.meb.oneringdb.db.dao.JpaDao;
 import org.meb.oneringdb.db.model.Deck;
 import org.meb.oneringdb.db.model.DeckComment;
+import org.meb.oneringdb.db.model.DeckComp;
 import org.meb.oneringdb.db.model.DeckLink;
 import org.meb.oneringdb.db.model.DeckLinkType;
 import org.meb.oneringdb.db.model.DeckMember;
@@ -120,11 +121,9 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 		List<Deck> decks = deckDao.find(query);
 		for (Deck deck : decks) {
 			deck.setUser(ucm.getUser(deck.getUser().getId()));
-			deck.setWarlord(ccm.getCard(deck.getWarlord().getId()));
 			Deck snapshotBase = deck.getSnapshotBase();
 			if (snapshotBase != null) {
 				snapshotBase.setUser(ucm.getUser(snapshotBase.getUser().getId()));
-				snapshotBase.setWarlord(ccm.getCard(snapshotBase.getWarlord().getId()));
 			}
 		}
 		t[1] = System.currentTimeMillis();
@@ -169,7 +168,8 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 
 			List<Deck> snapshots = new ArrayList<>();
 			if (query.isLoadSnapshots()) {
-				TypedQuery<Deck> snapshotQuery = em.createQuery("from Deck where snapshotBase in :decks", Deck.class);
+				TypedQuery<Deck> snapshotQuery = em
+						.createQuery("from Deck where snapshotBase in :decks", Deck.class);
 				snapshotQuery.setParameter("decks", decks);
 				t[8] = System.currentTimeMillis();
 				snapshots = snapshotQuery.getResultList();
@@ -222,8 +222,11 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 		}
 		t[10] = System.currentTimeMillis();
 
-		Object[] times = new Object[] { t[10] - t[0], t[1] - t[0], t[3] - t[2], t[5] - t[4], t[7] - t[6], t[9] - t[8] };
-		log.info("find times: total: {}, decks: {}, members: {}, links: {}, comments: {}, snapshots: {}", times);
+		Object[] times = new Object[] { t[10] - t[0], t[1] - t[0], t[3] - t[2], t[5] - t[4],
+				t[7] - t[6], t[9] - t[8] };
+		log.info(
+				"find times: total: {}, decks: {}, members: {}, links: {}, comments: {}, snapshots: {}",
+				times);
 
 		return decks;
 	}
@@ -236,6 +239,13 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 	@Override
 	public Deck findUserDeck(Long deckId, boolean throwWhenNotFound) throws DeckException {
 		checkUserIdSet();
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		DatabaseUtils.executeSetUserLang(em, requestContext.getUserLanguage());
 		Deck deck = new Deck(deckId);
@@ -253,7 +263,8 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 
 	@Override
 	@Transactional
-	public Deck findUserDeckViaPrivateLink(String value, boolean throwWhenNotFound) throws DeckException {
+	public Deck findUserDeckViaPrivateLink(String value, boolean throwWhenNotFound)
+			throws DeckException {
 		DatabaseUtils.executeSetUserLang(em, requestContext.getUserLanguage());
 		DeckLink deckLink = new DeckLink();
 		deckLink.setValue(value);
@@ -306,13 +317,15 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 			if (deck.getId() == null) {
 				Long count = countUserDecks(new DeckQuery());
 				if (count >= Constant.Deck.MAX_QUANTITY) {
-					DeckException de = buildDeckException(deck, "error.deck.decksQuantity.exceeded");
+					DeckException de = buildDeckException(deck,
+							"error.deck.decksQuantity.exceeded");
 					de.setErrorCoreParameter(0, String.valueOf(Constant.Deck.MAX_QUANTITY));
 					throw de;
 				}
 			}
 
-			ValidationMode validationMode = deck.getType() == DeckType.SNAPSHOT ? ValidationMode.STRICT : null;
+			ValidationMode validationMode = deck.getType() == DeckType.SNAPSHOT
+					? ValidationMode.STRICT : null;
 
 			DeckHelper deckHelper = DeckHelperFactory.buildDeckHelper();
 			DeckValidatorChain validator = new DeckValidatorChain();
@@ -368,7 +381,8 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 				Deck persistent = findUserDeck(deckId, false);
 
 				if (deck.getType() != persistent.getType()) {
-					DeckException de = new DeckException("error.deck.deck.invalidType", "error.deck.oper.modify");
+					DeckException de = new DeckException("error.deck.deck.invalidType",
+							"error.deck.oper.modify");
 					de.setDeck(deck);
 					de.setRequestContext(requestContext);
 					throw de;
@@ -380,20 +394,14 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 				persistent.setTournamentPlace(deck.getTournamentPlace());
 
 				if (deck.getType() != DeckType.SNAPSHOT) {
-					persistent.setConfigCsQuantity(deck.getConfigCsQuantity());
-
-					// check warlord ids match
-					if (!persistent.getWarlord().getId().equals(deck.getWarlord().getId())) {
-						DeckException de = new DeckException("error.deck.warlord.invalidId", "error.deck.oper.modify");
-						de.setDeck(deck);
-						de.setRequestContext(requestContext);
-						throw de;
-					}
+					persistent.setCoreSetQuantity(deck.getCoreSetQuantity());
 
 					HashMap<Long, DeckMember> membersMap = new HashMap<>();
-					MapUtils.populateMap(membersMap, deck.getDeckMembers(), Transformers.DEME_CARD_ID);
+					MapUtils.populateMap(membersMap, deck.getDeckMembers(),
+							Transformers.DEME_CARD_ID);
 					HashMap<Long, DeckMember> persistentMembersMap = new HashMap<>();
-					MapUtils.populateMap(persistentMembersMap, persistent.getDeckMembers(), Transformers.DEME_CARD_ID);
+					MapUtils.populateMap(persistentMembersMap, persistent.getDeckMembers(),
+							Transformers.DEME_CARD_ID);
 
 					// merge
 					Iterator<DeckMember> iter = persistent.getDeckMembers().iterator();
@@ -426,7 +434,7 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 				deck = persistent;
 			}
 
-			computeDeckInfo(deck);
+			deck.setComp(computeDeckInfo(deck));
 
 			Date date = new Date();
 			deck.setUser(userDao.findUnique(new User(requestContext.getUserId())));
@@ -486,7 +494,8 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 				if (filter.findViolatedConstraint()) {
 					String violatedConstraint = filter.getViolatedConstraint();
 					if (Constant.Constraint.FK_DECK_SNAPSHOT_BASE.equals(violatedConstraint)) {
-						de = new DeckException("error.deck.publishedDeck.exists", "error.deck.oper.delete", e);
+						de = new DeckException("error.deck.publishedDeck.exists",
+								"error.deck.oper.delete", e);
 					}
 				}
 				if (de == null) {
@@ -633,7 +642,8 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 		checkUserIdSet();
 
 		if (deckId == null) {
-			DeckException de = new DeckException("error.deck.deck.invalidId", "error.deck.oper.saveComment");
+			DeckException de = new DeckException("error.deck.deck.invalidId",
+					"error.deck.oper.saveComment");
 			de.setDeckId(deckId);
 			de.setRequestContext(requestContext);
 			throw de;
@@ -648,7 +658,8 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 			}
 
 			if (value.trim().length() > Constant.Deck.MAX_COMMENT_LEN) {
-				DeckException de = new DeckException("error.deck.comment.tooLong", "error.deck.oper.saveComment");
+				DeckException de = new DeckException("error.deck.comment.tooLong",
+						"error.deck.oper.saveComment");
 				de.setErrorCoreParameter(0, String.valueOf(Constant.Deck.MAX_COMMENT_LEN));
 				throw de;
 			}
@@ -679,11 +690,11 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 	private ExportedDeck exportDeck(Deck deck, Type type) throws DeckException {
 		ExportedDeck exported;
 		switch (type) {
-		case OCTGN:
-			exported = exportOctgn(deck);
-			break;
-		default:
-			throw new IllegalArgumentException("Unsupported export type");
+			case OCTGN:
+				exported = exportOctgn(deck);
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported export type");
 		}
 		return exported;
 	}
@@ -694,41 +705,43 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 			return null;
 		}
 
-//		MultiValueMap<Faction, Deck> deckMap = new MultiValueMap<>();
-//		MapUtils.populateMap(deckMap, decks, Transformers.DECK_PRI_FACT);
+		// MultiValueMap<Faction, Deck> deckMap = new MultiValueMap<>();
+		// MapUtils.populateMap(deckMap, decks, Transformers.DECK_PRI_FACT);
 
 		ExportedDeck exported = null;
-//		try {
-//			switch (type) {
-//			case OCTGN:
-//				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//				ZipOutputStream zos = new ZipOutputStream(baos);
-//
-//				Set<Faction> factions = deckMap.keySet();
-//				for (Faction faction : factions) {
-//					Collection<Deck> factionDecks = deckMap.getCollection(faction);
-//					for (Deck fd : factionDecks) {
-//						StringBuilder nameBuilder = new StringBuilder(faction.toString().toLowerCase());
-//						nameBuilder.append("/");
-//						nameBuilder.append(StringUtils.replaceChars(fd.getName(), "/\\?%*:;|\"<>", " "));
-//						nameBuilder.append(".o8d");
-//						zos.putNextEntry(new ZipEntry(nameBuilder.toString()));
-//						zos.write(exportOctgn(fd).getCharacterData().getBytes());
-//						zos.closeEntry();
-//					}
-//				}
-//				zos.flush();
-//				zos.close();
-//
-//				exported = new ExportedDeck();
-//				exported.setByteData(baos.toByteArray());
-//				break;
-//			default:
-//				throw new IllegalArgumentException("Unsupported export type");
-//			}
-//		} catch (IOException e) {
-//			throw new DeckException("error.deck.oper.export");
-//		}
+		// try {
+		// switch (type) {
+		// case OCTGN:
+		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		// ZipOutputStream zos = new ZipOutputStream(baos);
+		//
+		// Set<Faction> factions = deckMap.keySet();
+		// for (Faction faction : factions) {
+		// Collection<Deck> factionDecks = deckMap.getCollection(faction);
+		// for (Deck fd : factionDecks) {
+		// StringBuilder nameBuilder = new
+		// StringBuilder(faction.toString().toLowerCase());
+		// nameBuilder.append("/");
+		// nameBuilder.append(StringUtils.replaceChars(fd.getName(),
+		// "/\\?%*:;|\"<>", " "));
+		// nameBuilder.append(".o8d");
+		// zos.putNextEntry(new ZipEntry(nameBuilder.toString()));
+		// zos.write(exportOctgn(fd).getCharacterData().getBytes());
+		// zos.closeEntry();
+		// }
+		// }
+		// zos.flush();
+		// zos.close();
+		//
+		// exported = new ExportedDeck();
+		// exported.setByteData(baos.toByteArray());
+		// break;
+		// default:
+		// throw new IllegalArgumentException("Unsupported export type");
+		// }
+		// } catch (IOException e) {
+		// throw new DeckException("error.deck.oper.export");
+		// }
 
 		return exported;
 	}
@@ -747,18 +760,21 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 			Element deckElem = (Element) doc.appendChild(doc.createElement("deck"));
 			deckElem.setAttribute("game", gameId);
 
-			Card warlord = ccm.getCard(deck.getWarlord().getId());
-			Element warlordSectionElem = (Element) deckElem.appendChild(doc.createElement("section"));
-			warlordSectionElem.setAttribute("name", "Warlord");
-			warlordSectionElem.appendChild(createCardElement(doc, warlord.getOctgnId(), warlord.getNameEn(), 1));
+			// Card warlord = ccm.getCard(deck.getWarlord().getId());
+			// Element warlordSectionElem = (Element)
+			// deckElem.appendChild(doc.createElement("section"));
+			// warlordSectionElem.setAttribute("name", "Warlord");
+			// warlordSectionElem.appendChild(createCardElement(doc,
+			// warlord.getOctgnId(), warlord.getNameEn(), 1));
 
-			Element armiesSectionElem = (Element) deckElem.appendChild(doc.createElement("section"));
+			Element armiesSectionElem = (Element) deckElem
+					.appendChild(doc.createElement("section"));
 			armiesSectionElem.setAttribute("name", "Armies");
 			for (DeckMember member : deck.getDeckMembers()) {
 				Card card = ccm.getCard(member.getCard().getId());
 				member.setCard(card);
-				armiesSectionElem
-						.appendChild(createCardElement(doc, card.getOctgnId(), card.getNameEn(), member.getQuantity()));
+				armiesSectionElem.appendChild(createCardElement(doc, card.getOctgnId(),
+						card.getNameEn(), member.getQuantity()));
 			}
 
 			exported.setCharacterData(serialize(doc));
@@ -797,7 +813,7 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 		return writer.toString();
 	}
 
-	private void computeDeckInfo(Deck deck) {
+	private DeckComp computeDeckInfo(Deck deck) {
 		// Faction primaryFaction = deck.getWarlord().getFaction();
 		// Faction secondaryFaction = null;
 		// TreeSet<String> crstSet = new TreeSet<>();
@@ -851,6 +867,8 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 		// deck.setAttachmentCardsQuantity(sumDeckMembersQuantity(cardTypeMap.getCollection(CardType.ATTACHMENT)));
 		// deck.setEventCardsQuantity(sumDeckMembersQuantity(cardTypeMap.getCollection(CardType.EVENT)));
 		// deck.setSupportCardsQuantity(sumDeckMembersQuantity(cardTypeMap.getCollection(CardType.SUPPORT)));
+		
+		return new DeckComp();
 	}
 
 	private int sumDeckMembersQuantity(Collection<DeckMember> deckMembers) {

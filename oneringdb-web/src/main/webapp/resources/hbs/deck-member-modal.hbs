@@ -3,8 +3,8 @@
 		<div class="modal-content">
 			<div class="modal-body">
 				<div class="btn-group quantity-group" style="display: table; margin-bottom: 10px; margin-left: auto; margin-right: auto;">
-					{{#for 0 member.availableQuantity 1}}
-					<label class="btn btn-default" {{#smartIf ../readOnly}}disabled="disabled"{{/smartIf}} data-quantity="{{this}}">{{this}}</label>
+					{{#for 0 member.maxQuantity 1}}
+					<label class="btn btn-default" {{#smartIf ../membersReadOnly}}disabled="disabled"{{/smartIf}} data-quantity="{{this}}">{{this}}</label>
 					{{/for}}
 				</div>
 				<div class="row">

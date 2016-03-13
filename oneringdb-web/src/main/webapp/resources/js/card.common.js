@@ -38,22 +38,20 @@ ordb.card = ordb.card || {};
 	};
 
 	_card.CardsFilter = Backbone.Model.extend({
-		isNotEmpty: function() {
-			return !_.isEmpty(this.toJSON());
-		},
-		
 		/**
 		 * @memberOf CardsFilter
 		 */
+		initialize: function(attributes, options) {
+			_.bindAll(this, 'filter', 'isEmpty');
+		},
+		
 		filter: function(cards) {
-			var filter = this;
-
 			var db = TAFFY(cards);
 			var query = {};
 			var query2;
 
 			_.each(ordb.filter.fds, function(fd) {
-				var value = filter.get(fd.key);
+				var value = this.get(fd.key);
 				if (fd.type === ordb.filter.FD_TYPE_SET) {					
 					if (value && value.length > 0) {
 						query[fd.key] = value;
@@ -72,7 +70,7 @@ ordb.card = ordb.card || {};
 						query[fd.key] = obj;
 					}
 				}
-			});
+			}, this);
 
 			/* var anyText = this.get('anyText');
 			if (anyText && !(query.techName || query.keyword || query.trait)) {
@@ -91,7 +89,11 @@ ordb.card = ordb.card || {};
 			} else {
 				return db(query).get();
 			}
-		}
+		},
+		
+		isEmpty: function() {
+			return _.isEmpty(this.toJSON());
+		},
 	});
 	
 	//

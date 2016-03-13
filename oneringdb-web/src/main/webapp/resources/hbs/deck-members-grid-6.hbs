@@ -2,8 +2,8 @@
 	{{#each members}}
 	<div class="col-xs-4 col-sm-2 members-grid-item text-center" data-card-id="{{cardId}}">
 		<div class="btn-group quantity-group">
-		{{#for 0 availableQuantity 1}}
-			<label class="btn btn-default" {{#smartIf ../../readOnly}}disabled="disabled"{{/smartIf}} data-quantity="{{this}}">{{this}}</label>
+		{{#for 0 maxQuantity 1}}
+			<label class="btn btn-default" {{#smartIf ../../membersReadOnly}}disabled="disabled"{{/smartIf}} data-quantity="{{this}}">{{this}}</label>
 		{{/for}}	
 		</div>
 		<a class="toggle-popover toggle-modal" data-card-id="{{cardId}}"
