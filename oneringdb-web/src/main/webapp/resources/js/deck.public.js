@@ -161,7 +161,7 @@ $(function() {
 						}
 					}
 
-					var filteredMembers = view.deck.get('members').filter(function(member) {
+					var filteredMembers = view.deck.getMembers().filter(function(member) {
 						var card = member.get('card');
 						var cardSelection = member.get('quantity') === 0 ? 'not-selected' : 'selected';
 						var matches = (!factions || factions.indexOf(card.faction) > -1) && (!types || types.indexOf(card.type) > -1);
@@ -178,7 +178,7 @@ $(function() {
 						return matches;
 					});
 
-					view.deck.get('filteredMembers').reset(filteredMembers);
+					view.deck.getFilteredMembers().reset(filteredMembers);
 				};
 
 				view.config.get('filter').set({
@@ -190,7 +190,7 @@ $(function() {
 				view.membersListView = new ordb.deck.MembersListView({
 					el: '.members-container'
 				});
-				view.membersListView.listenTo(view.deck.get('filteredMembers'), 'reset', function(filteredMembers) {
+				view.membersListView.listenTo(view.deck.getFilteredMembers(), 'reset', function(filteredMembers) {
 					this.render(filteredMembers, {
 						layout: view.config.get('layout'),
 						membersReadOnly: true
@@ -200,7 +200,7 @@ $(function() {
 					el: '.mg-container'
 				});
 				view.listenTo(view.config, 'change:layout', function(config) {
-					view.membersListView.render(view.deck.get('filteredMembers'), {
+					view.membersListView.render(view.deck.getFilteredMembers(), {
 						layout: config.get('layout'),
 						membersReadOnly: true
 					});
@@ -264,7 +264,7 @@ $(function() {
 
 					var draw = function(quantity) {
 						if (_.isUndefined(view.shuffledCards)) {
-							view.shuffledCards = ordb.util.membersShuffle(view.deck.get('members'));
+							view.shuffledCards = ordb.util.membersShuffle(view.deck.getMembers());
 							view.shuffledCardsIndex = 0;
 							$drawContainer.empty();
 						}
@@ -296,7 +296,7 @@ $(function() {
 						quantity = view.deck.get('warlord').startingHandSize;
 					} else if ($buttons.index($button) == 1) {
 						view.shuffledCards = undefined;
-						quantity = view.deck.get('members').reduce(function(total, member) {
+						quantity = view.deck.getMembers().reduce(function(total, member) {
 							return total + member.get('quantity');
 						}, 0);
 					} else {
@@ -314,7 +314,7 @@ $(function() {
 				var cards = new Bloodhound({
 					datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
 					queryTokenizer: Bloodhound.tokenizers.whitespace,
-					local: $.map(view.deck.get('members').toJSON(), function(member) {
+					local: $.map(view.deck.getMembers().toJSON(), function(member) {
 						return {
 							name: member.card.name,
 							card: member.card
@@ -391,7 +391,7 @@ $(function() {
 					}
 				});
 
-				view.groupsView.render(view.deck.get('members'), {
+				view.groupsView.render(view.deck.getMembers(), {
 					membersReadOnly: true
 				});
 				filter();

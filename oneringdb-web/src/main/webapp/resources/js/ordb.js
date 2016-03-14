@@ -24,7 +24,7 @@ ordb.dict = ordb.dict || {};
 	
 	_dict.triggerWords = {
 		de: [ 'Reise Aktion', 'Aktion', 'Erzwungen', 'Reaktion', 'Reise', 'Schatten', 'Wenn aufgedeckt' ],
-		en: [ 'Travel Action', 'Action', 'Forced', 'Response', 'Shadow', 'Travel', 'When Revealed' ],
+		en: [ 'Travel Action', 'Action', 'Forced', 'Response', 'Riddle', 'Shadow', 'Travel', 'When Revealed' ],
 		pl: [ 'Akcja wyprawy', 'Akcja', 'Cień', 'Odpowiedź', 'Podróż', 'Po odkryciu', 'Wymuszony', ]
 	};
 	_dict.iconWords = [ 'Willpower', 'Threat', 'Attack', 'Defense', 'Leadership', 'Tactics', 'Lore', 'Spirit',
@@ -159,6 +159,10 @@ ordb.dict = ordb.dict || {};
 	_dict.findEncounterSet = function(id) {
 		return _.clone(indexes[IDX_ENCOUNTER_SET_BY_ID][id]);
 	};
+	
+	_dict.findSphere = function(techName) {
+		return indexes[IDX_SPHERE_BY_TECH_NAME][techName];
+	}
 
 	_dict.findCard = function(idOrTechName) {
 		var tmp;
@@ -233,18 +237,18 @@ ordb.dict = ordb.dict || {};
 		_.each(_dict.buildCardSetTree().nodes, function(node) {
 			if (node.type == 'set') {
 				tree = {
-					nodes: []
+					nodes: [ node ]
 				};
 				trees.push(tree);
-				tree.nodes.push(node);
 			} else if (node.type == 'cycle') {
-				if (node.techName == 'the-hobbit' || node.techName == 'the-lord-of-the-rings') {
-					tree = {
-						nodes: []
-					};
-					trees.push(tree);
+				if (tree) {
+					tree.nodes.push(node);
+					tree = undefined;
+				} else {
+					trees.push({
+						nodes: [ node ]
+					});
 				}
-				tree.nodes.push(node);
 			}
 		});
 		return trees;
@@ -606,49 +610,37 @@ ordb.ui = ordb.ui || {};
 	};
 
 	_ui.colors = {
-		factions: {
-			'astra-militarum': {
-				bg: '#3C3C3C',
+		spheres: {
+			leadership: {
+				bg: '#A22FA0',
 				fg: '#FFF'
 			},
-			chaos: {
-				bg: '#EA5400',
+			tactics: {
+				bg: '#C71313',
 				fg: '#FFF'
 			},
-			'dark-eldar': {
-				bg: '#AF4D9D',
+			spirit: {
+				bg: '#4EBBF7',
 				fg: '#000'
 			},
-			eldar: {
-				bg: '#EADA67',
+			lore: {
+				bg: '#108413',
 				fg: '#000'
 			},
-			ork: {
-				bg: '#407424',
-				fg: '#FFF'
+			baggins: {
+				bg: '#FBE821',
+				fg: '#000'
 			},
-			'space-marines': {
-				bg: '#095DAD',
-				fg: '#FFF'
-			},
-			tau: {
-				bg: '#4CD0DC'
-			},
-			tyranid: {
-				bg: '#A32618',
-				fg: '#FFF'
-			},
-			necron: {
-				bg: '#57D8A9',
+			fellowship: {
+				bg: '#FD7E17',
 				fg: '#000'
 			},
 			neutral: {
-				bg: '#BBB',
-				fg: '#000'
+				bg: '#DDD'
 			}
 		},
 		types: {
-			army: {
+			ally: {
 				bg: '#ED2626'
 			},
 			attachment: {
@@ -657,11 +649,8 @@ ordb.ui = ordb.ui || {};
 			event: {
 				bg: '#F0AD36'
 			},
-			support: {
+			treasure: {
 				bg: '#3B84CC'
-			},
-			synapse: {
-				bg: '#B848A3'
 			}
 		}
 	};

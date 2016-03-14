@@ -345,6 +345,8 @@ ordb.deck = ordb.deck || {};
 			this.heroesView = new _deck.DeckHeroesView(partialViewOptions);
 			// members groups view
 			this.membersGroupsView = new _deck.MembersGroupsView(partialViewOptions);
+			// members charts view
+			this.membersChartsView = new _deck.MembersChartsView(partialViewOptions);
 			// members list view
 			this.membersListView = new _deck.MembersListView(partialViewOptions);
 			// description view
@@ -442,6 +444,9 @@ ordb.deck = ordb.deck || {};
 			}, {
 				ctr: '.members-groups-view-ctr',
 				sv: this.membersGroupsView
+			}, {
+				ctr: '.members-charts-view-ctr',
+				sv: this.membersChartsView
 			}, {
 				ctr: '.members-list-view-ctr',
 				sv: this.membersListView

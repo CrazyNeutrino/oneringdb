@@ -933,10 +933,10 @@ table.table-with-btn > tbody > tr > td {
 
 .fg-leadership { color: #A22FA0; }
 .fg-tactics { color: #C71313; }
-.fg-lore { color: #108413; }
 .fg-spirit { color: #4EBBF7 ; }
-.fg-fellowship { color: #FD7E17; }
+.fg-lore { color: #108413; }
 .fg-baggins { color: #FBE821; }
+.fg-fellowship { color: #FD7E17; }
 .fg-tau { color: #4CD0DC; }
 .fg-tyranid { color: #A32618; }
 .fg-neutral { color: #DDD; }
@@ -948,10 +948,10 @@ table.table-with-btn > tbody > tr > td {
 
 .bg-leadership { background-color: #A22FA0 !important; color: #fff !important; }
 .bg-tactics { background-color: #C71313 !important; color: #fff !important; }
-.bg-lore { background-color: #108413 !important; color: #fff !important; }
 .bg-spirit { background-color: #4EBBF7  !important; color: #000 !important; }
-.bg-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
+.bg-lore { background-color: #108413 !important; color: #fff !important; }
 .bg-baggins { background-color: #FBE821 !important; color: #000 !important; }
+.bg-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
 .bg-neutral { background-color: #DDD !important; color: #000 !important; }
 
 .bg-enemy { background-color: #6A150A !important; color: #fff !important; }

@@ -144,7 +144,7 @@ ordb.deck = ordb.deck || {};
 					link.key = 'core.createdWith';
 					link.value = /^(?:http:\/\/)?([^/?]+).*/.exec(document.URL)[1];
 				}
-				var membersGroups = ordb.util.membersGroupBy(deck.get('members'), $modal.data(GK), $modal.data(SK));
+				var membersGroups = ordb.util.membersGroupBy(deck.getMembers(), $modal.data(GK), $modal.data(SK));
 				var plainData = Handlebars.templates['deck-export-plain']({
 					warlord: deck.get('warlord'),
 					membersGroups: membersGroups,
@@ -857,7 +857,7 @@ ordb.deck = ordb.deck || {};
 		},
 
 		shuffle: function() {
-			this.cards = ordb.util.membersShuffle(this.deck.get('members').filter(function(member) {
+			this.cards = ordb.util.membersShuffle(this.deck.getMembers().filter(function(member) {
 				return member.get('card').type != 'hero' && _.isNumber(member.get('quantity'))
 			}));
 			this.drawnCards = [];
@@ -1132,7 +1132,7 @@ ordb.deck = ordb.deck || {};
 
 				deckWrappers.push({
 					deck: deck.toJSON(),
-					membersGroups: ordb.util.membersGroupBy(deck.get('members'), 'typeDisplay', 'name'),
+					membersGroups: ordb.util.membersGroupBy(deck.getMembers(), 'typeDisplay', 'name'),
 					totalQuantity: deck.computeMembersTotalQuantity.call(deck),
 					totalCost: deck.computeMembersTotalCost.call(deck),
 					stats: stats,
@@ -1176,7 +1176,7 @@ ordb.deck = ordb.deck || {};
 				var deck = decks.findWhere({
 					id: parseInt($(this).data('deck-id'))
 				});
-				var members = deck.get('members').toJSON();
+				var members = deck.getMembers().toJSON();
 				var membersByCost = _.groupBy(members, function(member) {
 					return member.card.cost;
 				});
@@ -1250,78 +1250,73 @@ ordb.deck = ordb.deck || {};
 			});
 
 			//
-			// factions chart
+			// spheres chart
 			//
-			view.$el.find('.chart-container.faction').each(function() {
-				var deck = decks.findWhere({
-					id: parseInt($(this).data('deck-id'))
-				});
-				var members = ordb.util.toJSON(deck.get('members').filter(function(member) {
-					return member.get('quantity') > 0;
-				}));
-				var membersByFaction = _.groupBy(members, function(member) {
-					return member.card.faction;
-				});
+			var members = ordb.util.toJSON(deck.getMembers().filter(function(member) {
+				return member.isSelected() && !memeber.isHero();
+			}));
+			var membersByFaction = _.groupBy(members, function(member) {
+				return member.card.faction;
+			});
 
-				var dataByFaction = [];
-				var sortedKeys = _.sortBy(Object.keys(membersByFaction), function(key) {
-					if (key == deck.get('warlord').faction) {
-						return 0;
-					} else if (key == 'neutral') {
-						return 2;
-					} else {
-						return 1;
+			var dataByFaction = [];
+			var sortedKeys = _.sortBy(Object.keys(membersByFaction), function(key) {
+				if (key == deck.get('warlord').faction) {
+					return 0;
+				} else if (key == 'neutral') {
+					return 2;
+				} else {
+					return 1;
+				}
+			});
+			_.each(sortedKeys, function(key) {
+				dataByFaction.push({
+					name: ordb.dict.findFaction(key).name,
+					y: _.reduce(membersByFaction[key], function(count, member) {
+						return count + member.quantity;
+					}, 0),
+					color: ordb.ui.colors.factions[key].bg
+				});
+			});
+
+			view.$el.find('.chart-ctr.sphere').highcharts({
+				chart: {
+					plotBackgroundColor: null,
+					plotBorderWidth: null,
+					plotShadow: false,
+					type: 'pie',
+					spacing: 0
+				},
+				title: {
+					text: ordb.dict.messages['core.cardsBySphere'],
+					style: {
+						fontSize: '12px'
 					}
-				});
-				_.each(sortedKeys, function(key) {
-					dataByFaction.push({
-						name: ordb.dict.findFaction(key).name,
-						y: _.reduce(membersByFaction[key], function(count, member) {
-							return count + member.quantity;
-						}, 0),
-						color: ordb.ui.colors.factions[key].bg
-					});
-				});
-
-				$(this).highcharts({
-					chart: {
-						plotBackgroundColor: null,
-						plotBorderWidth: null,
-						plotShadow: false,
-						type: 'pie',
-						spacing: 0
-					},
-					title: {
-						text: ordb.dict.messages['core.cardsByFaction'],
-						style: {
-							fontSize: '12px'
-						}
-					},
-					tooltip: {
-						pointFormat: '{series.name}: <b>{point.y}</b>'
-					},
-					plotOptions: {
-						pie: {
-							size: '100%',
-							allowPointSelect: false,
-							cursor: 'pointer',
-							dataLabels: {
-								enabled: false,
-								format: '{point.name}'
-							},
-							borderWidth: 0
+				},
+				tooltip: {
+					pointFormat: '{series.name}: <b>{point.y}</b>'
+				},
+				plotOptions: {
+					pie: {
+						size: '100%',
+						allowPointSelect: false,
+						cursor: 'pointer',
+						dataLabels: {
+							enabled: false,
+							format: '{point.name}'
 						},
-						series: {
-							animation: false
-						}
+						borderWidth: 0
 					},
-					series: [ {
-						name: ordb.dict.messages['core.numberOfCards'],
-						colorByPoint: true,
-						data: dataByFaction
-					} ],
-					credits: false
-				});
+					series: {
+						animation: false
+					}
+				},
+				series: [ {
+					name: ordb.dict.messages['core.numberOfCards'],
+					colorByPoint: true,
+					data: dataByFaction
+				} ],
+				credits: false
 			});
 
 			//
@@ -1331,7 +1326,7 @@ ordb.deck = ordb.deck || {};
 				var deck = decks.findWhere({
 					id: parseInt($(this).data('deck-id'))
 				});
-				var members = ordb.util.toJSON(deck.get('members').filter(function(member) {
+				var members = ordb.util.toJSON(deck.getMembers().filter(function(member) {
 					return member.get('quantity') > 0;
 				}));
 				var membersByType = _.groupBy(members, function(member) {
@@ -1416,6 +1411,262 @@ ordb.deck = ordb.deck || {};
 			//				
 			view.$el.find('[data-toggle="tooltip"]').tooltip({
 				container: 'body'
+			});
+		}
+	});
+	
+	_deck.MembersChartsView = _deck.DeckPartialView.extend({
+		className: 'members-charts-view',
+		
+		/**
+		 * @memberOf MembersChartsView
+		 */
+		events: function() {
+			return _.extend({
+				// no op at the moment
+			}, _deck.MembersChartsView.__super__.events.call(this));
+		},
+
+		initialize: function(options) {
+			_deck.MembersChartsView.__super__.initialize.call(this, options);
+			
+			_.bindAll(this, 'render');
+
+			this.heroes = new Backbone.Collection();
+			
+			// Listen to quantity change event on each member separately.
+			this.deck.getMembers().each(function(member) {
+				this.listenTo(member, 'change:quantity', function(member, quantity, options) {
+					if (member.isSelected()) {
+						this.heroes.add(member);
+					} else {
+						this.heroes.remove(member);
+					}
+					this.render();
+				});
+			}, this);
+			// Listen to batch quantity change event on all members.
+			this.listenTo(this.deck.getMembers(), 'batchChange:quantity', this.render);
+		},
+
+		render: function() {
+			var template = Handlebars.templates['members-charts-view']();
+			this.$el.html(template);
+			
+//			this.prepareCostCharts();
+			this.prepareSpheresChart();
+			this.prepareTypesChart();
+
+			return this;
+		},
+		
+		prepareCostChart: function() {
+			//
+			// cost chart
+			//
+			view.$el.find('.chart-ctr.cost').each(function() {
+				var deck = decks.findWhere({
+					id: parseInt($(this).data('deck-id'))
+				});
+				var members = deck.getMembers().toJSON();
+				var membersByCost = _.groupBy(members, function(member) {
+					return member.card.cost;
+				});
+				delete membersByCost['-1'];
+				delete membersByCost['undefined'];
+	
+				var sortedKeys = _.sortBy(Object.keys(membersByCost), function(key) {
+					return parseInt(key);
+				});
+				var dataByCost = [];
+				_.each(sortedKeys, function(key) {
+					dataByCost.push([ parseInt(key), _.reduce(membersByCost[key], function(count, member) {
+						return count + member.quantity;
+					}, 0) ]);
+				});
+	
+				var colors = [];
+				var base = Highcharts.getOptions().colors[0];
+	
+				for (var i = 0; i < 11; i++) {
+					colors.push(Highcharts.Color(base).brighten((-i) / 20).get());
+				}
+	
+				$(this).highcharts({
+					chart: {
+						type: 'column',
+						spacingBottom: 0,
+						spacingTop: 0,
+						spacingLeft: 0,
+						spacingRight: 0,
+					},
+					title: {
+						text: ordb.dict.messages['core.cardsByCost'],
+						style: {
+							fontSize: '12px'
+						}
+					},
+					xAxis: {
+						title: {
+							text: null
+						},
+						categories: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
+						min: 0,
+						max: 10
+					},
+					yAxis: {
+						title: {
+							text: null
+						},
+						min: 0,
+						max: 26,
+						tickInterval: 2
+					},
+					plotOptions: {
+						column: {
+							colorByPoint: true,
+							colors: colors
+						},
+						series: {
+							animation: false
+						}
+					},
+					series: [ {
+						name: ordb.dict.messages['core.numberOfCards'],
+						data: dataByCost,
+						showInLegend: false,
+						pointWidth: 14
+					} ],
+					credits: false
+				});
+			});
+		},
+
+		prepareSpheresChart: function() {
+			var members = ordb.util.toJSON(this.deck.getMembers().filter(function(member) {
+				return member.get('quantity') > 0;
+			}));
+			var membersBySphere = _.groupBy(members, function(member) {
+				return member.card.sphere;
+			});
+			
+			var order = [ 'leadership', 'tactics', 'spirit', 'lore', 'baggins', 'fellowship', 'neutral' ];
+			var sortedKeys = _.sortBy(Object.keys(membersBySphere), function(key) {
+				return order.indexOf(key);
+			});
+			var dataBySphere = [];
+			_.each(sortedKeys, function(key) {
+				dataBySphere.push({
+					name: ordb.dict.findSphere(key).name,
+					y: _.reduce(membersBySphere[key], function(count, member) {
+						return count + member.quantity;
+					}, 0),
+					color: ordb.ui.colors.spheres[key].bg
+				});
+			});
+
+			this.$el.find('.chart-ctr.sphere').highcharts({
+				chart: {
+					plotBackgroundColor: null,
+					plotBorderWidth: null,
+					plotShadow: false,
+					type: 'pie',
+					spacing: 0
+				},
+				title: {
+					text: ordb.dict.messages['core.cardsBySphere'],
+					style: {
+						fontSize: '12px'
+					}
+				},
+				tooltip: {
+					pointFormat: '{series.name}: <b>{point.y}</b>'
+				},
+				plotOptions: {
+					pie: {
+						size: '100%',
+						allowPointSelect: false,
+						cursor: 'pointer',
+						dataLabels: {
+							enabled: false,
+							format: '{point.name}'
+						},
+						borderWidth: 0
+					},
+					series: {
+						animation: false
+					}
+				},
+				series: [ {
+					name: ordb.dict.messages['core.numberOfCards'],
+					colorByPoint: true,
+					data: dataBySphere
+				} ],
+				credits: false
+			});
+		},
+
+		prepareTypesChart: function() {
+			var members = ordb.util.toJSON(this.deck.getMembers().filter(function(member) {
+				return member.isSelected() && !member.isHero();
+			}));
+			var membersByType = _.groupBy(members, function(member) {
+				return member.card.type;
+			});
+
+			var order = [ 'ally', 'attachment', 'event', 'treasure' ];
+			var sortedKeys = _.sortBy(Object.keys(membersByType), function(key) {
+				return order.indexOf(key);
+			});
+			var dataByType = [];
+			_.each(sortedKeys, function(key) {
+				dataByType.push({
+					name: ordb.dict.findCardType(key).name,
+					y: _.reduce(membersByType[key], function(count, member) {
+						return count + member.quantity;
+					}, 0),
+					color: ordb.ui.colors.types[key].bg
+				});
+			});
+	
+			this.$el.find('.chart-ctr.type').highcharts({
+				chart: {
+					plotBackgroundColor: null,
+					plotBorderWidth: null,
+					plotShadow: false,
+					type: 'pie',
+					spacing: 0
+				},
+				title: {
+					text: ordb.dict.messages['core.cardsByType'],
+					style: {
+						fontSize: '12px'
+					}
+				},
+				tooltip: {
+					pointFormat: '{series.name}: <b>{point.y}</b>'
+				},
+				plotOptions: {
+					pie: {
+						size: '100%',
+						allowPointSelect: false,
+						cursor: 'pointer',
+						dataLabels: {
+							enabled: false,
+							format: '{point.name}'
+						},
+						borderWidth: 0
+					},
+					series: {
+						animation: false
+					}
+				},
+				series: [ {
+					name: ordb.dict.messages['core.numberOfCards'],
+					colorByPoint: true,
+					data: dataByType
+				} ],
+				credits: false
 			});
 		}
 	});
