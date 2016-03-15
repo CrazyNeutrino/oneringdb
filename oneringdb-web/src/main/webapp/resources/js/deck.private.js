@@ -237,7 +237,7 @@ ordb.deck = ordb.deck || {};
 				/*'click .user-deck-edit-view a': 'onViewLinkClick',*/
 				'click .user-deck-edit-view .select-one .btn': 'onSelectOneGroupClick',
 				'click .user-deck-edit-view .select-many .btn': 'onSelectManyGroupClick',
-				'click .user-deck-edit-view .layout-group .btn': 'onLayoutClick',
+				'click .user-deck-edit-view .layout-group .btn': 'onMembersLayoutClick',
 				'click .user-deck-edit-view .filter-sphere .btn': 'onSphereFilterClick',
 				'click .user-deck-edit-view .filter-card-type .btn': 'onCardTypeFilterClick',
 				'click .user-deck-edit-view .filter-selection .btn': 'onSelectionFilterClick',
@@ -245,7 +245,8 @@ ordb.deck = ordb.deck || {};
 				'click .user-deck-edit-view .btn.deck-save': 'onDeckSaveClick',
 				'click .user-deck-edit-view .btn.deck-save-copy': 'onDeckSaveCopyClick',
 				'click .user-deck-edit-view .btn.deck-delete': 'onDeckDeleteClick',
-				'click .user-deck-edit-view .btn.deck-publish': 'onDeckPublishClick'
+				'click .user-deck-edit-view .btn.deck-publish': 'onDeckPublishClick',
+				'click .user-deck-edit-view #cardSetFilterTrigger':	'openCardSetFilterModal'
 			}, _deck.PageViewBase.prototype.events.call(this));
 		},
 
@@ -566,7 +567,7 @@ ordb.deck = ordb.deck || {};
 
 			this.$el.find('.layout-group .btn').each(function() {
 				var $this = $(this);
-				if (_.contains(filter.layout, $this.data('layout'))) {
+				if (_.contains(filter.layout, $this.data('members-layout'))) {
 					$this.addClass('active');
 				}
 			});
@@ -591,14 +592,14 @@ ordb.deck = ordb.deck || {};
 		},
 		
 		applyLayoutToUI: function() {
-			$('.btn-group.layout-group > .btn[data-layout="' + this.config.get('layout') + '"]').addClass('active');
+			$('.btn-group.layout-group > .btn[data-members-layout="' + this.config.get('membersLayout') + '"]').addClass('active');
 		},
 		
 		// buildFilterFromUI: function() {
 		// var filter = {};
 		// filter.layout = this.$el.find('.btn-group-layout
 		// .btn.active').map(function() {
-		// return $(this).data('layout');
+		// return $(this).data('members-layout');
 		// }).get();
 		// filter.faction =
 		// this.$el.find('.btn-group-filter.filter-faction
@@ -822,9 +823,9 @@ ordb.deck = ordb.deck || {};
 			}
 		},
 
-		onLayoutClick: function(e) {
+		onMembersLayoutClick: function(e) {
 			this.config.set({
-				layout: $(e.currentTarget).data('layout')
+				membersLayout: $(e.currentTarget).data('members-layout')
 			});
 		},
 
@@ -861,6 +862,22 @@ ordb.deck = ordb.deck || {};
 		onSortControlChange: function(e) {
 			this.membersSorter.set({
 				keys: ordb.util.buildSortKeys($('.sort-control'))
+			});
+		},
+		
+		openCardSetFilterModal: function(e) {
+			var handler = _.bind(function(filter) {
+				this.membersFilter.set({
+					setTechName: filter.sets,
+					cycleTechName: filter.cycles
+				});
+			}, this);
+			ordb.card.openCardSetFilterModal({
+				sets: this.membersFilter.get('setTechName'),
+				cycles: this.membersFilter.get('cycleTechName')
+			}, {
+				applyFilterHandler: handler,
+				excludeNightmare: true
 			});
 		},
 
@@ -1162,6 +1179,9 @@ $(function() {
 
 	// register partials
 	Handlebars.registerPartial({
+		'pagination': Handlebars.templates['pagination'],
+		'card-text-content': Handlebars.templates['card-text-content'],
+		'common-ul-tree': Handlebars.templates['common-ul-tree'],
 		'deck-actions': Handlebars.templates['deck-actions']
 	});
 

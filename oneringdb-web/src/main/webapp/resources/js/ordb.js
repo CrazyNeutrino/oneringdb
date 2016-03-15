@@ -231,7 +231,10 @@ ordb.dict = ordb.dict || {};
 	};
 
 	_dict.buildCardSetTrees = function() {
-		var trees = [];
+		var trees = {
+			regular: [],
+			nightmare: []
+		};
 
 		var tree;
 		_.each(_dict.buildCardSetTree().nodes, function(node) {
@@ -239,15 +242,25 @@ ordb.dict = ordb.dict || {};
 				tree = {
 					nodes: [ node ]
 				};
-				trees.push(tree);
+				if (node.techName.indexOf('-nightmare') == -1) {
+					trees.regular.push(tree);
+				} else {
+					trees.nightmare.push(tree);
+				}
 			} else if (node.type == 'cycle') {
 				if (tree) {
 					tree.nodes.push(node);
 					tree = undefined;
 				} else {
-					trees.push({
-						nodes: [ node ]
-					});
+					if (node.techName.indexOf('-nightmare') == -1) {
+						trees.regular.push({
+							nodes: [ node ]
+						});
+					} else {
+						trees.nightmare.push({
+							nodes: [ node ]
+						});
+					}
 				}
 			}
 		});

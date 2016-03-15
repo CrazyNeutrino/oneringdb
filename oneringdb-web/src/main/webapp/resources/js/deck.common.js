@@ -360,23 +360,23 @@ ordb.deck = ordb.deck || {};
 			this.$el.find('[data-toggle="tooltip"]').tooltip('destroy');
 		},
 		
-		onViewLinkClick: function(event) {
+		onViewLinkClick: function(e) {
 			var root = ordb.static.root;
-			var href = $(event.currentTarget).attr('href');
-			if (href && href.indexOf(root) == 0 && !event.ctrlKey && !event.shiftKey) {
-				$(event.currentTarget).tooltip('hide');
-				event.preventDefault();
+			var href = $(e.currentTarget).attr('href');
+			if (href && href.indexOf(root) == 0 && !e.ctrlKey && !e.shiftKey) {
+				$(e.currentTarget).tooltip('hide');
+				e.preventDefault();
 				ordb.router.navigate(href.replace(ordb.static.root, ''), {
 					trigger: true
 				});
 			}
 		},
 
-		onNonViewLinkClick: function(event) {
-			var data = event.data;
+		onNonViewLinkClick: function(e) {
+			var data = e.data;
 			if (data && data.deck) {
 				if (data.deck.history.length > 0) {
-					event.preventDefault();
+					e.preventDefault();
 
 					var href = this.href;
 					var options = {
@@ -1176,7 +1176,7 @@ ordb.deck = ordb.deck || {};
 				var deck = decks.findWhere({
 					id: parseInt($(this).data('deck-id'))
 				});
-				var members = deck.getMembers().toJSON();
+				var members = deck.getSelectedNonHeroes().toJSON();
 				var membersByCost = _.groupBy(members, function(member) {
 					return member.card.cost;
 				});
@@ -1252,7 +1252,7 @@ ordb.deck = ordb.deck || {};
 			//
 			// spheres chart
 			//
-			var members = ordb.util.toJSON(deck.getMembers().filter(function(member) {
+			var members = ordb.util.toJSON(deck.getSelectedNonHeroes().filter(function(member) {
 				return member.isSelected() && !memeber.isHero();
 			}));
 			var membersByFaction = _.groupBy(members, function(member) {
@@ -1326,7 +1326,7 @@ ordb.deck = ordb.deck || {};
 				var deck = decks.findWhere({
 					id: parseInt($(this).data('deck-id'))
 				});
-				var members = ordb.util.toJSON(deck.getMembers().filter(function(member) {
+				var members = ordb.util.toJSON(deck.getSelectedNonHeroes().filter(function(member) {
 					return member.get('quantity') > 0;
 				}));
 				var membersByType = _.groupBy(members, function(member) {
@@ -1432,18 +1432,9 @@ ordb.deck = ordb.deck || {};
 			
 			_.bindAll(this, 'render');
 
-			this.heroes = new Backbone.Collection();
-			
 			// Listen to quantity change event on each member separately.
 			this.deck.getMembers().each(function(member) {
-				this.listenTo(member, 'change:quantity', function(member, quantity, options) {
-					if (member.isSelected()) {
-						this.heroes.add(member);
-					} else {
-						this.heroes.remove(member);
-					}
-					this.render();
-				});
+				this.listenTo(member, 'change:quantity', this.render);				
 			}, this);
 			// Listen to batch quantity change event on all members.
 			this.listenTo(this.deck.getMembers(), 'batchChange:quantity', this.render);
@@ -1465,9 +1456,6 @@ ordb.deck = ordb.deck || {};
 			// cost chart
 			//
 			view.$el.find('.chart-ctr.cost').each(function() {
-				var deck = decks.findWhere({
-					id: parseInt($(this).data('deck-id'))
-				});
 				var members = deck.getMembers().toJSON();
 				var membersByCost = _.groupBy(members, function(member) {
 					return member.card.cost;
@@ -1543,10 +1531,7 @@ ordb.deck = ordb.deck || {};
 		},
 
 		prepareSpheresChart: function() {
-			var members = ordb.util.toJSON(this.deck.getMembers().filter(function(member) {
-				return member.get('quantity') > 0;
-			}));
-			var membersBySphere = _.groupBy(members, function(member) {
+			var membersBySphere = _.groupBy(this.deck.getSelectedNonHeroes().toJSON(), function(member) {
 				return member.card.sphere;
 			});
 			
@@ -1607,10 +1592,7 @@ ordb.deck = ordb.deck || {};
 		},
 
 		prepareTypesChart: function() {
-			var members = ordb.util.toJSON(this.deck.getMembers().filter(function(member) {
-				return member.isSelected() && !member.isHero();
-			}));
-			var membersByType = _.groupBy(members, function(member) {
+			var membersByType = _.groupBy(this.deck.getSelectedNonHeroes().toJSON(), function(member) {
 				return member.card.type;
 			});
 

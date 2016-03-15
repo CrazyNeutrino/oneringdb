@@ -953,6 +953,7 @@ table.table-with-btn > tbody > tr > td {
 .bg-baggins { background-color: #FBE821 !important; color: #000 !important; }
 .bg-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
 .bg-neutral { background-color: #DDD !important; color: #000 !important; }
+.bg-dummy { background-color: #e6e6e6 !important; color: #000 !important; }
 
 .bg-enemy { background-color: #6A150A !important; color: #fff !important; }
 .bg-location { background-color: #A6875F !important; color: #000 !important; }
@@ -972,25 +973,22 @@ table.table-with-btn > tbody > tr > td {
 .bor-tyranid { border-color: #A32618 !important; }
 .bor-necron { border-color: #57D8A9 !important; }
 
-.btn-astra-militarum { background-color: #3C3C3C !important; color: #fff !important; }
-.btn-chaos { background-color: #EA5400 !important; color: #fff !important; }
-.btn-dark-eldar { background-color: #AF4D9D !important; color: #fff !important; }
-.btn-eldar { background-color: #EADA67 !important; color: #000 !important; }
-.btn-ork { background-color: #407424 !important; color: #fff !important; }
-.btn-space-marines { background-color: #095DAD !important; color: #fff !important; }
-.btn-tau { background-color: #4CD0DC !important; color: #000 !important; }
-.btn-tyranid { background-color: #A32618 !important; color: #fff !important; }
-.btn-necron { background-color: #57D8A9 !important; color: #000 !important; }
+.btn-leadership { background-color: #A22FA0 !important; color: #fff !important; }
+.btn-tactics { background-color: #C71313 !important; color: #fff !important; }
+.btn-spirit { background-color: #4EBBF7  !important; color: #000 !important; }
+.btn-lore { background-color: #108413 !important; color: #fff !important; }
+.btn-baggins { background-color: #FBE821 !important; color: #000 !important; }
+.btn-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
+.btn-neutral { background-color: #DDD !important; color: #000 !important; }
+.btn-dummy { background-color: #e6e6e6 !important; color: #000 !important; }
 
-.btn-astra-militarum:hover { background-color: #242424 !important; }
-.btn-chaos:hover { background-color: #E05400 !important; }
-.btn-dark-eldar:hover { background-color: #9C448C !important; }
-.btn-eldar:hover { background-color: #E7D550 !important; }
-.btn-ork:hover { background-color: #36621E !important; }
-.btn-space-marines:hover { background-color: #085196 !important; }
-.btn-tau:hover { background-color: #37CAD7 !important; }
-.btn-tyranid:hover { background-color: #8E2115 !important; }
-.btn-necron:hover { background-color: #41D29D !important; color: #000 !important; }
+.btn-leadership:hover { background-color: #A22FA0 !important; color: #fff !important; }
+.btn-tactics:hover { background-color: #C71313 !important; color: #fff !important; }
+.btn-spirit:hover { background-color: #4EBBF7  !important; color: #000 !important; }
+.btn-lore:hover { background-color: #108413 !important; color: #fff !important; }
+.btn-baggins:hover { background-color: #FBE821 !important; color: #000 !important; }
+.btn-fellowship:hover { background-color: #FD7E17 !important; color: #000 !important; }
+.btn-neutral:hover { background-color: #DDD !important; color: #000 !important; }
 
 /*
  * bootstrap overrides

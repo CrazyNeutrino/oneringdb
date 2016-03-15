@@ -365,7 +365,7 @@ Handlebars.registerHelper('ifRowBegin', function(index, rowMax, max, options) {
 });
 
 Handlebars.registerHelper('ifRowEnd', function(index, rowMax, max, options) {
-	if (index % rowMax == rowMax - 1 || index == max -1) {
+	if (index % rowMax == rowMax - 1 || index == max - 1) {
 		return options.fn(this);
 	} else {
 		return options.inverse(this);

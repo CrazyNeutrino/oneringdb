@@ -32,6 +32,7 @@ public class DeckMember {
 	private Card card;
 
 	private Integer quantity;
+	private Integer sequence;
 
 	@Version
 	private Long version;

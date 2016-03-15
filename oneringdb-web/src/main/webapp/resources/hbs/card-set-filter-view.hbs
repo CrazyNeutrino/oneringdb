@@ -1,14 +1,42 @@
-{{#each trees}}
-
-{{#ifRowBegin @index 4 trees.length}}
-<div class="row">
-{{/ifRowBegin}}
-
-	<div class="col-md-3">
-		{{> commons-ul-tree}}
+{{#smartIf multiple ~}}
+<div style="text-align: center;">
+	<div class="btn-group select-one sets-group" style="margin-bottom: 10px;">
+		<label class="btn btn-default active" data-sets-group="regular">{{loc 'core.sets.regular'}}</label>
+		<label class="btn btn-default" data-sets-group="nightmare">{{loc 'core.sets.nightmare'}}</label>
 	</div>
-
-{{#ifRowEnd @index 4 result.cards.length}}
 </div>
-{{/ifRowEnd}}
-{{/each}}
+{{/smartIf ~}}
+
+<div>
+	<div class="sets-group-regular">
+		{{#each trees.regular ~}}
+		{{#ifRowBegin @index 4 ../trees.regular.length ~}}
+		<div class="row">
+		{{/ifRowBegin}}
+		
+			<div class="col-md-3">
+				{{> commons-ul-tree}}
+			</div>
+		
+		{{#ifRowEnd @index 4 ../trees.regular.length ~}}
+		</div>
+		{{/ifRowEnd ~}}
+		{{/each ~}}
+	</div>
+	
+	<div class="sets-group-nightmare hidden" style="font-size: 0.8em;">
+		{{#each trees.nightmare ~}}
+		{{#ifRowBegin @index 3 ../trees.nightmare.length ~}}
+		<div class="row">
+		{{/ifRowBegin}}
+		
+			<div class="col-md-4">
+				{{> commons-ul-tree}}
+			</div>
+		
+		{{#ifRowEnd @index 3 ../trees.nightmare.length ~}}
+		</div>
+		{{/ifRowEnd ~}}
+		{{/each ~}}
+	</div>
+</div>

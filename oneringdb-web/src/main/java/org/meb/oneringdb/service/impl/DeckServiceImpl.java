@@ -241,7 +241,7 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 		checkUserIdSet();
 		
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(200);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -363,19 +363,6 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 						throw de;
 					}
 					deck.setSnapshotBase(snapshotBase);
-
-					// Integer maxSnapshotVersion = 0;
-					// Set<Deck> pds = publishBase.getSnapshots();
-					// for (Deck pd : pds) {
-					// maxSnapshotVersion = Math.max(maxSnapshotVersion,
-					// pd.getSnapshotVersion());
-					// if (Boolean.TRUE.equals(pd.getSnapshotLatest())) {
-					// pd.setSnapshotLatest(Boolean.FALSE);
-					// em.flush();
-					// }
-					// }
-					// deck.setSnapshotVersion(maxSnapshotVersion + 1);
-					// deck.setSnapshotLatest(Boolean.TRUE);
 				}
 			} else {
 				Deck persistent = findUserDeck(deckId, false);
@@ -424,6 +411,7 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 							} else {
 								persistentMember.setQuantity(quantity);
 							}
+							persistentMember.setSequence(member.getSequence());
 						} else {
 							member.setDeck(persistent);
 							persistent.getDeckMembers().add(member);

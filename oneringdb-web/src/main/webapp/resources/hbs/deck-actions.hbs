@@ -3,10 +3,10 @@
 {{#if decksave ~}}
 {{#ifSignedIn ~}}
 <div class="btn-group">
-	<button type="button" class="btn btn-raised btn-{{../faction}} deck-save">
+	<button type="button" class="btn btn-raised btn-{{../deck.primarySphere}} deck-save">
 		<span class="glyphicon glyphicon-save"></span>{{#if decksave.showText}}&nbsp;{{loc 'core.save'}}{{/if}}
 	</button>
-	<button type="button" class="btn btn-raised btn-{{../faction}} dropdown-toggle" data-toggle="dropdown">
+	<button type="button" class="btn btn-raised btn-{{../deck.primarySphere}} dropdown-toggle" data-toggle="dropdown">
 		<span class="caret"></span>
 		<span class="sr-only">Toggle Dropdown</span>
 	</button>
@@ -24,7 +24,7 @@
 
 {{#if publicdecksave ~}}
 {{#ifSignedIn ~}}
-<a class="btn btn-raised btn-{{../faction}} deck-save-copy" data-toggle="tooltip"
+<a class="btn btn-raised btn-{{../deck.primarySphere}} deck-save-copy" data-toggle="tooltip"
 	title="{{#unless publicdecksave.showText}}{{loc 'core.saveCopy'}}{{/unless}}">
 	<span class="glyphicon glyphicon-save"></span>{{#if publicdecksave.showText}}&nbsp;{{loc 'core.saveCopy'}}{{/if}}
 </a>

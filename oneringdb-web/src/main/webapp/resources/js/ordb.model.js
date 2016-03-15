@@ -39,14 +39,8 @@ ordb.model = ordb.model || {};
 		isHero: function() {
 			return this.getCard().type == 'hero';
 		},
-		isNotHero: function() {
-			return this.getCard().type != 'hero';
-		},
 		isSelected: function() {
 			return this.getQuantity() > 0;
-		},
-		isNotSelected: function() {
-			return this.getQuantity() == 0;
 		}
 	});
 
@@ -65,7 +59,13 @@ ordb.model = ordb.model || {};
 			}, 0);
 		},
 		
-		computeTotalCost: function() {
+		computeTotalThreatCost: function() {
+			return this.reduce(function(total, member) {
+				return total += member.isHero() ? member.getQuantity() * member.getCard().threatCost : 0; 
+			}, 0);
+		},
+		
+		computeTotalResourceCost: function() {
 			return this.reduce(function(total, member) {
 				return total += member.isHero() ? 0 : member.getQuantity() * member.getCard().resourceCost; 
 			}, 0);
@@ -73,7 +73,7 @@ ordb.model = ordb.model || {};
 		
 		computeStatistics: function() {
 			var stats = {};
-			var keys = [ 'resourceCost', 'willpower', 'attack', 'defense', 'hitPoints' ];
+			var keys = [ 'threatCost', 'resourceCost', 'willpower', 'attack', 'defense', 'hitPoints' ];
 
 			_.each(keys, function(key) {
 				stats[key] = {
@@ -86,7 +86,7 @@ ordb.model = ordb.model || {};
 			this.each(function(member) {
 				var quantity = member.getQuantity();
 				var card = member.getCard();
-				if (quantity > 0 && card.type != 'hero') {
+				if (quantity > 0) {
 					_.each(keys, function(key) {
 						if (!_.isUndefined(card[key])) {
 							if (card[key] === -1) {
@@ -131,10 +131,12 @@ ordb.model = ordb.model || {};
 				});
 			});
 			this.trigger('batchChange:quantity', this);
+			
+			return this;
 		},
 		
 		canChangeQuantity: function(member, quantity) {
-			if (quantity == 0 || member.isNotHero()) {
+			if (quantity == 0 || !member.isHero()) {
 				return true;
 			}
 
@@ -163,6 +165,8 @@ ordb.model = ordb.model || {};
 				}
 			});
 			this.add(members);
+			
+			return this;
 		},
 		
 		indexByCardId: function() {
@@ -249,31 +253,16 @@ ordb.model = ordb.model || {};
 	});
 
 	_model.Deck = Backbone.Model.extend({
-//		members: new _model.DeckMembers(),
-//		filteredMembers: new _model.DeckMembers(),
-//		selectedMembers: new _model.DeckMembers(),
-//		selectedHeroes: new _model.DeckMembers(),
-//		history: new _model.DeckHistory(),
-		
 		/**
 		 * @memberOf Deck
 		 */
 		initialize: function(attributes) {
 			attributes.type = attributes.type || 'base';
-			
-			this.members = new _model.DeckMembers();
-			this.filteredMembers = new _model.DeckMembers();
-			this.selectedMembers = new _model.DeckMembers();
-			this.selectedHeroes = new _model.DeckMembers();
 			this.history = new _model.DeckHistory();
 		},
 		
 		parse: function(response) {
-//			response.filteredMembers = new _model.DeckMembers();
-//			response.selectedMembers = new _model.DeckMembers();
-//			response.selectedHeroes = new _model.DeckMembers();
-			
-			var processMember = _.bind(function(member, quantity) {
+			var processQuantityChange = _.bind(function(member, quantity) {
 				if (member.isHero()) {
 					if (quantity == 0) {
 						this.getSelectedHeroes().remove(member);
@@ -282,27 +271,33 @@ ordb.model = ordb.model || {};
 					}
 				} else {
 					if (quantity == 0) {
-						this.getSelectedMembers().remove(member);
+						this.getSelectedNonHeroes().remove(member);
 					} else {
-						this.getSelectedMembers().add(member);
+						this.getSelectedNonHeroes().add(member);
 					}
 				}
 			}, this);
 			
 			response.createDateMillis = moment.tz(response.createDate, ordb.static.timezone).valueOf();
 			response.modifyDateMillis = moment.tz(response.modifyDate, ordb.static.timezone).valueOf();
-			this.members = new _model.DeckMembers(response.members, {
+			
+			response.members = new _model.DeckMembers(response.members, {
 				parse: true,
 				comparator: ordb.util.buildMembersDefaultComparator()
 			});
-			this.members.fillMissing();
-			this.members.adjustQuantities(response.coreSetQuantity);
-			this.members.each(function(member) {
-				processMember.call(response, member, member.getQuantity());
-				this.listenTo(member, 'change:quantity', processMember);
-			}, this);
+			var grouppedMembers = response.members.groupBy(function(member) {
+				return member.isSelected() ? (member.isHero() ? 'selectedHero' : 'selectedNonHero') : 'rest';
+			});
+			response.selectedHeroes = new _model.DeckMembers(grouppedMembers['selectedHero'], {
+				comparator: 'sequence'
+			});
+			response.selectedNonHeroes = new _model.DeckMembers(grouppedMembers['selectedNonHero']);
+			response.filteredMembers = new _model.DeckMembers();
 			
-			delete response.members;
+			response.members.fillMissing().adjustQuantities(response.coreSetQuantity);
+			response.members.each(function(member) {
+				this.listenTo(member, 'change:quantity', processQuantityChange);
+			}, this);
 			
 			response.links = new _model.DeckLinks(response.links, {
 				parse: true,
@@ -324,6 +319,18 @@ ordb.model = ordb.model || {};
 				comment.owner = undefined;
 			});
 			
+//			var tmp = _.chain(response.selectedHeroes.countBy(function(hero) {
+//				return hero.getCard().sphere; 
+//			})).pairs().max(function(pair) {
+//				return pair[1]
+//			}).value();
+//			if (tmp[1] == 1) {
+//				response.primarySphere = response.selectedHeroes.at(0).getCard().sphere;
+//			} else {
+//				response.primarySphere = tmp[0];
+//			}
+			response.primarySphere = 'dummy';
+			
 			return response;
 		},
 		
@@ -331,6 +338,15 @@ ordb.model = ordb.model || {};
 			var json = _model.Deck.__super__.toJSON.apply(this, arguments);
 			if (json.members instanceof Backbone.Collection) {
 				json.members = json.members.toJSON();
+			}
+			if (json.selectedHeroes instanceof Backbone.Collection) {
+				json.selectedHeroes = json.selectedHeroes.toJSON();
+			}
+			if (json.selectedNonHeroes instanceof Backbone.Collection) {
+				json.selectedNonHeroes = json.selectedNonHeroes.toJSON();
+			}
+			if (json.filteredMembers instanceof Backbone.Collection) {
+				json.filteredMembers = json.filteredMembers.toJSON();
 			}
 			if (json.links instanceof Backbone.Collection) {
 				json.links = json.links.toJSON();
@@ -345,23 +361,19 @@ ordb.model = ordb.model || {};
 		},
 		
 		getMembers: function() {
-//			return this.get('members');
-			return this.members;
+			return this.get('members');
 		},
 		
 		getFilteredMembers: function() {
-//			return this.get('filteredMembers');
-			return this.filteredMembers;
-		},
-		
-		getSelectedMembers: function() {
-//			return this.get('selectedMembers');
-			return this.selectedMembers;
+			return this.get('filteredMembers');
 		},
 		
 		getSelectedHeroes: function() {
-//			return this.get('selectedHeroes');
-			return this.selectedHeroes;
+			return this.get('selectedHeroes');
+		},
+		
+		getSelectedNonHeroes: function() {
+			return this.get('selectedNonHeroes');
 		},
 		
 		validate: function(attributes, options) {
@@ -372,23 +384,23 @@ ordb.model = ordb.model || {};
 		},
 		
 		computeMembersTotalQuantity: function() {
-			return this.members.computeTotalQuantity();
+			return this.getMembers().computeTotalQuantity();
 		},
 		
 		computeMembersTotalCost: function() {
-			return this.members.computeTotalCost();
+			return this.getMembers().computeTotalCost();
 		},
 		
 		computeMembersStatistics: function() {
-			return this.members.computeStatistics();
+			return this.getMembers().computeStatistics();
 		},
 		
 		adjustMembersQuantities: function() {
-			this.members.adjustQuantities(this.get('coreSetQuantity'));
+			this.getMembers().adjustQuantities(this.get('coreSetQuantity'));
 		},
 		
 		fillMissingMembers: function() {
-			this.members.fillMissing();
+			this.getMembers().fillMissing();
 		},
 		
 		getBackupJson: function() {
@@ -474,35 +486,39 @@ ordb.model = ordb.model || {};
 			console.info('sync: ' + method);
 			var target = source;
 			if (method === 'create' || method === 'update') {
-				var sourceJson = source.toJSON();
+				var json = source.toJSON();
 
-				delete sourceJson.createDate;
-				delete sourceJson.modifyDate;
-				delete sourceJson.createDateMillis;
-				delete sourceJson.modifyDateMillis;
-				delete sourceJson.snapshots;
-				delete sourceJson.relatedSnapshots;
-				delete sourceJson.links;
-				delete sourceJson.comments;
-				
-				sourceJson.members = this.selectedMembers.toJSON();
-				this.selectedHeroes.each(function(hero, index) {
-//					var hero = hero.toJSON();
-//					delete hero.card;
-//					delete hero.fixedQuantity;
-//					delete hero.maxQuantityFixed;
-//					delete hero.maxQuantity;
-					sourceJson['heroId' + index] = hero.get('cardId');
+				json.members = [];
+				_.each(json.selectedHeroes, function(hero, index) {
+					json.members.push({
+						cardId: hero.cardId,
+						quantity: hero.quantity,
+						sequence: json.members.length
+						
+					})
 				});
-				if (_.isArray(sourceJson.members)) {
-					_.each(sourceJson.members, function(member) {
-						delete member.card;
-						delete member.fixedQuantity;
-						delete member.maxQuantityFixed;
-						delete member.maxQuantity;
-					});
-				}
-				target = new _model.PrivateDeck(sourceJson);
+
+				_.each(json.selectedNonHeroes, function(nonHero) {
+					json.members.push({
+						cardId: nonHero.cardId,
+						quantity: nonHero.quantity,
+						sequence: json.members.length
+					})
+				});
+				
+				delete json.selectedHeroes;
+				delete json.selectedNonHeroes;
+				delete json.filteredMembers;
+				delete json.createDate;
+				delete json.modifyDate;
+				delete json.createDateMillis;
+				delete json.modifyDateMillis;
+				delete json.snapshots;
+				delete json.relatedSnapshots;
+				delete json.links;
+				delete json.comments;
+				
+				target = new _model.PrivateDeck(json);
 			}
 
 			_model.PrivateDeck.__super__.sync.apply(this, [ method, target, options ]);

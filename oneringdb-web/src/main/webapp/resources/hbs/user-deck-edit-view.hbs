@@ -8,7 +8,7 @@
 <div class="user-deck-edit-view">
 	<div class="deck user-deck">
 	
-		<div class="header-band bg-{{deck.warlord.faction}}">
+		<div class="header-band ">
 			<div class="container">
 	
 				{{!-- header --}}
@@ -115,11 +115,13 @@
 									<div class="members-list-filter-container">
 										<div class="form-inline">
 											<div class="btn-group select-one layout-group">
-												<label class="btn btn-default" data-layout="list"><span class="glyphicon glyphicon-align-justify"></span></label>
-												<label class="btn btn-default" data-layout="grid-6"><span class="glyphicon glyphicon-th"></span></label>
-												<label class="btn btn-default" data-layout="grid-4"><span class="glyphicon glyphicon-th-large"></span></label>
-												<label class="btn btn-default" data-layout="grid-3"><span class="glyphicon glyphicon-th"></span></label>
-												<label class="btn btn-default" data-layout="grid-2"><span class="glyphicon glyphicon-th-large"></span></label>
+												<label class="btn btn-default" data-members-layout="list"><span class="glyphicon glyphicon-align-justify"></span></label>
+												<label class="btn btn-default" data-members-layout="grid-6"><span class="glyphicon glyphicon-th"></span></label>
+												<label class="btn btn-default" data-members-layout="grid-4"><span class="glyphicon glyphicon-th-large"></span></label>
+												{{!--
+												<label class="btn btn-default" data-members-layout="grid-3"><span class="glyphicon glyphicon-th"></span></label>
+												<label class="btn btn-default" data-members-layout="grid-2"><span class="glyphicon glyphicon-th-large"></span></label>
+												--}}
 											</div>
 											
 											<label id="configTrigger" class="btn btn-default btn-standard filter-group">
@@ -133,7 +135,16 @@
 												<option value="{{value}},desc">{{label}}&nbsp;&#9660;</option>
 												{{/each}}
 											</select>
+											
+											<label id="cardSetFilterTrigger" class="btn btn-default btn-standard filter-group">
+												<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.sets'}}
+											</label>
 				
+											<label id="cardStatFilterTrigger" class="btn btn-default btn-standard filter-group">
+												<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.stats.sh'}}
+											</label>
+				
+											{{!--
 											<select class="form-control sort-control filter-group">
 												<option value="default">{{loc 'core.defaultSorting'}}</option>
 												{{#each sortItems ~}}
@@ -141,6 +152,7 @@
 												<option value="{{value}},desc">{{label}}&nbsp;&#9660;</option>
 												{{/each}}
 											</select>
+											--}}
 				
 											<div class="btn-group filter-group select-many filter-sphere">
 												{{#each filterItems.spheres}}							
@@ -162,14 +174,6 @@
 												<label class="btn btn-default" data-selection="not-selected" data-toggle="tooltip" title="{{loc 'core.notSelected'}}"><span>0</span></label>
 												<label class="btn btn-default" data-selection="selected" data-toggle="tooltip" title="{{loc 'core.selected'}}"><span>1+</span></label>
 											</div>
-				
-											<label id="cardSetfilterTrigger" class="btn btn-default btn-standard filter-group">
-												<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.sets'}}
-											</label>
-				
-											<label id="cardStatfilterTrigger" class="btn btn-default btn-standard filter-group">
-												<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.stats.sh'}}
-											</label>
 										</div>
 										
 										<div class="form">
@@ -195,7 +199,7 @@
 								<div id="deckUtilitiesTab" role="tabpanel" class="tab-pane">
 									<div class="block folding-block">
 										<div class="block-header">
-											<div class="block-header-text bg-{{deck.warlord.faction}}">
+											<div class="block-header-text bg-{{deck.primarySphere}}">
 												<span class="glyphicon glyphicon-random"></span>
 												&nbsp;{{loc 'core.draw.simulator'}}
 											</div>
@@ -206,7 +210,7 @@
 									</div>
 									<div class="block folding-block">
 										<div class="block-header">
-											<div class="block-header-text bg-{{deck.warlord.faction}}">
+											<div class="block-header-text bg-{{deck.primarySphere}}">
 												<span class="glyphicon glyphicon-stats"></span>
 												&nbsp;{{loc 'core.stats'}}
 											</div>
@@ -221,14 +225,14 @@
 								<div id="deckSharingTab" role="tabpanel" class="tab-pane">				
 									<div class="block folding-block">
 										<div class="block-header">
-											<div class="block-header-text bg-{{deck.warlord.faction}}">
+											<div class="block-header-text bg-{{deck.primarySphere}}">
 												<span class="glyphicon glyphicon-share"></span>
 												&nbsp;{{loc 'core.publishedVersions'}}
 											</div>
 										</div>
 										<div class="block-content">
 											<div style="margin-bottom: 10px;">
-												<label id="deckPublishButton" class="btn btn-raised btn-{{deck.warlord.faction}}">
+												<label id="deckPublishButton" class="btn btn-raised btn-{{deck.primarySphere}}">
 													<span class="glyphicon glyphicon-share"></span>&nbsp;{{loc 'core.publishDeck'}}							
 												</label>							
 											</div>
@@ -238,7 +242,7 @@
 				
 									<div class="block folding-block">
 										<div class="block-header">
-											<div class="block-header-text bg-{{deck.warlord.faction}}">
+											<div class="block-header-text bg-{{deck.primarySphere}}">
 												<span class="glyphicon glyphicon-link"></span>
 												&nbsp;{{loc 'core.privateLinks'}}
 											</div>
@@ -246,7 +250,7 @@
 										<div class="block-content">
 											<div style="margin-bottom: 10px;">
 												<input id="createLinkInput" class="form-control" type="text" placeholder="{{loc 'core.linkDescription'}}" style="width: 300px; float: left; margin-right: 10px;" maxlength="50" />
-												<label id="createLinkButton" class="btn btn-raised btn-{{deck.warlord.faction}}">
+												<label id="createLinkButton" class="btn btn-raised btn-{{deck.primarySphere}}">
 													<span class="glyphicon glyphicon-plus"></span>&nbsp;{{loc 'core.createLink'}}
 												</label>
 											</div>

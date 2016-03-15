@@ -145,6 +145,7 @@ public class JsonDeck {
 			DeckMember deckMember = new DeckMember();
 			deckMember.setCard(new Card(member.getCardId()));
 			deckMember.setQuantity(member.getQuantity());
+			deckMember.setSequence(member.getSequence());
 			deckMembers.add(deckMember);
 		}
 		deck.setDeckMembers(deckMembers);

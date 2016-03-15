@@ -74,8 +74,6 @@ ordb.card = ordb.card || {};
 		},
 		
 		onSelectManyFilterClick: function(event) {
-			console.log('onSelectManyFilterClick');
-			
 			var $target = $(event.currentTarget);
 			if (event.ctrlKey) {
 				$target.addClass('active').siblings().removeClass('active');
@@ -85,8 +83,6 @@ ordb.card = ordb.card || {};
 		},
 		
 		onSphereFilterClick: function(e) {
-			console.log('onSphereFilterClick');
-			
 			this.cardsFilter.set({
 				sphere: $(e.currentTarget).parent().children().filter('.active').map(function() {
 					return $(this).data('sphere');
@@ -95,8 +91,6 @@ ordb.card = ordb.card || {};
 		},
 		
 		onCardTypeFilterClick: function(e) {
-			console.log('onCardTypeFilterClick');
-			
 			this.cardsFilter.set({
 				type: $(e.currentTarget).parent().children().filter('.active').map(function() {
 					return $(this).data('card-type');
@@ -105,8 +99,6 @@ ordb.card = ordb.card || {};
 		},
 		
 		onQuantityFilterClick: function(e) {
-			console.log('onQuantityFilterClick');
-			
 			this.cardsFilter.set({
 				quantity: $(e.currentTarget).parent().children().filter('.active').map(function() {
 					return $(this).data('quantity');
@@ -115,8 +107,6 @@ ordb.card = ordb.card || {};
 		},
 		
 		openCardSetFilterModal: function(e) {
-			console.log('openCardSetFilterModal');
-			
 			var view = this;
 			_card.openCardSetFilterModal({
 				sets: this.cardsFilter.get('setTechName'),
@@ -344,7 +334,8 @@ $(function() {
 	
 	Handlebars.registerPartial({
 		'pagination': Handlebars.templates['pagination'],
-		'card-text-content': Handlebars.templates['card-text-content']
+		'card-text-content': Handlebars.templates['card-text-content'],
+		'common-ul-tree': Handlebars.templates['common-ul-tree']
 	});
 
 	ordb.static.root = '/' + ordb.static.language + '/card/';
