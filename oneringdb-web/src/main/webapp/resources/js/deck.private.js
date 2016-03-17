@@ -131,45 +131,45 @@ ordb.deck = ordb.deck || {};
 	/**
 	 * Deck list view
 	 */
-	_deck.UserDeckListView = _deck.PageViewBase.extend({
+	_deck.UserDeckListView = _deck.PageView.extend({
+		className: 'user-deck-list-view',
+		
 		events: {
-			'click .user-deck-list-view a': 'onViewLinkClickHandler'
+			'click a': 'onViewLinkClick'
 		},
-		decks: new ordb.model.PrivateDecks(),
-		filter: {},
-		filterAdvanced: false,
 
 		/**
 		 * @memberOf UserDeckListView
 		 */
+		initialize: function() {
+			
+			_.bindAll(this, 'render', 'fetchDecks');
+			
+			this.decks = new ordb.model.PrivateDecks(),
+			this.filter = {};
+			this.filterAdvanced = false;
+
+			this.filterView = new _deck.DeckListFilterView({});
+			this.dataView = new _deck.DeckListDataView({
+				decks: this.decks
+			});
+			
+			this.fetchDecks();
+		},
+		
 		render: function() {
-			var view = this;
-
-			var queryDeckList = function(pageNumber) {
-				view.filter = view.deckListFilterView.buildFilterFromUI();
-
-				var data = _.clone(view.filter);
-				data.pageNumber = _.isNumber(pageNumber) ? pageNumber : 1;
-				data.pageSize = 20;
-				view.decks.fetch({
-					data: data,
-					success: function() {
-						view.deckListDataView.render(view.decks, {
-							pageClickHandler: queryDeckList
-						});
-					}
-				});
-			};
-
-			view.unbindMenuLinkClickHandler();
+			
 			ordb.ui.adjustWrapperStyle({
 				backgroundColor: '#f2f2f2'
 			});
-
-			var template = Handlebars.templates['user-deck-list-view']();
-			view.$el.html(template);
-			view.renderMessages();
-			var actionsTemplate = Handlebars.templates['deck-actions']({
+			
+			if (this.decks.get('loading')) {
+				this.$el.html(Handlebars.templates['user-deck-list-view']());
+				return this;
+			}
+			
+			// Render this view.
+			var template = Handlebars.templates['user-deck-list-view']({
 				actions: {
 					decknew: {
 						showText: true
@@ -182,52 +182,89 @@ ordb.deck = ordb.deck || {};
 					}
 				}
 			});
-			view.$el.find('.actions-container').append(actionsTemplate);
+			this.$el.html(template);
+			this.renderMessages();
+			this.makeTooltips();
+			
+			// Render sub views.
+			var svItems = [{
+				ctr: '.deck-list-filter-view-ctr',
+				sv: this.filterView
+			}, {
+				ctr: '.deck-list-data-view-ctr',
+				sv: this.dataView
+			}  ];
+			_.each(svItems, function(svItem) {
+				this.$el.find(svItem.ctr).empty().append(svItem.sv.render().el);
+			}, this);
 
-			var sortItems = [];
-			_.each([ [ 'createDate', 'core.createDate' ], [ 'modifyDate', 'core.modifyDate' ], [ 'name', 'core.name' ],
-					[ 'warlord', 'core.warlord' ], [ 'cardsQuantity', 'core.cardsQuantity' ],
-					[ 'armyCardsQuantity', 'core.cardsQuantity.army' ],
-					[ 'attachmentCardsQuantity', 'core.cardsQuantity.attachment' ],
-					[ 'eventCardsQuantity', 'core.cardsQuantity.event' ],
-					[ 'supportCardsQuantity', 'core.cardsQuantity.support' ] ], function(arr) {
-				sortItems.push({
-					value: arr[0],
-					label: ordb.dict.messages[arr[1]]
-				})
+//			var sortItems = [];
+//			_.each([ [ 'createDate', 'core.createDate' ], [ 'modifyDate', 'core.modifyDate' ], [ 'name', 'core.name' ],
+//					[ 'warlord', 'core.warlord' ], [ 'cardsQuantity', 'core.cardsQuantity' ],
+//					[ 'armyCardsQuantity', 'core.cardsQuantity.army' ],
+//					[ 'attachmentCardsQuantity', 'core.cardsQuantity.attachment' ],
+//					[ 'eventCardsQuantity', 'core.cardsQuantity.event' ],
+//					[ 'supportCardsQuantity', 'core.cardsQuantity.support' ] ], function(arr) {
+//				sortItems.push({
+//					value: arr[0],
+//					label: ordb.dict.messages[arr[1]]
+//				})
+//			});
+//			view.deckListFilterView = new _deck.DeckListFilterView({
+//				config: {
+//					showCreateDate: true,
+//					showModifyDate: true,
+//					sortItems: sortItems
+//				}
+//			});
+//			view.deckListFilterView.state.on('change:advanced', function(state) {
+//				view.filterAdvanced = state.get('advanced');
+//			});
+//			view.deckListFilterView.render({
+//				filter: view.filter,
+//				advanced: view.filterAdvanced,
+//				searchClickHandler: queryDeckList
+//			});
+//			view.deckListDataView = new _deck.DeckListDataView();
+//			if (view.decks.length > 0) {
+//				view.deckListDataView.render(view.decks, {
+//					pageClickHandler: queryDeckList,
+//					pageNumber: view.pageNumber
+//				});
+//			} else {
+//				queryDeckList();
+//			}
+			
+			return this;
+		},
+	
+		fetchDecks: function(options) {
+			options = options || {};
+			
+			var filter = this.filterView.buildFilterFromUI();
+			var data = _.chain(filter).clone().extend({
+				pageNumber: _.isNumber(options.pageNumber) ? options.pageNumber : 0,
+				pageSize: 20
+			}).value();
+
+			this.decks.fetch({
+				data: data,
+				reset: true
+//				success: _.bind(function(decks) {
+////					this.deckListDataView.render(view.decks, {
+////						pageClickHandler: queryDeckList
+////					});
+//					console.log(decks.length)
+//				}, this)
 			});
-			view.deckListFilterView = new _deck.DeckListFilterView({
-				config: {
-					showCreateDate: true,
-					showModifyDate: true,
-					sortItems: sortItems
-				}
-			});
-			view.deckListFilterView.state.on('change:advanced', function(state) {
-				view.filterAdvanced = state.get('advanced');
-			});
-			view.deckListFilterView.render({
-				filter: view.filter,
-				advanced: view.filterAdvanced,
-				searchClickHandler: queryDeckList
-			});
-			view.deckListDataView = new _deck.DeckListDataView();
-			if (view.decks.length > 0) {
-				view.deckListDataView.render(view.decks, {
-					pageClickHandler: queryDeckList,
-					pageNumber: view.pageNumber
-				});
-			} else {
-				queryDeckList();
-			}
 		}
 	});
 
 	/**
 	 * Deck edit view
 	 */
-	_deck.UserDeckEditView = _deck.PageViewBase.extend({
-		el: '.content',
+	_deck.UserDeckEditView = _deck.PageView.extend({
+		className: 'user-deck-edit-view',
 		
 		/**
 		 * @memberOf UserDeckEditView
@@ -246,8 +283,15 @@ ordb.deck = ordb.deck || {};
 				'click .user-deck-edit-view .btn.deck-save-copy': 'onDeckSaveCopyClick',
 				'click .user-deck-edit-view .btn.deck-delete': 'onDeckDeleteClick',
 				'click .user-deck-edit-view .btn.deck-publish': 'onDeckPublishClick',
-				'click .user-deck-edit-view #cardSetFilterTrigger':	'openCardSetFilterModal'
-			}, _deck.PageViewBase.prototype.events.call(this));
+				'click .user-deck-edit-view #cardSetFilterTrigger':	'openCardSetFilterModal',
+				'keyup #fastFilter input[type="text"]': _.debounce(function(e) {
+					this.membersFilter.set('anytext', $(e.currentTarget).val())
+				}, 500),
+				'click #fastFilter .btn': function(e) {
+					$('#fastFilter input[type="text"]').val('');
+					this.membersFilter.unset('anytext');
+				}
+			}, _deck.PageView.prototype.events.call(this));
 		},
 
 		initialize: function(options) {
@@ -260,7 +304,7 @@ ordb.deck = ordb.deck || {};
 			this.membersFilter = new _deck.MembersFilter();
 			this.membersSorter = new Backbone.Model();
 
-			_.bindAll(this, 'initializeSubviews', 'render');
+			_.bindAll(this, 'initializeWhenDeckChanges', 'render');
 			
 			if (options.deck) {
 				// Deck data is available: via deck list view or via deck import view. Fetch its
@@ -279,9 +323,7 @@ ordb.deck = ordb.deck || {};
 						view.renderPrivateLinksList.call(view);
 					}
 				});
-				this.deck.fillMissingMembers();	// probably not neeeded
-				this.deck.adjustMembersQuantities();		// probably not neeeded
-				this.initializeSubviews();
+				this.initializeWhenDeckChanges();
 			} else if (options.deckId) {
 				// Deck data is not available. Fetch it. Render whole view on success. Render error
 				// message on error.
@@ -291,9 +333,7 @@ ordb.deck = ordb.deck || {};
 				this.deck.set('loading', {});
 				this.deck.fetch({
 					success: function(deck, response, options) {
-						deck.fillMissingMembers();
-						deck.adjustMembersQuantities();
-						view.initializeSubviews();
+						view.initializeWhenDeckChanges();
 						view.deck.unset('loading');
 						view.render();
 					},
@@ -318,7 +358,7 @@ ordb.deck = ordb.deck || {};
 					parse: true
 				});
 				
-				this.initializeSubviews();
+				this.initializeWhenDeckChanges();
 			}
 
 			this.listenTo(this.deck, 'invalid', function(deck) {
@@ -334,26 +374,26 @@ ordb.deck = ordb.deck || {};
 			this.listenTo(this.membersFilter, 'change', this.filterMembers);
 			this.listenTo(this.membersSorter, 'change', this.sortMembers);
 			
-			this.bindMenuLinkClickHandler();
+//			this.bindMenuLinkClickHandler();
 		},
 		
-		initializeSubviews: function() {
-			var partialViewOptions = {
+		initializeWhenDeckChanges: function() {
+			var subviewOptions = {
 				deck: this.deck,
 				config: this.config
 			};
 			// heroes view
-			this.heroesView = new _deck.DeckHeroesView(partialViewOptions);
+			this.heroesView = new _deck.DeckHeroesView(subviewOptions);
 			// members groups view
-			this.membersGroupsView = new _deck.MembersGroupsView(partialViewOptions);
+			this.membersGroupsView = new _deck.MembersGroupsView(subviewOptions);
 			// members charts view
-			this.membersChartsView = new _deck.MembersChartsView(partialViewOptions);
+			this.membersChartsView = new _deck.MembersChartsView(subviewOptions);
 			// members list view
-			this.membersListView = new _deck.MembersListView(partialViewOptions);
+			this.membersListView = new _deck.MembersListView(subviewOptions);
 			// description view
-			this.deckDescriptionView = new _deck.DeckDescriptionView(partialViewOptions);
+			this.deckDescriptionView = new _deck.DeckDescriptionView(subviewOptions);
 			// deck draw view
-			this.deckDrawView = new _deck.DeckDrawView(partialViewOptions);
+			this.deckDrawView = new _deck.DeckDrawView(subviewOptions);
 			
 			// Listen to quantity change event on each member separately.
 			this.deck.getMembers().each(function(member) {
@@ -415,6 +455,7 @@ ordb.deck = ordb.deck || {};
 			});
 			this.$el.html(template);
 			this.makeTooltips();
+			this.renderMessages();
 
 			// If there's no filter set, set the default.
 			if (this.membersFilter.isEmpty()) {
@@ -438,7 +479,6 @@ ordb.deck = ordb.deck || {};
 			this.applyLayoutToUI();
 
 			// Render sub views.
-			this.renderMessages();
 			var svItems = [{
 				ctr: '.deck-heroes-view-ctr',
 				sv: this.heroesView
@@ -529,11 +569,6 @@ ordb.deck = ordb.deck || {};
 			});
 
 			//
-			// filter: sets
-			// 
-			// TODO
-
-			//
 			// filter: stats
 			// 
 			// TODO
@@ -548,6 +583,8 @@ ordb.deck = ordb.deck || {};
 
 			this.filterMembers();
 			this.bindMenuLinkClickHandler();
+			
+			return this;
 		},
 		
 		filterMembers: function() {
@@ -751,7 +788,7 @@ ordb.deck = ordb.deck || {};
 		},
 
 		renderStatistics: function() {
-			var stats = this.deck.computeMembersStatistics();
+			var stats = this.deck.getMembers().computeStatistics();
 			stats.resourceCost.name = ordb.dict.messages['card.cost.sh'];
 			stats.willpower.name = '<i class="db-icon db-icon-willpower"></i>';
 			stats.attack.name = '<i class="db-icon db-icon-attack"></i>';
@@ -899,7 +936,7 @@ ordb.deck = ordb.deck || {};
 					view.messages = _deck.buildSuccessMessage({
 						message: 'ok.deck.oper.save'
 					});
-					view.initializeSubviews();
+					view.initializeWhenDeckChanges();
 					view.render();
 				},
 				error: function(deck, response, options) {
@@ -960,9 +997,11 @@ ordb.deck = ordb.deck || {};
 		}
 	});
 
-	_deck.UserDeckImportView = _deck.PageViewBase.extend({
+	_deck.UserDeckImportView = _deck.PageView.extend({
+		className: 'user-deck-import-view',
+		
 		events: {
-			'click .user-deck-import-view a': 'viewLinkClickHandler'
+			'click .user-deck-import-view a': 'onViewLinkClick'
 		},
 
 		/**
@@ -1114,6 +1153,8 @@ ordb.deck = ordb.deck || {};
 					}));
 				}
 			});
+			
+			return this;
 		}
 	});
 
@@ -1130,7 +1171,7 @@ $(function() {
 		}
 	});
 
-//	var userDeckListView = new ordb.deck.UserDeckListView();
+//	ordb.app.deckListView = new ordb.deck.UserDeckListView();
 //	var userDeckImportView = new ordb.deck.UserDeckImportView();
 //	var userDeckEditView = new ordb.deck.UserDeckEditView();
 	
@@ -1138,7 +1179,8 @@ $(function() {
 		if (ordb.app.view) {
 			ordb.app.view.remove();
 		}
-		return ordb.app.view = view;
+		ordb.app.view = view;
+		$('.content').empty().append(view.render().el);
 	};
 
 	ordb.router = new Router();
@@ -1152,26 +1194,31 @@ $(function() {
 			}
 			options = {
 				deckId: deckId,
-				deck: undefined
-//				deck: userDeckListView.decks.findWhere({
-//					id: deckId
-//				})
+				deck: ordb.app.deckListView ? ordb.app.deckListView.decks.findWhere({
+					id: deckId
+				}) : undefined
 			};
 		}
 
-		changeView(new ordb.deck.UserDeckEditView(options)).render();
-//		userDeckEditView.render(options);
+		changeView(new ordb.deck.UserDeckEditView(options));
 		$('html,body').scrollTop(0);
 		ga('set', 'page', ordb.static.root + 'edit/' + options.deckId);
 		ga('send', 'pageview');
 	}).on('route:viewDecks', function() {
-		changeView(new ordb.deck.UserDeckListView()).render();
-//		userDeckListView.render();
+		var view;
+		if (ordb.app.deckListView && ordb.app.view instanceof ordb.deck.UserDeckEditView) {
+			view = ordb.app.deckListView;
+			view.delegateEvents();	// this is important
+		} else {
+			view = new ordb.deck.UserDeckListView();
+			ordb.app.deckListView = view;
+		}
+		changeView(view);
 		$('html,body').scrollTop(0);
 		ga('set', 'page', ordb.static.root);
 		ga('send', 'pageview');
 	}).on('route:importDeck', function() {
-		changeView(new ordb.deck.UserDeckImportView()).render();
+		changeView(new ordb.deck.UserDeckImportView());
 		$('html,body').scrollTop(0);
 		ga('set', 'page', ordb.static.root + 'import');
 		ga('send', 'pageview');

@@ -1,24 +1,4 @@
-{{#if pagination ~}}
-<div class="pagination-container text-center">
-	<nav>
-		<ul class="pagination">					
-			<li {{#unless pagination.prevPage}}class="disabled"{{/unless}}>
-				<a href="#" aria-label="Previous" {{#if pagination.prevPage}}data-page-number="{{pagination.prevPage.number}}"{{/if}}>
-					<span aria-hidden="true">&laquo;</span>
-				</a>
-			</li>
-			{{#each pagination.pages ~}}
-			<li {{#if active}}class="active"{{/if}}><a href="#" data-page-number="{{number}}">{{number}}</a></li>
-			{{/each ~}}
-			<li {{#unless pagination.nextPage}}class="disabled"{{/unless}}>
-				<a href="#" aria-label="Next" {{#if pagination.nextPage}}data-page-number="{{pagination.nextPage.number}}"{{/if}}>
-					<span aria-hidden="true">&raquo;</span>
-				</a>
-			</li>
-		</ul>
-	</nav>
-</div>
-{{/if ~}}
+{{> pagination ~}}
 <div class="deck-list">
 	<div class="row">
 		{{#each deckWrappers}}
@@ -26,10 +6,7 @@
 			<div class="deck">
 				
 				{{#with deck}}
-				<div class="header bg-{{warlord.faction}}">					
-					<div class="box-left">
-						<div class="db-icon db-icon-{{warlord.faction}}"></div>
-					</div>
+				<div class="header bg-dummy">					
 					<div class="box-center">
 						<h4 class="primary-text">
 							{{#if ../published}}
@@ -63,52 +40,18 @@
 				</div>
 				{{/with}}
 				
-				<div class="box-center">
-					{{!--
-					<div class="deck-stats-container pull-left">
-						<table class="deck-stats-table">
-							<thead>
-								<tr>
-									<th></th>
-									<th><span data-toggle="tooltip" title="{{loc 'core.cardsQuantity'}}">{{loc 'core.cardsQuantity.sh'}}</span></th>
-									<th><span data-toggle="tooltip" title="{{loc 'core.sum'}}">{{loc 'core.sum.sh'}}</span></th>
-									<th><span data-toggle="tooltip" title="{{loc 'core.average'}}">{{loc 'core.average.sh'}}</span></th>
-								</tr>
-							</thead>
-							<tbody>
-								{{#each stats}}
-								<tr>
-									<th>{{loc name}}</span></th>
-									<td>{{quantity}}{{#if quantityX}}+{{quantityX}}X{{/if}}</span></td>
-									<td>{{sum}}</span></td>
-									<td>{{average}}</span></td>
-								</tr>
-								{{/each}}
-							</tbody>
-						</table>
+				<div class="row" style="margin-left: 0px; margin-right: 0px;">
+					{{#each deck.selectedHeroes ~}}
+					<div class="col-xs-12 col-md-{{divide 12 ../deck.selectedHeroes.length}} bg-{{card.sphere}} hero">
+						<i class="db-icon db-icon-{{card.sphere}}" style="margin-right: 5px;"></i>{{card.name}}
 					</div>
-					--}}
-					
+					{{/each ~}}
+				</div>
+				
+				<div class="box-center">
 					<div class="chart-container cost pull-left" data-deck-id="{{deck.id}}" style="width:200px; height:150px;"></div>
 					<div class="chart-container faction pull-left" data-deck-id="{{deck.id}}" style="width:140px; height:150px;"></div>
 					<div class="chart-container type pull-left" data-deck-id="{{deck.id}}" style="width:140px; height:150px;"></div>
-					
-					<div class="row hidden members">
-						<div class="col-xs-12">
-							{{#each membersGroups}}
-							<div class="col-xs-4">
-								<div class="mg">
-									<span class="mg-title">{{title}}&nbsp;({{quantity}})</span>
-									<ul>
-										{{#each members}}
-										<li>{{quantity}}x&nbsp;{{card.name}}</li>
-										{{/each}}
-									</ul>
-								</div>
-							</div>
-							{{/each}}
-						</div>
-					</div>
 				</div>
 				
 				<div class="footer clearfix">
@@ -143,24 +86,4 @@
 		{{/each}}
 	</div>
 </div>
-{{#if pagination ~}}
-<div class="pagination-container text-center">
-	<nav>
-		<ul class="pagination">					
-			<li {{#unless pagination.prevPage}}class="disabled"{{/unless}}>
-				<a href="#" aria-label="Previous" {{#if pagination.prevPage}}data-page-number="{{pagination.prevPage.number}}"{{/if}}>
-					<span aria-hidden="true">&laquo;</span>
-				</a>
-			</li>
-			{{#each pagination.pages ~}}
-			<li {{#if active}}class="active"{{/if}}><a href="#" data-page-number="{{number}}">{{number}}</a></li>
-			{{/each ~}}
-			<li {{#unless pagination.nextPage}}class="disabled"{{/unless}}>
-				<a href="#" aria-label="Next" {{#if pagination.nextPage}}data-page-number="{{pagination.nextPage.number}}"{{/if}}>
-					<span aria-hidden="true">&raquo;</span>
-				</a>
-			</li>
-		</ul>
-	</nav>
-</div>
-{{/if ~}}
+{{> pagination ~}}

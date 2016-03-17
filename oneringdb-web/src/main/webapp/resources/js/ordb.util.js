@@ -273,6 +273,10 @@ ordb.util = ordb.util || {};
 
 	_util.buildPagination = function(options) {
 		options = options || {};
+		
+		if (_.isUndefined(options.total)) {
+			throw "Total is undefined";
+		}
 
 		var p = {
 			total: options.total,

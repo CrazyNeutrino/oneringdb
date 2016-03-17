@@ -383,18 +383,6 @@ ordb.model = ordb.model || {};
 			}
 		},
 		
-		computeMembersTotalQuantity: function() {
-			return this.getMembers().computeTotalQuantity();
-		},
-		
-		computeMembersTotalCost: function() {
-			return this.getMembers().computeTotalCost();
-		},
-		
-		computeMembersStatistics: function() {
-			return this.getMembers().computeStatistics();
-		},
-		
 		adjustMembersQuantities: function() {
 			this.getMembers().adjustQuantities(this.get('coreSetQuantity'));
 		},
@@ -433,7 +421,11 @@ ordb.model = ordb.model || {};
 		 * @memberOf Decks
 		 */
 		initialize: function() {
-			this.config = new Backbone.Model();
+			this.config = new Backbone.Model({
+				total: 0,
+				pageNumber: 0,
+				pageSize: 20
+			});
 		},
 		parse: function(response) {
 			var decks;

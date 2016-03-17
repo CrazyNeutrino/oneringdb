@@ -278,12 +278,13 @@ ordb.filter = ordb.filter || {};
 
 	_filter.CARD_ATTRS = [ 'type', 'sphere', 'techName', 'number', 'quantity', 'name', 'traits', 'keywords', 'text',
 			'threatCost', 'resourceCost', 'willpower', 'threat', 'attack', 'defense', 'hitPoints', 'setTechName',
-			'enstTechName' ];
+			'enstTechName', 'anytext'];
 
 	_filter.FD_TYPE_SET = 'set';
 	_filter.FD_TYPE_SIMPLE = 'simple';
 	_filter.FD_TYPE_RANGE = 'range';
 	_filter.FD_TYPE_RANGE_STAT = 'range-stat';
+	_filter.FD_TYPE_CUSTOM = 'custom';
 
 	_filter.fds = [ {
 		key: 'setTechName',
@@ -316,9 +317,14 @@ ordb.filter = ordb.filter || {};
 		parseInteger: true
 	}, {
 		key: 'techName',
-		queryStringKey: 'name',
+		queryStringKey: 'techName',
 		type: _filter.FD_TYPE_SIMPLE,
 		oper: 'isnocase'
+	}, {
+		key: 'name',
+		queryStringKey: 'name',
+		type: _filter.FD_TYPE_SIMPLE,
+		oper: 'likenocase'
 	}, {
 		key: 'traits',
 		queryStringKey: 'traits',
@@ -333,6 +339,11 @@ ordb.filter = ordb.filter || {};
 		key: 'text',
 		queryStringKey: 'text',
 		type: _filter.FD_TYPE_SIMPLE,
+		oper: 'likenocase'
+	}, {
+		key: 'anytext',
+		queryStringKey: 'anytext',
+		type: _filter.FD_TYPE_CUSTOM,
 		oper: 'likenocase'
 	}, {
 		key: 'threatCost',

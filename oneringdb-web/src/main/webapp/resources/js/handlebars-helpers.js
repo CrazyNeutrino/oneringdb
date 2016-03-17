@@ -375,3 +375,7 @@ Handlebars.registerHelper('ifRowEnd', function(index, rowMax, max, options) {
 Handlebars.registerHelper('escapeAttrX', function(value, options) {
 	return value == -1 ? 'X' : value;
 });
+
+Handlebars.registerHelper('divide', function(a, b) {
+	return a / b;
+});

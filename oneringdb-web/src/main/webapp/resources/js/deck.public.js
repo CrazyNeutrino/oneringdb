@@ -47,7 +47,7 @@ $(function() {
 			this.markClickHandler('/deck/public/' + deckId + '/superb/' + value);
 		},
 		updateStats: function() {
-			var stats = this.deck.computeMembersStatistics();
+			var stats = this.deck.getMembers().computeStatistics();
 			stats.cost.name = 'card.cost.sh';
 			stats.shield.name = 'card.shieldIcons.sh';
 			stats.command.name = 'card.commandIcons.sh';

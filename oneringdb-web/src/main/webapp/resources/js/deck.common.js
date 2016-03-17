@@ -320,9 +320,9 @@ ordb.deck = ordb.deck || {};
 	});
 	
 	/**
-	 * Base view
+	 * View.
 	 */
-	_deck.ViewBase = Backbone.View.extend({
+	_deck.View = Backbone.View.extend({
 		
 		events: function() {
 			return {
@@ -331,7 +331,7 @@ ordb.deck = ordb.deck || {};
 		},
 		
 		/**
-		 * @memberOf ViewBase
+		 * @memberOf View
 		 */
 		makeCardsPopovers: function(options) {
 			return this.$popovers = this.$el.find('a.toggle-popover[data-card-id]').popover({
@@ -406,14 +406,14 @@ ordb.deck = ordb.deck || {};
 			}, this.onNonViewLinkClick);
 		},
 
-		unbindMenuLinkClickHandler: function() {
-			$('.navbar a').off('click');
-		}
+//		unbindMenuLinkClickHandler: function() {
+//			$('.navbar a').off('click');
+//		}
 	});
 	
-	_deck.PageViewBase = _deck.ViewBase.extend({
+	_deck.PageView = _deck.View.extend({
 		/**
-		 * @memberOf PageViewBase
+		 * @memberOf PageView
 		 */
 		renderMessages: function(options) {
 			_deck.renderMessages({
@@ -466,7 +466,7 @@ ordb.deck = ordb.deck || {};
 //		}
 	});
 	
-	_deck.DeckPartialView = _deck.ViewBase.extend({
+	_deck.DeckPartialView = _deck.View.extend({
 		/**
 		 * @memberOf DeckPartialView
 		 */
@@ -687,7 +687,7 @@ ordb.deck = ordb.deck || {};
 		
 		applyStateToUI: function() {
 			var view = this;
-			var $members = $('.members-list-item, .members-grid-item');
+			var $members = this.$el.find('.members-list-item, .members-grid-item');
 			$members.each(function() {
 				var $member = $(this);
 				var $buttons = $member.find('.quantity-group .btn');
@@ -703,7 +703,7 @@ ordb.deck = ordb.deck || {};
 				cardId: parseInt($member.data('card-id'))
 			})
 			var quantity = parseInt($button.text());
-			if (this.deck.getFilteredMembers().canChangeQuantity(member, quantity)) {
+			if (this.deck.getMembers().canChangeQuantity(member, quantity)) {
 				this.onSelectOneGroupClick(e);
 				member.set({
 					quantity: quantity
@@ -895,7 +895,8 @@ ordb.deck = ordb.deck || {};
 	});
 
 	_deck.DeckListFilterView = Backbone.View.extend({
-		el: '.deck-list-filter-container',
+		className: 'deck-list-filter-view',
+		
 		initialize: function(options) {
 			this.config = options.config;
 			this.state = new Backbone.Model({
@@ -1023,417 +1024,185 @@ ordb.deck = ordb.deck || {};
 		 * @memberOf DeckListFilterView
 		 */
 		render: function(options) {
-			var view = this;
-
-			options = options || {};
-			options.filter = options.filter || {};
-
-			view.state.set({
-				advanced: _.isBoolean(options.advanced) ? options.advanced : view.advanced
-			});
-
-			var template = Handlebars.templates['deck-list-filter-view']({
-				advanced: view.state.get('advanced'),
-				config: view.config || {},
-				factions: _.filter(ordb.dict.factions, function(faction) {
-					return faction.techName != 'neutral';
-				})
-			});
-			view.$el.html(template);
-			view.$el.find('.input-daterange').datepicker({
-				autoclose: true,
-				format: 'yyyy-mm-dd',
-				language: ordb.static.language,
-				todayHighlight: true
-			});
-			view.$el.find('#moreButton').click(function() {
-				var filter = view.buildFilterFromUI();
-				view.render({
-					advanced: true,
-					searchClickHandler: options.searchClickHandler
-				});
-				view.applyFilterToUI(filter);
-			});
-			view.$el.find('#lessButton').click(function() {
-				var filter = view.buildFilterFromUI();
-				view.render({
-					advanced: false,
-					searchClickHandler: options.searchClickHandler
-				});
-				view.applyFilterToUI(filter);
-			});
-			view.$el.find('#clearButton').click(function() {
-				view.$el.find('.btn-group-filter.filter-faction .btn').removeClass('active');
-				view.$el.find('input[type="text"]').val('');
-				view.$el.find('input[type="checkbox"]').prop('checked', '');
-				view.$el.find('select').prop('selectedIndex', 0)
-			});
-
-			var cardSetFilterTemplate = Handlebars.templates['commons-ul-tree']({
-				tree: ordb.dict.buildCardSetTree()
-			});
-			view.$el.find('#cardSetFilter').html(cardSetFilterTemplate);
-			view.$el.find('#cardSetFilter li[data-node-type="cycle"] > input[type="checkbox"]').click(
-					function() {
-						var $this = $(this);
-						$this.siblings().filter('ul').find('li[data-node-type="set"] > input[type="checkbox"]').prop('checked',
-								$this.prop('checked'));
-					});
-
-			var warlordFilterTemplate = Handlebars.templates['commons-ul-tree']({
-				tree: ordb.dict.buildWarlordTree()
-			});
-			view.$el.find('#warlordFilter').html(warlordFilterTemplate);
-
-			var sortTemplate = Handlebars.templates['commons-sort-select']({
-				sortItems: view.config.sortItems
-			});
-			var $container = view.$el.find('.deck-sort-container');
-			$container.append(sortTemplate);
-			$container.append(sortTemplate);
-			$container.append(sortTemplate);
-
-			view.applyFilterToUI(options.filter);
-
-			//
-			// click handlers
-			//
-			view.$el.find('.btn-group.select-many > .btn').click(function(event) {
-				var $this = $(this);
-				if (event.ctrlKey) {
-					$this.addClass('active').siblings().removeClass('active');
-				} else {
-					$this.toggleClass('active');
-				}
-			});
-
-			// //
-			// // date range filter
-			// //
-			// view.$el.find('.btn-group-date-range .btn').click(function() {
-			// var $this = $(this);
-			// $(this).toggleClass('active').siblings().removeClass('active');
-			// if ($this.hasClass('active')) {
-			// var range = $this.data('date-range');
-			// var filter = $this.closest('.date-range-filter');
-			// }
-			// });
-
-			if (options.searchClickHandler) {
-				view.$el.find('#searchButton').click(function() {
-					options.searchClickHandler();
-				});
-			}
-
-			//
-			// tooltips
-			//				
-			view.$el.find('[data-toggle="tooltip"]').tooltip({
-				container: 'body'
-			});
+//			var view = this;
+//
+//			options = options || {};
+//			options.filter = options.filter || {};
+//
+//			view.state.set({
+//				advanced: _.isBoolean(options.advanced) ? options.advanced : view.advanced
+//			});
+//
+//			var template = Handlebars.templates['deck-list-filter-view']({
+//				advanced: view.state.get('advanced'),
+//				config: view.config || {},
+//				factions: _.filter(ordb.dict.factions, function(faction) {
+//					return faction.techName != 'neutral';
+//				})
+//			});
+//			view.$el.html(template);
+//			view.$el.find('.input-daterange').datepicker({
+//				autoclose: true,
+//				format: 'yyyy-mm-dd',
+//				language: ordb.static.language,
+//				todayHighlight: true
+//			});
+//			view.$el.find('#moreButton').click(function() {
+//				var filter = view.buildFilterFromUI();
+//				view.render({
+//					advanced: true,
+//					searchClickHandler: options.searchClickHandler
+//				});
+//				view.applyFilterToUI(filter);
+//			});
+//			view.$el.find('#lessButton').click(function() {
+//				var filter = view.buildFilterFromUI();
+//				view.render({
+//					advanced: false,
+//					searchClickHandler: options.searchClickHandler
+//				});
+//				view.applyFilterToUI(filter);
+//			});
+//			view.$el.find('#clearButton').click(function() {
+//				view.$el.find('.btn-group-filter.filter-faction .btn').removeClass('active');
+//				view.$el.find('input[type="text"]').val('');
+//				view.$el.find('input[type="checkbox"]').prop('checked', '');
+//				view.$el.find('select').prop('selectedIndex', 0)
+//			});
+//
+//			var cardSetFilterTemplate = Handlebars.templates['commons-ul-tree']({
+//				tree: ordb.dict.buildCardSetTree()
+//			});
+//			view.$el.find('#cardSetFilter').html(cardSetFilterTemplate);
+//			view.$el.find('#cardSetFilter li[data-node-type="cycle"] > input[type="checkbox"]').click(
+//					function() {
+//						var $this = $(this);
+//						$this.siblings().filter('ul').find('li[data-node-type="set"] > input[type="checkbox"]').prop('checked',
+//								$this.prop('checked'));
+//					});
+//
+//			var warlordFilterTemplate = Handlebars.templates['commons-ul-tree']({
+//				tree: ordb.dict.buildWarlordTree()
+//			});
+//			view.$el.find('#warlordFilter').html(warlordFilterTemplate);
+//
+//			var sortTemplate = Handlebars.templates['commons-sort-select']({
+//				sortItems: view.config.sortItems
+//			});
+//			var $container = view.$el.find('.deck-sort-container');
+//			$container.append(sortTemplate);
+//			$container.append(sortTemplate);
+//			$container.append(sortTemplate);
+//
+//			view.applyFilterToUI(options.filter);
+//
+//			//
+//			// click handlers
+//			//
+//			view.$el.find('.btn-group.select-many > .btn').click(function(event) {
+//				var $this = $(this);
+//				if (event.ctrlKey) {
+//					$this.addClass('active').siblings().removeClass('active');
+//				} else {
+//					$this.toggleClass('active');
+//				}
+//			});
+//
+//			// //
+//			// // date range filter
+//			// //
+//			// view.$el.find('.btn-group-date-range .btn').click(function() {
+//			// var $this = $(this);
+//			// $(this).toggleClass('active').siblings().removeClass('active');
+//			// if ($this.hasClass('active')) {
+//			// var range = $this.data('date-range');
+//			// var filter = $this.closest('.date-range-filter');
+//			// }
+//			// });
+//
+//			if (options.searchClickHandler) {
+//				view.$el.find('#searchButton').click(function() {
+//					options.searchClickHandler();
+//				});
+//			}
+//
+//			//
+//			// tooltips
+//			//				
+//			view.$el.find('[data-toggle="tooltip"]').tooltip({
+//				container: 'body'
+//			});
+			
+			return this;
 		}
 	});
 
-	_deck.DeckListDataView = Backbone.View.extend({
-		el: '.deck-list-data-container',
+	_deck.DeckListDataView = _deck.View.extend({
+		className: 'deck-list-data-view',
 
 		/**
 		 * @memberOf DeckListDataView
 		 */
-		render: function(decks, options) {
-			var view = this;
-
+		initialize: function(options) {
+			if (!options || !options.decks) {
+				throw "Decks are undefined"
+			}
+			
+			_.bindAll(this, 'render');
+			
+			this.decks = options.decks;
+			this.listenTo(this.decks, 'reset', function(decks) {
+				this.render();
+			});
+		},
+		
+		render: function() {
 			var deckWrappers = [];
-			decks.each(function(deck) {
-				var stats = deck.computeMembersStats();
-				stats.cost.name = 'card.cost.sh';
-				stats.shield.name = 'card.shieldIcons.sh';
-				stats.command.name = 'card.commandIcons.sh';
-				stats.attack.name = 'card.attack.sh';
-				stats.hitPoints.name = 'card.hp.sh';
-
+			this.decks.each(function(deck) {
 				deckWrappers.push({
 					deck: deck.toJSON(),
 					membersGroups: ordb.util.membersGroupBy(deck.getMembers(), 'typeDisplay', 'name'),
-					totalQuantity: deck.computeMembersTotalQuantity.call(deck),
-					totalCost: deck.computeMembersTotalCost.call(deck),
-					stats: stats,
+					totalQuantity: deck.getMembers().computeTotalQuantity(),
+					totalCost: deck.getMembers().computeTotalResourceCost(),
 					published: deck.get('snapshotBaseId') && deck.get('snapshotPublic') === true
 				});
 			});
 
-			var pagination = undefined;
-			var total = decks.config.get('total');
-			var pageNumber = decks.config.get('pageNumber');
-			var pageSize = decks.config.get('pageSize');
-			if (_.isNumber(total) && _.isNumber(pageNumber) && _.isNumber(pageSize) && total / pageSize > 1) {
-				var lastPageNumber = Math.ceil(total / pageSize);
-				pagination = {
-					prevPage: pageNumber > 1 ? {
-						number: pageNumber - 1
-					} : undefined,
-					nextPage: pageNumber < lastPageNumber ? {
-						number: pageNumber + 1
-					} : undefined,
-					pages: []
-				};
-				_.each(_.range(1, lastPageNumber + 1), function(number) {
-					pagination.pages.push({
-						number: number,
-						active: number == pageNumber
-					});
-				});
-			}
+			var pg = ordb.util.buildPagination({
+				total: this.decks.config.get('total'),
+				pageNumber: this.decks.config.get('pageNumber'),
+				pageSize: this.decks.config.get('pageSize')
+			});
+			
 			var template = Handlebars.templates['deck-list-data-view']({
 				deckWrappers: deckWrappers,
-				pagination: pagination,
+				pagination: pg,
 
 			});
-			view.$el.html(template);
+			this.$el.html(template);
+			this.makeTooltips();
 
-			//
-			// cost chart
-			//
-			view.$el.find('.chart-container.cost').each(function() {
-				var deck = decks.findWhere({
-					id: parseInt($(this).data('deck-id'))
-				});
-				var members = deck.getSelectedNonHeroes().toJSON();
-				var membersByCost = _.groupBy(members, function(member) {
-					return member.card.cost;
-				});
-				delete membersByCost['-1'];
-				delete membersByCost['undefined'];
-
-				var sortedKeys = _.sortBy(Object.keys(membersByCost), function(key) {
-					return parseInt(key);
-				});
-				var dataByCost = [];
-				_.each(sortedKeys, function(key) {
-					dataByCost.push([ parseInt(key), _.reduce(membersByCost[key], function(count, member) {
-						return count + member.quantity;
-					}, 0) ]);
-				});
-
-				var colors = [];
-				var base = Highcharts.getOptions().colors[0];
-
-				for (var i = 0; i < 11; i++) {
-					colors.push(Highcharts.Color(base).brighten((-i) / 20).get());
-				}
-
-				$(this).highcharts({
-					chart: {
-						type: 'column',
-						spacingBottom: 0,
-						spacingTop: 0,
-						spacingLeft: 0,
-						spacingRight: 0,
-					},
-					title: {
-						text: ordb.dict.messages['core.cardsByCost'],
-						style: {
-							fontSize: '12px'
-						}
-					},
-					xAxis: {
-						title: {
-							text: null
-						},
-						categories: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
-						min: 0,
-						max: 10
-					},
-					yAxis: {
-						title: {
-							text: null
-						},
-						min: 0,
-						max: 26,
-						tickInterval: 2
-					},
-					plotOptions: {
-						column: {
-							colorByPoint: true,
-							colors: colors
-						},
-						series: {
-							animation: false
-						}
-					},
-					series: [ {
-						name: ordb.dict.messages['core.numberOfCards'],
-						data: dataByCost,
-						showInLegend: false,
-						pointWidth: 14
-					} ],
-					credits: false
-				});
-			});
-
-			//
-			// spheres chart
-			//
-			var members = ordb.util.toJSON(deck.getSelectedNonHeroes().filter(function(member) {
-				return member.isSelected() && !memeber.isHero();
-			}));
-			var membersByFaction = _.groupBy(members, function(member) {
-				return member.card.faction;
-			});
-
-			var dataByFaction = [];
-			var sortedKeys = _.sortBy(Object.keys(membersByFaction), function(key) {
-				if (key == deck.get('warlord').faction) {
-					return 0;
-				} else if (key == 'neutral') {
-					return 2;
-				} else {
-					return 1;
-				}
-			});
-			_.each(sortedKeys, function(key) {
-				dataByFaction.push({
-					name: ordb.dict.findFaction(key).name,
-					y: _.reduce(membersByFaction[key], function(count, member) {
-						return count + member.quantity;
-					}, 0),
-					color: ordb.ui.colors.factions[key].bg
-				});
-			});
-
-			view.$el.find('.chart-ctr.sphere').highcharts({
-				chart: {
-					plotBackgroundColor: null,
-					plotBorderWidth: null,
-					plotShadow: false,
-					type: 'pie',
-					spacing: 0
-				},
-				title: {
-					text: ordb.dict.messages['core.cardsBySphere'],
-					style: {
-						fontSize: '12px'
-					}
-				},
-				tooltip: {
-					pointFormat: '{series.name}: <b>{point.y}</b>'
-				},
-				plotOptions: {
-					pie: {
-						size: '100%',
-						allowPointSelect: false,
-						cursor: 'pointer',
-						dataLabels: {
-							enabled: false,
-							format: '{point.name}'
-						},
-						borderWidth: 0
-					},
-					series: {
-						animation: false
-					}
-				},
-				series: [ {
-					name: ordb.dict.messages['core.numberOfCards'],
-					colorByPoint: true,
-					data: dataByFaction
-				} ],
-				credits: false
-			});
-
-			//
-			// types chart
-			//
-			view.$el.find('.chart-container.type').each(function() {
-				var deck = decks.findWhere({
-					id: parseInt($(this).data('deck-id'))
-				});
-				var members = ordb.util.toJSON(deck.getSelectedNonHeroes().filter(function(member) {
-					return member.get('quantity') > 0;
-				}));
-				var membersByType = _.groupBy(members, function(member) {
-					return member.card.type;
-				});
-
-				var dataByType = [];
-				var order = [ 'army', 'attachment', 'support', 'event', 'synapse' ];
-				var sortedKeys = _.sortBy(Object.keys(membersByType), function(key) {
-					return order.indexOf(key);
-				});
-				_.each(sortedKeys, function(key) {
-					dataByType.push({
-						name: ordb.dict.findCardType(key).name,
-						y: _.reduce(membersByType[key], function(count, member) {
-							return count + member.quantity;
-						}, 0),
-						color: ordb.ui.colors.types[key].bg
-					});
-				});
-
-				$(this).highcharts({
-					chart: {
-						plotBackgroundColor: null,
-						plotBorderWidth: null,
-						plotShadow: false,
-						type: 'pie',
-						spacing: 0
-					},
-					title: {
-						text: ordb.dict.messages['core.cardsByType'],
-						style: {
-							fontSize: '12px'
-						}
-					},
-					tooltip: {
-						pointFormat: '{series.name}: <b>{point.y}</b>'
-					},
-					plotOptions: {
-						pie: {
-							size: '100%',
-							allowPointSelect: false,
-							cursor: 'pointer',
-							dataLabels: {
-								enabled: false,
-								format: '{point.name}'/*
-														 * , style: { color: (Highcharts.theme &&
-														 * Highcharts.theme.contrastTextColor) ||
-														 * 'black' }
-														 */
-							},
-							borderWidth: 0
-						},
-						series: {
-							animation: false
-						}
-					},
-					series: [ {
-						name: ordb.dict.messages['core.numberOfCards'],
-						colorByPoint: true,
-						data: dataByType
-					} ],
-					credits: false
-				});
-			});
-
-			//
-			// click handlers
-			//
-			view.$el.find('.expand-toggle').click(function() {
-				$(this).toggleClass('active').parents('.deck-container').find('.members').toggleClass('hidden');
-			});
-			view.$el.find('.pagination-container a[data-page-number]').click(function(event) {
-				if (options.pageClickHandler) {
-					options.pageClickHandler(parseInt($(this).data("page-number")));
-				}
-				event.preventDefault();
-			});
-
-			//
-			// tooltips
-			//				
-			view.$el.find('[data-toggle="tooltip"]').tooltip({
-				container: 'body'
-			});
+//			//
+//			// click handlers
+//			//
+//			view.$el.find('.expand-toggle').click(function() {
+//				$(this).toggleClass('active').parents('.deck-container').find('.members').toggleClass('hidden');
+//			});
+//			view.$el.find('.pagination-container a[data-page-number]').click(function(event) {
+//				if (options.pageClickHandler) {
+//					options.pageClickHandler(parseInt($(this).data("page-number")));
+//				}
+//				event.preventDefault();
+//			});
+//
+//			//
+//			// tooltips
+//			//				
+//			view.$el.find('[data-toggle="tooltip"]').tooltip({
+//				container: 'body'
+//			});
+			
+			return this;
 		}
 	});
 	

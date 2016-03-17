@@ -392,7 +392,7 @@ public abstract class JpaDaoAbstract<E, Q extends Query<E>> {
 		Integer pn = query.getPageNumber();
 		Integer ps = query.getPageSize();
 		if (pn != null && ps != null) {
-			typedQuery.setFirstResult((pn - 1) * ps);
+			typedQuery.setFirstResult(pn * ps);
 			typedQuery.setMaxResults(ps);
 		}
 		return typedQuery;

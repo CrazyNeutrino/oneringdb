@@ -97,6 +97,14 @@ footer.footer > .container > p:first-child {
 .deck-list .deck > .header a:hover {
 	color: inherit;
 }
+
+.deck-list .deck .hero {
+	font-size: 1.1em;
+	text-overflow: clip;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 5px 5px;
+}
  
 .deck-list .deck {
 	border: none;
@@ -958,7 +966,7 @@ table.table-with-btn > tbody > tr > td {
 .bg-baggins { background-color: #FBE821 !important; color: #000 !important; }
 .bg-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
 .bg-neutral { background-color: #DDD !important; color: #000 !important; }
-.bg-dummy { background-color: #e6e6e6 !important; color: #000 !important; }
+.bg-dummy { background-color: #DFDAC0 !important; color: #000 !important; }
 
 .bg-enemy { background-color: #6A150A !important; color: #fff !important; }
 .bg-location { background-color: #A6875F !important; color: #000 !important; }
@@ -985,7 +993,7 @@ table.table-with-btn > tbody > tr > td {
 .btn-baggins { background-color: #FBE821 !important; color: #000 !important; }
 .btn-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
 .btn-neutral { background-color: #DDD !important; color: #000 !important; }
-.btn-dummy { background-color: #e6e6e6 !important; color: #000 !important; }
+.btn-dummy { background-color: #DFDAC0 !important; color: #000 !important; }
 
 .btn-leadership:hover { background-color: #A22FA0 !important; color: #fff !important; }
 .btn-tactics:hover { background-color: #C71313 !important; color: #fff !important; }
@@ -994,7 +1002,7 @@ table.table-with-btn > tbody > tr > td {
 .btn-baggins:hover { background-color: #FBE821 !important; color: #000 !important; }
 .btn-fellowship:hover { background-color: #FD7E17 !important; color: #000 !important; }
 .btn-neutral:hover { background-color: #DDD !important; color: #000 !important; }
-
+.btn-dummy:hover { background-color: #D6CFAE !important; color: #000 !important; }
 /*
  * bootstrap overrides
  */

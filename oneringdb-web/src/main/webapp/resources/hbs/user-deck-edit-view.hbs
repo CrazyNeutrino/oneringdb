@@ -132,15 +132,6 @@
 										{{/each}}
 									</select>
 									
-									<label id="cardSetFilterTrigger" class="btn btn-default btn-standard filter-group">
-										<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.sets'}}
-									</label>
-		
-									<label id="cardStatFilterTrigger" class="btn btn-default btn-standard filter-group">
-										<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.stats.sh'}}
-									</label>
-		
-									{{!--
 									<select class="form-control sort-control filter-group">
 										<option value="default">{{loc 'core.defaultSorting'}}</option>
 										{{#each sortItems ~}}
@@ -148,7 +139,11 @@
 										<option value="{{value}},desc">{{label}}&nbsp;&#9660;</option>
 										{{/each}}
 									</select>
-									--}}
+									
+									<div class="btn-group filter-group select-many filter-selection">
+										<label class="btn btn-default" data-selection="not-selected" data-toggle="tooltip" title="{{loc 'core.notSelected'}}"><span>0</span></label>
+										<label class="btn btn-default" data-selection="selected" data-toggle="tooltip" title="{{loc 'core.selected'}}"><span>1+</span></label>
+									</div>
 		
 									<div class="btn-group filter-group select-many filter-sphere">
 										{{#each filterItems.spheres}}							
@@ -165,21 +160,40 @@
 										</label>
 										{{/each}}
 									</div>
+									
+									<label id="cardSetFilterTrigger" class="btn btn-default btn-standard filter-group">
+										<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.sets'}}
+									</label>
 		
-									<div class="btn-group filter-group select-many filter-selection">
-										<label class="btn btn-default" data-selection="not-selected" data-toggle="tooltip" title="{{loc 'core.notSelected'}}"><span>0</span></label>
-										<label class="btn btn-default" data-selection="selected" data-toggle="tooltip" title="{{loc 'core.selected'}}"><span>1+</span></label>
+									<label id="cardStatFilterTrigger" class="btn btn-default btn-standard filter-group">
+										<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.stats.sh'}}
+									</label>
+								</div>
+
+								<div class="form">
+									<div id="fastFilter" class="input-group" style="margin-bottom: 10px;">
+										<span class="input-group-addon">
+									        <input type="checkbox" aria-label="...">Name&nbsp;
+									        <input type="checkbox" aria-label="...">Trait&nbsp;
+									        <input type="checkbox" aria-label="...">Keyword&nbsp;
+									        <input type="checkbox" aria-label="...">Text&nbsp;
+									      </span>
+										<input type="text" class="form-control" placeholder="Fast filter (name or trait or keyword or text)"/>
+										<span class="input-group-btn">
+											<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
+										</span>
 									</div>
 								</div>
 								
-								<div class="form">
+									{{!--
 									<div id="textFilter" class="input-group" style="margin-bottom: 10px;">
 										<input class="form-control" id="mainSearchInput" type="text" placeholder="{{loc 'core.nameOrTraitOrKeyword'}}" value="" />
 										<span class="input-group-btn">
 											<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
 										</span>
 									</div>
-								</div>
+									--}}
+									
 							</div>
 							<div class="members-list-view-ctr"></div>
 						</div>

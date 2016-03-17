@@ -31,8 +31,8 @@ public class Query<T> {
 	}
 	
 	public void correctPageNumberAndSize(int maxPageSize) {
-		if (pageNumber == null || pageNumber < 1) {
-			pageNumber = 1;
+		if (pageNumber == null || pageNumber < 0) {
+			pageNumber = 0;
 		}
 		if (pageSize == null || pageSize < 1 || pageSize > maxPageSize) {
 			pageSize = maxPageSize;

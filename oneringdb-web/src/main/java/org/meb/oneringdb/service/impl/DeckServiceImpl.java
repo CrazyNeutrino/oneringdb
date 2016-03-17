@@ -140,7 +140,8 @@ public class DeckServiceImpl extends SearchServiceImpl implements DeckService, S
 				t[2] = System.currentTimeMillis();
 				deckMembers = deckMemberDao.find(deckMemberQuery);
 				for (DeckMember deckMember : deckMembers) {
-					deckMember.setCard(ccm.getCard(deckMember.getCard().getId()));
+					Card card = ccm.getCard(deckMember.getCard().getId());
+					deckMember.setCard(card);
 				}
 				t[3] = System.currentTimeMillis();
 				log.info("deck members found: {}", deckMembers.size());

@@ -12,7 +12,7 @@ ordb.card = ordb.card || {};
 	 */
 	_card.dummy = function() {};
 
-	_card.ViewBase = Backbone.View.extend({
+	_card.View = Backbone.View.extend({
 		el: '.content',
 		events: function() {
 			return {
@@ -47,7 +47,7 @@ ordb.card = ordb.card || {};
 		}
 	});
 
-	_card.CardView = _card.ViewBase.extend({
+	_card.CardView = _card.View.extend({
 		render: function(setNumber, cardNumber) {
 			var card = ordb.dict.findCardByNumber(setNumber, cardNumber);			
 			this.$el.html(Handlebars.templates['card-view'](card));
@@ -55,7 +55,7 @@ ordb.card = ordb.card || {};
 		}
 	});
 
-	_card.CardSearchView = _card.ViewBase.extend({
+	_card.CardSearchView = _card.View.extend({
 		config: new Backbone.Model({
 			layout: 'grid-text-only'
 		}),
@@ -70,7 +70,7 @@ ordb.card = ordb.card || {};
 				'click .filter-card-type .btn':	'onCardTypeFilterClick',
 				'click .filter-quantity .btn':	'onQuantityFilterClick',
 				'click #cardSetFilterTrigger':	'openCardSetFilterModal'
-			}, _card.ViewBase.prototype.events.call(this));
+			}, _card.View.prototype.events.call(this));
 		},
 		
 		onSelectManyFilterClick: function(event) {
@@ -239,7 +239,7 @@ ordb.card = ordb.card || {};
 		}
 	});
 	
-	_card.CardSearchResultsView = _card.ViewBase.extend({
+	_card.CardSearchResultsView = _card.View.extend({
 		el: '.card-search-results-container',
 		render: function(cards, options) {
 			var view = this;

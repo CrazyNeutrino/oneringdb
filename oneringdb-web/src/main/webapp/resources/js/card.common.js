@@ -45,22 +45,33 @@ ordb.card = ordb.card || {};
 
 			_.each(ordb.filter.fds, function(fd) {
 				var value = this.get(fd.key);
-				if (fd.type === ordb.filter.FD_TYPE_SET) {					
+				if (fd.type == ordb.filter.FD_TYPE_SET) {					
 					if (value && value.length > 0) {
 						query[fd.key] = value;
 					}
-				} else if (fd.type === ordb.filter.FD_TYPE_RANGE_STAT) {
-					if (value && (value.length == 2 || value.length === 3 && value[2] !== true)) {
+				} else if (fd.type == ordb.filter.FD_TYPE_RANGE_STAT) {
+					if (value && (value.length == 2 || value.length == 3 && value[2] != true)) {
 						query[fd.key] = {
 							gte: value[0],
 							lte: value[1]
 						};
 					}
-				} else if (fd.type === ordb.filter.FD_TYPE_SIMPLE/* && fd.key != 'anyText'*/) {
+				} else if (fd.type == ordb.filter.FD_TYPE_SIMPLE/* && fd.key != 'anyText'*/) {
 					if (value) {
 						var obj = {};
 						obj[fd.oper] = value;
 						query[fd.key] = obj;
+					}
+				} else if (fd.type == ordb.filter.FD_TYPE_CUSTOM) {
+					if (fd.key == 'anytext' && value) {
+						query2 = [];
+						_.each(['name', 'keywords', 'traits', 'text'], function(key) {
+							var obj = {};
+							obj[key] = { 
+								likenocase: value
+							};
+							query2.push(obj);
+						});	
 					}
 				}
 			}, this);
