@@ -636,14 +636,7 @@ ordb.deck = ordb.deck || {};
 			_deck.MembersListView.__super__.initialize.call(this, options);
 			
 			this.listenTo(this.config, 'change:membersLayout', this.render);
-			this.listenTo(this.deck.getFilteredMembers(), 'reset', function(members) {
-//				this.pagination = ordb.util.buildPagination({
-//					total: this.deck.getFilteredMembers().size(),
-//					pageNumber: options.pageNumber || 0,
-//					pageSize: 48
-//				});
-				this.render();
-			});
+			this.listenTo(this.deck.getFilteredMembers(), 'reset', this.render);
 
 			// Listen to quantity change event on each member separately.
 			this.deck.getMembers().each(function(member) {
