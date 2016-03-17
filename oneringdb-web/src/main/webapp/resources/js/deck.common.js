@@ -338,6 +338,9 @@ ordb.deck = ordb.deck || {};
 				html: true,
 				trigger: 'hover',
 				placement: 'auto right',
+				delay: {
+					show: 500
+				},
 				template: '<div class="popover popover-card" role="tooltip">' + '<div class="arrow"></div>'
 						+ '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div>' + '</div>',
 				content: function() {
@@ -351,7 +354,7 @@ ordb.deck = ordb.deck || {};
 				container: 'body',
 				trigger: 'hover',
 				delay: {
-					show: '1000'
+					show: 500
 				}
 			});
 		},
@@ -633,7 +636,14 @@ ordb.deck = ordb.deck || {};
 			_deck.MembersListView.__super__.initialize.call(this, options);
 			
 			this.listenTo(this.config, 'change:membersLayout', this.render);
-			this.listenTo(this.deck.getFilteredMembers(), 'reset', this.render);
+			this.listenTo(this.deck.getFilteredMembers(), 'reset', function(members) {
+//				this.pagination = ordb.util.buildPagination({
+//					total: this.deck.getFilteredMembers().size(),
+//					pageNumber: options.pageNumber || 0,
+//					pageSize: 48
+//				});
+				this.render();
+			});
 
 			// Listen to quantity change event on each member separately.
 			this.deck.getMembers().each(function(member) {
@@ -649,13 +659,32 @@ ordb.deck = ordb.deck || {};
 			this.listenTo(this.deck.getMembers(), 'batchChange:quantity', this.render);
 		},
 
-		render: function() {
-			var membersLayout = this.config.get('membersLayout') || 'list';
-			var template = Handlebars.templates['deck-members-' + membersLayout]({
-				members: this.deck.getFilteredMembers().toJSON(),
-				membersReadOnly: this.config.get('membersReadOnly')
+		render: function(options) {
+			options = options || {};
+			
+			this.pg = ordb.util.buildPagination({
+				total: this.deck.getFilteredMembers().size(),
+				pageNumber: options.pageNumber || 0,
+				pageSize: 48
 			});
+			
+			var membersLayout = this.config.get('membersLayout') || 'list';
+			var displayedMembers = this.deck.getFilteredMembers().slice(this.pg.pageStartIndex, this.pg.pageEndIndex + 1);
+			var template = Handlebars.templates['deck-members-' + membersLayout]({
+				members: ordb.util.toJSON(displayedMembers),
+				membersReadOnly: this.config.get('membersReadOnly'),
+				pagination: this.pg
+			});
+			
+			var view = this;
 			this.$el.html(template);
+			this.$el.find('.pagination-container a[data-page-number]').click(function(event) {
+				view.render({
+					pageNumber: parseInt($(this).data("page-number"))
+				});
+				event.preventDefault();
+			});
+			
 			this.applyStateToUI();
 			this.makeCardsPopovers();
 			this.makeTooltips();
@@ -669,7 +698,7 @@ ordb.deck = ordb.deck || {};
 			$members.each(function() {
 				var $member = $(this);
 				var $buttons = $member.find('.quantity-group .btn');
-				var member = view.deck.getFilteredMembers().at($members.index($member));
+				var member = view.deck.getFilteredMembers().at(view.pg.pageNumber * view.pg.pageSize + $members.index($member));
 				$buttons.eq(member.getQuantity()).addClass('active');
 			});
 		},

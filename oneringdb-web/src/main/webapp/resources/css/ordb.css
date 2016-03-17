@@ -71,6 +71,12 @@ footer.footer > .container > p:first-child {
 	margin-top: 20px;
 }
 
+.user-deck-edit-view .pagination,
+.public-deck-view .pagination,
+.card-search-view .pagination {
+	margin: 10px 0px;
+}
+
 /**
  * deck list view
  */
@@ -166,13 +172,12 @@ footer.footer > .container > p:first-child {
 }
 
 .pub-deck-view .deck .header > .box-center > h2:first-child,
-.user-deck-edit-view .deck .header > .box-center > h2:first-child {
+.user-deck-edit-view .deck .header > .box-center > h3:first-child {
 	margin-top: 0px;
 	margin-bottom: 5px;
 }
 
-.pub-deck-view .deck .content,
-.user-deck-edit-view .deck .content {
+.pub-deck-view .deck .content {
 	padding: 15px 0px;
 }
 
@@ -198,7 +203,7 @@ footer.footer > .container > p:first-child {
 .deck-heroes-view-ctr,
 .deck-stats-view-ctr,
 .members-groups-view-ctr {
-	margin-bottom: 10px;
+	margin-bottom: 20px;
 }
 
 .deck-heroes-view .heroes {

@@ -14,10 +14,9 @@ ordb.card = ordb.card || {};
 			$modal.data('bs.modal', null);
 		}
 		
-		var view = new _card.CardSetFilterView({
+		var view = new _card.CardSetFilterView(filter, {
 			excludeNightmare: options.excludeNightmare 
 		});
-		view.applyFilterToUI(filter);
 		$modal = $(Handlebars.templates['card-set-filter-modal']());
 		$modal.find('.card-set-filter-view-ctr').empty().append(view.render().el);
 
@@ -102,7 +101,8 @@ ordb.card = ordb.card || {};
 			'click .btn-group.sets-group .btn': 'onSetsGroupClick'
 		},
 		
-		initialize: function(options) {
+		initialize: function(filter, options) {
+			this.filter = filter;
 			this.excludeNightmare = (options || {}).excludeNightmare;
 		},
 		
@@ -157,8 +157,6 @@ ordb.card = ordb.card || {};
 		 * @memberOf CardSetsFilterView
 		 */
 		render: function() {
-			var view = this;
-
 			var trees = ordb.dict.buildCardSetTrees();
 			if (this.excludeNightmare == true) {
 				delete trees.nightmare;
@@ -167,7 +165,8 @@ ordb.card = ordb.card || {};
 				trees: trees,
 				multiple: trees.regular && trees.nightmare
 			});
-			view.$el.html(template);
+			this.$el.html(template);
+			this.applyFilterToUI(this.filter);
 			
 			return this;
 		}

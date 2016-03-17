@@ -31,14 +31,6 @@
 {{/ifSignedIn ~}}
 {{/if ~}}
 
-{{#if deckdelete ~}}
-{{#ifSignedIn ~}}
-<a id="deckDelete" class="btn btn-default pull-right" data-toggle="tooltip" title="{{loc 'core.delete'}}">
-	<span class="glyphicon glyphicon-trash"></span>
-</a>
-{{/ifSignedIn ~}}
-{{/if ~}}
-
 {{#if deckedit ~}}
 {{#ifSignedIn ~}}
 <a class="btn btn-default" data-toggle="tooltip" title="{{loc 'core.edit'}}" href="{{rootUrl}}edit/{{deckedit.id}}-{{deckedit.techName}}">
@@ -99,6 +91,14 @@
 		</li>
 	</ul>
 </div>
+{{/if ~}}
+
+{{#if deckdelete ~}}
+{{#ifSignedIn ~}}
+<a id="deckDelete" class="btn btn-default" data-toggle="tooltip" title="{{loc 'core.delete'}}">
+	<span class="glyphicon glyphicon-trash"></span>
+</a>
+{{/ifSignedIn ~}}
 {{/if ~}}
 
 {{#ifSignedIn}}

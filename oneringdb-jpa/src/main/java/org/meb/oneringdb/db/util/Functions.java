@@ -8,9 +8,11 @@ import org.meb.oneringdb.db.model.DeckComment;
 import org.meb.oneringdb.db.model.DeckInterest;
 import org.meb.oneringdb.db.model.DeckLink;
 import org.meb.oneringdb.db.model.DeckMember;
+import org.meb.oneringdb.db.model.EncounterSetBase;
 import org.meb.oneringdb.db.model.loc.Card;
 import org.meb.oneringdb.db.model.loc.CardSet;
 import org.meb.oneringdb.db.model.loc.Domain;
+import org.meb.oneringdb.db.model.loc.EncounterSet;
 
 import com.google.common.base.Function;
 
@@ -40,6 +42,14 @@ public class Functions {
 		}
 	};
 
+	public static final Function<EncounterSet, String> EncounterSetTechName = new Function<EncounterSet, String>() {
+
+		@Override
+		public String apply(EncounterSet input) {
+			return input.getTechName();
+		}
+	};
+
 	public static final Function<CardBase, String> CardBaseTechName = new Function<CardBase, String>() {
 
 		@Override
@@ -52,7 +62,8 @@ public class Functions {
 
 		@Override
 		public String apply(CardBase input) {
-			return input.getCardSetBase().getTechName() + "#" + input.getTechName() + "#" + input.getNumber();
+			return input.getCardSetBase().getTechName() + "#" + input.getTechName() + "#"
+					+ input.getNumber();
 		}
 	};
 
@@ -60,6 +71,14 @@ public class Functions {
 
 		@Override
 		public String apply(CardSetBase input) {
+			return input.getTechName();
+		}
+	};
+
+	public static final Function<EncounterSetBase, String> EncounterSetBaseTechName = new Function<EncounterSetBase, String>() {
+
+		@Override
+		public String apply(EncounterSetBase input) {
 			return input.getTechName();
 		}
 	};

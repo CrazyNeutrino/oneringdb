@@ -283,7 +283,7 @@ ordb.util = ordb.util || {};
 		p.pages = new Array(Math.ceil(p.total / p.pageSize));
 		p.firstPage = p.pages[0];
 		p.lastPage = p.pages[p.pages.length - 1];
-		p.singlePage = p.pages.length == 1;
+		p.singlePage = p.pages.length < 2;
 
 		_.each(_.range(0, p.pages.length), function(number) {
 			p.pages[number] = {
