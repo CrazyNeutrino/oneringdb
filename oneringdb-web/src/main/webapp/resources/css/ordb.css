@@ -966,7 +966,7 @@ table.table-with-btn > tbody > tr > td {
 .bg-baggins { background-color: #FBE821 !important; color: #000 !important; }
 .bg-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
 .bg-neutral { background-color: #DDD !important; color: #000 !important; }
-.bg-dummy { background-color: #DFDAC0 !important; color: #000 !important; }
+.bg-dummy { background-color: #3576B0 !important; color: #fff !important; }
 
 .bg-enemy { background-color: #6A150A !important; color: #fff !important; }
 .bg-location { background-color: #A6875F !important; color: #000 !important; }
@@ -974,7 +974,7 @@ table.table-with-btn > tbody > tr > td {
 .bg-quest { background-color: #BBB !important; color: #000 !important; }
 .bg-objective { background-color: #DDD !important; color: #000 !important; }
 .bg-objective-ally { background-color: #DDD !important; color: #000 !important; }
-.bg-objective-location { background-color: #DDD !important; color: #000 !important; }
+.bg-objective-location { background-color: #DDD !important; color: #white !important; }
 
 .bor-astra-militarum { border-color: #3C3C3C !important; }
 .bor-chaos { border-color: #EA5400 !important; }
@@ -993,7 +993,7 @@ table.table-with-btn > tbody > tr > td {
 .btn-baggins { background-color: #FBE821 !important; color: #000 !important; }
 .btn-fellowship { background-color: #FD7E17 !important; color: #000 !important; }
 .btn-neutral { background-color: #DDD !important; color: #000 !important; }
-.btn-dummy { background-color: #DFDAC0 !important; color: #000 !important; }
+.btn-dummy { background-color: #3576B0 !important; color: #fff !important; }
 
 .btn-leadership:hover { background-color: #A22FA0 !important; color: #fff !important; }
 .btn-tactics:hover { background-color: #C71313 !important; color: #fff !important; }
@@ -1002,7 +1002,7 @@ table.table-with-btn > tbody > tr > td {
 .btn-baggins:hover { background-color: #FBE821 !important; color: #000 !important; }
 .btn-fellowship:hover { background-color: #FD7E17 !important; color: #000 !important; }
 .btn-neutral:hover { background-color: #DDD !important; color: #000 !important; }
-.btn-dummy:hover { background-color: #D6CFAE !important; color: #000 !important; }
+.btn-dummy:hover { background-color: #3B84C4 !important; color: #fff !important; }
 /*
  * bootstrap overrides
  */

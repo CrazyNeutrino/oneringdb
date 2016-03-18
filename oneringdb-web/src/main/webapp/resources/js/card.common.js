@@ -30,7 +30,7 @@ ordb.card = ordb.card || {};
 		$modal.modal();
 	};
 
-	_card.CardsFilter = Backbone.Model.extend({
+	_card.CardsFilter = Backbone.NestedModel.extend({
 		/**
 		 * @memberOf CardsFilter
 		 */
@@ -40,58 +40,56 @@ ordb.card = ordb.card || {};
 		
 		filter: function(cards) {
 			var db = TAFFY(cards);
-			var query = {};
-			var query2;
+			var andQuery = {};
+			var orQuery = [];
 
 			_.each(ordb.filter.fds, function(fd) {
 				var value = this.get(fd.key);
 				if (fd.type == ordb.filter.FD_TYPE_SET) {					
 					if (value && value.length > 0) {
-						query[fd.key] = value;
+						andQuery[fd.key] = value;
 					}
 				} else if (fd.type == ordb.filter.FD_TYPE_RANGE_STAT) {
-					if (value && (value.length == 2 || value.length == 3 && value[2] != true)) {
-						query[fd.key] = {
-							gte: value[0],
-							lte: value[1]
+					var range = value;
+					if (range && (range.length == 2 || range.length == 3 && range[2] != true)) {
+						andQuery[fd.key] = {
+							gte: range[0],
+							lte: range[1]
 						};
 					}
-				} else if (fd.type == ordb.filter.FD_TYPE_SIMPLE/* && fd.key != 'anyText'*/) {
+				} else if (fd.type == ordb.filter.FD_TYPE_SIMPLE) {
 					if (value) {
 						var obj = {};
 						obj[fd.oper] = value;
-						query[fd.key] = obj;
+						andQuery[fd.key] = obj;
 					}
 				} else if (fd.type == ordb.filter.FD_TYPE_CUSTOM) {
-					if (fd.key == 'anytext' && value) {
-						query2 = [];
-						_.each(['name', 'keywords', 'traits', 'text'], function(key) {
-							var obj = {};
-							obj[key] = { 
-								likenocase: value
-							};
-							query2.push(obj);
-						});	
+					if (fd.key == 'anytext' && _.isObject(value)) {
+						var anytext = value;
+						if (anytext.value) {
+							var keys = ['name', 'traits', 'text'];
+							var pickedKeys = _.chain(anytext).pick(function(value, key, object) {
+								return value == true && _.contains(keys, key);
+							}).keys().value();
+							if (pickedKeys.length == 0) {
+								pickedKeys = keys;
+							}
+							_.each(pickedKeys, function(key) {
+								var obj = {};
+								obj[key] = {
+									likenocase: anytext.value
+								};
+								orQuery.push(obj);
+							});
+						}
 					}
 				}
 			}, this);
 
-			/* var anyText = this.get('anyText');
-			if (anyText && !(query.techName || query.keyword || query.trait)) {
-				query2 = [];
-				_.each(['name', 'keyword', 'trait', 'text'], function(key) {
-					var obj = {};
-					obj[key] = { 
-						likenocase: anyText
-					};
-					query2.push(obj);
-				});				
-			} */
-
-			if (query2) {
-				return db(query, query2).get();
+			if (orQuery && orQuery.length > 0) {
+				return db(andQuery, orQuery).get();
 			} else {
-				return db(query).get();
+				return db(andQuery).get();
 			}
 		},
 		

@@ -291,11 +291,19 @@ ordb.deck = ordb.deck || {};
 		});
 	};
 
-	_deck.MembersFilter = Backbone.Model.extend({
+	_deck.MembersFilter = Backbone.NestedModel.extend({
+		defaults: {
+			anytext: {
+				name: true,
+				traits: true,
+				text: true
+			}
+		},
+		
 		isEmpty: function() {
 			return _.isEmpty(this.toJSON());
 		},
-
+		
 		/**
 		 * @memberOf MembersFilter
 		 */

@@ -285,11 +285,15 @@ ordb.deck = ordb.deck || {};
 				'click .user-deck-edit-view .btn.deck-publish': 'onDeckPublishClick',
 				'click .user-deck-edit-view #cardSetFilterTrigger':	'openCardSetFilterModal',
 				'keyup #fastFilter input[type="text"]': _.debounce(function(e) {
-					this.membersFilter.set('anytext', $(e.currentTarget).val())
+					this.membersFilter.set('anytext.value', $(e.currentTarget).val());
 				}, 500),
 				'click #fastFilter .btn': function(e) {
-					$('#fastFilter input[type="text"]').val('');
-					this.membersFilter.unset('anytext');
+					$(e.currentTarget).parent().siblings().filter('input[type="text"]').val('');
+					this.membersFilter.unset('anytext.value');
+				},
+				'click #fastFilter input[type="checkbox"]': function(e) {
+					var $checkbox = $(e.currentTarget);
+					this.membersFilter.set('anytext.' + $checkbox.data('text-type'), $checkbox.prop('checked'));
 				}
 			}, _deck.PageView.prototype.events.call(this));
 		},
@@ -624,6 +628,12 @@ ordb.deck = ordb.deck || {};
 				var $this = $(this);
 				if (_.contains(filter.quantity, $this.data('selection') == 'not-selected' ? 0 : 1)) {
 					$this.addClass('active');
+				}
+			});
+			this.$el.find('#fastFilter input[type="checkbox"]').each(function() {
+				var $this = $(this);
+				if (filter.anytext[$this.data('text-type')] == true) {
+					$this.prop('checked', true);
 				}
 			});
 		},
