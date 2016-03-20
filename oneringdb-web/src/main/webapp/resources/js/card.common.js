@@ -101,7 +101,7 @@ ordb.card = ordb.card || {};
 	//
 	// card set filter view
 	//
-	_card.CardSetFilterView = Backbone.View.extend({
+	_card.CardSetFilterView = ordb.view.View.extend({
 		className: 'card-set-filter-view',
 		
 		events: {

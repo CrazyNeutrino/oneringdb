@@ -33,7 +33,7 @@
 
 {{#if deckedit ~}}
 {{#ifSignedIn ~}}
-<a class="btn btn-default" data-toggle="tooltip" title="{{loc 'core.edit'}}" href="{{rootUrl}}edit/{{deckedit.id}}-{{deckedit.techName}}">
+<a class="btn btn-default" data-toggle="tooltip" title="{{loc 'core.edit'}}" href="{{rootUrl}}deck/edit/{{deckedit.id}}-{{deckedit.techName}}">
 	<span class="glyphicon glyphicon-pencil"></span>
 </a>
 {{/ifSignedIn ~}}
@@ -41,32 +41,32 @@
 
 {{#if deckview ~}}
 {{!--
-<a class="btn btn-default" data-toggle="tooltip" title="{{loc 'core.view'}}" href="{{rootUrl}}{{deckview.id}}-{{deckview.techName}}">
+<a class="btn btn-default" data-toggle="tooltip" title="{{loc 'core.view'}}" href="{{rootUrl}}deck/{{deckview.id}}-{{deckview.techName}}">
 	<span class="glyphicon glyphicon-eye-open"></span>
 </a>
 --}}
 {{/if ~}}
 
 {{#if decklist ~}}
-<a class="btn btn-default" data-toggle="tooltip" title="{{#unless decklist.showText}}{{loc 'core.myDecks'}}{{/unless}}" href="{{rootUrl}}">
+<a class="btn btn-default" data-toggle="tooltip" title="{{#unless decklist.showText}}{{loc 'core.myDecks'}}{{/unless}}" href="{{rootUrl}}deck">
 	<span class="glyphicon glyphicon-align-justify"></span>{{#if decklist.showText}}&nbsp;{{loc 'core.myDecks'}}{{/if}}
 </a>
 {{/if ~}}
 
 {{#if publicdecklist ~}}
-<a class="btn btn-default" data-toggle="tooltip" title="{{#unless publicdecklist.showText}}{{loc 'core.decks'}}{{/unless}}" href="{{rootUrl}}">
+<a class="btn btn-default" data-toggle="tooltip" title="{{#unless publicdecklist.showText}}{{loc 'core.decks'}}{{/unless}}" href="{{rootUrl}}public/deck">
 	<span class="glyphicon glyphicon-align-justify"></span>{{#if publicdecklist.showText}}&nbsp;{{loc 'core.decks'}}{{/if}}
 </a>
 {{/if ~}}
 
 {{#if decknew ~}}
-<a class="btn btn-default" data-toggle="tooltip" title="{{#unless decknew.showText}}{{loc 'core.create'}}{{/unless}}" href="{{rootUrl}}edit">
+<a class="btn btn-default" data-toggle="tooltip" title="{{#unless decknew.showText}}{{loc 'core.create'}}{{/unless}}" href="{{rootUrl}}deck/edit">
 	<span class="glyphicon glyphicon-plus"></span>{{#if decknew.showText}}&nbsp;{{loc 'core.createDeck'}}{{/if}}
 </a>
 {{/if ~}}
 
 {{#if deckimport ~}}
-<a class="btn btn-default" data-toggle="tooltip" title="{{#unless deckimport.showText}}{{loc 'core.import'}}{{/unless}}" href="{{rootUrl}}import">
+<a class="btn btn-default" data-toggle="tooltip" title="{{#unless deckimport.showText}}{{loc 'core.import'}}{{/unless}}" href="{{rootUrl}}deck/import">
 	<span class="glyphicon glyphicon-import"></span>{{#if deckimport.showText}}&nbsp;{{loc 'core.importDeck'}}{{/if}}
 </a>
 {{/if ~}}
@@ -95,7 +95,7 @@
 
 {{#if deckdelete ~}}
 {{#ifSignedIn ~}}
-<a id="deckDelete" class="btn btn-default" data-toggle="tooltip" title="{{loc 'core.delete'}}">
+<a class="btn btn-default deck-delete" data-toggle="tooltip" title="{{loc 'core.delete'}}">
 	<span class="glyphicon glyphicon-trash"></span>
 </a>
 {{/ifSignedIn ~}}

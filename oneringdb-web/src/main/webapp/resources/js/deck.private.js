@@ -131,7 +131,7 @@ ordb.deck = ordb.deck || {};
 	/**
 	 * Deck list view
 	 */
-	_deck.UserDeckListView = _deck.PageView.extend({
+	_deck.UserDeckListView = ordb.view.PageView.extend({
 		className: 'user-deck-list-view',
 		
 		events: {
@@ -154,6 +154,7 @@ ordb.deck = ordb.deck || {};
 				decks: this.decks
 			});
 			
+			this.rebindMenuLinkClickHandler();
 			this.fetchDecks();
 		},
 		
@@ -237,6 +238,10 @@ ordb.deck = ordb.deck || {};
 			
 			return this;
 		},
+		
+		show: function() {
+			
+		},
 	
 		fetchDecks: function(options) {
 			options = options || {};
@@ -263,7 +268,7 @@ ordb.deck = ordb.deck || {};
 	/**
 	 * Deck edit view
 	 */
-	_deck.UserDeckEditView = _deck.PageView.extend({
+	_deck.UserDeckEditView = ordb.view.PageView.extend({
 		className: 'user-deck-edit-view',
 		
 		/**
@@ -271,22 +276,21 @@ ordb.deck = ordb.deck || {};
 		 */
 		events: function() {
 			return _.extend({
-				/*'click .user-deck-edit-view a': 'onViewLinkClick',*/
-				'click .user-deck-edit-view .select-one .btn': 'onSelectOneGroupClick',
-				'click .user-deck-edit-view .select-many .btn': 'onSelectManyGroupClick',
-				'click .user-deck-edit-view .layout-group .btn': 'onMembersLayoutClick',
-				'click .user-deck-edit-view .filter-sphere .btn': 'onSphereFilterClick',
-				'click .user-deck-edit-view .filter-card-type .btn': 'onCardTypeFilterClick',
-				'click .user-deck-edit-view .filter-selection .btn': 'onSelectionFilterClick',
-				'change .user-deck-edit-view .sort-control': 'onSortControlChange',
-				'click .user-deck-edit-view .btn.deck-save': 'onDeckSaveClick',
-				'click .user-deck-edit-view .btn.deck-save-copy': 'onDeckSaveCopyClick',
-				'click .user-deck-edit-view .btn.deck-delete': 'onDeckDeleteClick',
-				'click .user-deck-edit-view .btn.deck-publish': 'onDeckPublishClick',
-				'click .user-deck-edit-view #cardSetFilterTrigger':	'openCardSetFilterModal',
+				'click .select-one .btn': 'onSelectOneGroupClick',
+				'click .select-many .btn': 'onSelectManyGroupClick',
+				'click .layout-group .btn': 'onMembersLayoutClick',
+				'click .filter-sphere .btn': 'onSphereFilterClick',
+				'click .filter-card-type .btn': 'onCardTypeFilterClick',
+				'click .filter-selection .btn': 'onSelectionFilterClick',
+				'change .sort-control': 'onSortControlChange',
+				'click .btn.deck-save': 'onDeckSaveClick',
+				'click .btn.deck-save-copy': 'onDeckSaveCopyClick',
+				'click .btn.deck-delete': 'onDeckDeleteClick',
+				'click .btn.deck-publish': 'onDeckPublishClick',
+				'click #cardSetFilterTrigger':	'openCardSetFilterModal',
 				'keyup #fastFilter input[type="text"]': _.debounce(function(e) {
 					this.membersFilter.set('anytext.value', $(e.currentTarget).val());
-				}, 500),
+				}, 200),
 				'click #fastFilter .btn': function(e) {
 					$(e.currentTarget).parent().siblings().filter('input[type="text"]').val('');
 					this.membersFilter.unset('anytext.value');
@@ -295,10 +299,12 @@ ordb.deck = ordb.deck || {};
 					var $checkbox = $(e.currentTarget);
 					this.membersFilter.set('anytext.' + $checkbox.data('text-type'), $checkbox.prop('checked'));
 				}
-			}, _deck.PageView.prototype.events.call(this));
+			}, ordb.view.PageView.prototype.events.call(this));
 		},
 
 		initialize: function(options) {
+			options = options || {};
+			
 			var view = this;
 			
 			this.config = new Backbone.Model({
@@ -308,7 +314,7 @@ ordb.deck = ordb.deck || {};
 			this.membersFilter = new _deck.MembersFilter();
 			this.membersSorter = new Backbone.Model();
 
-			_.bindAll(this, 'initializeWhenDeckChanges', 'render');
+			_.bindAll(this, 'initializeWhenDeckChanges', 'render', 'onViewLinkClick');
 			
 			if (options.deck) {
 				// Deck data is available: via deck list view or via deck import view. Fetch its
@@ -378,7 +384,7 @@ ordb.deck = ordb.deck || {};
 			this.listenTo(this.membersFilter, 'change', this.filterMembers);
 			this.listenTo(this.membersSorter, 'change', this.sortMembers);
 			
-//			this.bindMenuLinkClickHandler();
+			this.rebindMenuLinkClickHandler();
 		},
 		
 		initializeWhenDeckChanges: function() {
@@ -586,7 +592,6 @@ ordb.deck = ordb.deck || {};
 			});
 
 			this.filterMembers();
-			this.bindMenuLinkClickHandler();
 			
 			return this;
 		},
@@ -731,7 +736,7 @@ ordb.deck = ordb.deck || {};
 					buttonNo: {}
 				};
 
-				_deck.showMessageModalDialog(options);
+				_view.showMessageModalDialog(options);
 			});
 		},
 
@@ -793,7 +798,7 @@ ordb.deck = ordb.deck || {};
 					buttonNo: {}
 				};
 
-				_deck.showMessageModalDialog(options);
+				_view.showMessageModalDialog(options);
 			});
 		},
 
@@ -844,13 +849,13 @@ ordb.deck = ordb.deck || {};
 						titleKey: 'core.deck.aboutToLeave.title',
 						messageKey: 'core.deck.aboutToLeave.message',
 						buttonYes: {
-							labelKey: 'core.yes.long' + Math.floor(Math.random() * 2),
+							labelKey: 'core.yes.long',
 							class: 'btn-danger',
 							handler: navigateHandler
 						},
 						buttonNo: {}
 					};
-					_deck.showMessageModalDialog(options);
+					ordb.view.showMessageModalDialog(options);
 				} else {
 					navigateHandler();
 				}
@@ -938,7 +943,7 @@ ordb.deck = ordb.deck || {};
 				success: function(deck, response, options) {
 					ordb.router.navigate('edit/' + deck.get('id') + '-' + deck.get('techName'));
 					if (!view.deck.get('id')) {
-						ga('set', 'page', ordb.static.root + 'edit/' + parseInt(deck.get('id')));
+						ga('set', 'page', ordb.static.root + 'deck/edit/' + parseInt(deck.get('id')));
 					}
 					ga('send', 'pageview');
 					view.deck = deck;
@@ -948,6 +953,7 @@ ordb.deck = ordb.deck || {};
 					});
 					view.initializeWhenDeckChanges();
 					view.render();
+					ordb.app.userDeckListView.decks.unshift(view.deck);
 				},
 				error: function(deck, response, options) {
 					view.messages = _deck.buildErrorMessage({
@@ -969,14 +975,13 @@ ordb.deck = ordb.deck || {};
 				view.deck.destroy({
 					wait: true,
 					success: function(deck, response, options) {
-						ordb.router.navigate('');
-						ga('set', 'page', ordb.static.root);
-						ga('send', 'pageview');
-						userDeckListView.messages = _deck.buildSuccessMessage({
-							message: 'ok.deck.oper.delete'
-						});
 						delete view.deck;
-						userDeckListView.render();
+						ordb.app.gotoUserDeckListView({
+							navigate: true,
+							messages: _deck.buildSuccessMessage({
+								message: 'ok.deck.oper.delete'
+							})
+						});
 					},
 					error: function(deck, response, options) {
 						view.messages = _deck.buildErrorMessage({
@@ -999,7 +1004,7 @@ ordb.deck = ordb.deck || {};
 				buttonNo: {}
 			};
 
-			_deck.showMessageModalDialog(options);
+			ordb.view.showMessageModalDialog(options);
 		},
 
 		onDeckPublishClick: function(e) {
@@ -1007,7 +1012,7 @@ ordb.deck = ordb.deck || {};
 		}
 	});
 
-	_deck.UserDeckImportView = _deck.PageView.extend({
+	_deck.UserDeckImportView = ordb.view.PageView.extend({
 		className: 'user-deck-import-view',
 		
 		events: {
@@ -1017,6 +1022,10 @@ ordb.deck = ordb.deck || {};
 		/**
 		 * @memberOf UserDeckImportView
 		 */
+		initialize: function() {
+			this.rebindMenuLinkClickHandler();	
+		},
+		
 		render: function(id) {
 			var view = this;
 
@@ -1169,83 +1178,3 @@ ordb.deck = ordb.deck || {};
 	});
 
 })(ordb.deck);
-
-$(function() {
-
-	var Router = Backbone.Router.extend({
-		routes: {
-			'edit': 'editDeck',
-			'edit/:id': 'editDeck',
-			'import': 'importDeck',
-			'': 'viewDecks',
-		}
-	});
-
-//	ordb.app.deckListView = new ordb.deck.UserDeckListView();
-//	var userDeckImportView = new ordb.deck.UserDeckImportView();
-//	var userDeckEditView = new ordb.deck.UserDeckEditView();
-	
-	var changeView = function(view) {
-		if (ordb.app.view) {
-			ordb.app.view.remove();
-		}
-		ordb.app.view = view;
-		$('.content').empty().append(view.render().el);
-	};
-
-	ordb.router = new Router();
-	ordb.router.on('route:editDeck', function(deckIdWithName) {
-		var options = {};
-
-		if (deckIdWithName) {
-			var deckId = /^\w+/.exec(deckIdWithName)[0];
-			if (/^\d+$/.test(deckId)) {
-				deckId = parseInt(deckId);
-			}
-			options = {
-				deckId: deckId,
-				deck: ordb.app.deckListView ? ordb.app.deckListView.decks.findWhere({
-					id: deckId
-				}) : undefined
-			};
-		}
-
-		changeView(new ordb.deck.UserDeckEditView(options));
-		$('html,body').scrollTop(0);
-		ga('set', 'page', ordb.static.root + 'edit/' + options.deckId);
-		ga('send', 'pageview');
-	}).on('route:viewDecks', function() {
-		var view;
-		if (ordb.app.deckListView && ordb.app.view instanceof ordb.deck.UserDeckEditView) {
-			view = ordb.app.deckListView;
-			view.delegateEvents();	// this is important
-		} else {
-			view = new ordb.deck.UserDeckListView();
-			ordb.app.deckListView = view;
-		}
-		changeView(view);
-		$('html,body').scrollTop(0);
-		ga('set', 'page', ordb.static.root);
-		ga('send', 'pageview');
-	}).on('route:importDeck', function() {
-		changeView(new ordb.deck.UserDeckImportView());
-		$('html,body').scrollTop(0);
-		ga('set', 'page', ordb.static.root + 'import');
-		ga('send', 'pageview');
-	});
-
-	// register partials
-	Handlebars.registerPartial({
-		'pagination': Handlebars.templates['pagination'],
-		'card-text-content': Handlebars.templates['card-text-content'],
-		'common-ul-tree': Handlebars.templates['common-ul-tree'],
-		'deck-actions': Handlebars.templates['deck-actions']
-	});
-
-	ordb.static.root = '/' + ordb.static.language + '/deck/';
-
-	Backbone.history.start({
-		pushState: true,
-		root: ordb.static.root
-	});
-});

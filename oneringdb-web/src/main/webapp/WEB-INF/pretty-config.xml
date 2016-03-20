@@ -14,22 +14,22 @@
 
 	<url-mapping id="deck0">
 		<pattern value="/#{ /(en)|(pl)|(de)/ localeCtrl.language }/deck" />
-		<view-id value="/deck/index.jsf" />
+		<view-id value="/app/index.jsf" />
 	</url-mapping>
 
 	<url-mapping id="deck1">
 		<pattern value="/#{ /(en)|(pl)|(de)/ localeCtrl.language }/deck/*" />
-		<view-id value="/deck/index.jsf" />
+		<view-id value="/app/index.jsf" />
 	</url-mapping>
 
 	<url-mapping id="card0">
 		<pattern value="/#{ /(en)|(pl)|(de)/ localeCtrl.language }/card" />
-		<view-id value="/card/index.jsf" />
+		<view-id value="/app/index.jsf" />
 	</url-mapping>
 
 	<url-mapping id="card1">
 		<pattern value="/#{ /(en)|(pl)|(de)/ localeCtrl.language }/card/*" />
-		<view-id value="/card/index.jsf" />
+		<view-id value="/app/index.jsf" />
 	</url-mapping>
 
 	<url-mapping id="register">

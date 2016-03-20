@@ -1,67 +1,61 @@
-<div class="card-search-view">
+<div class="container">
 
-	<div class="content-band">
-		<div class="container">
-
-			<div class="row">	
-				<div class="col-xs-12 card-search-filter-container">		
-					<div class="form-inline">
-						<div class="btn-group select-many filter-group filter-sphere">
-							{{#each filter.spheres}}							
-							<label class="btn btn-default" data-sphere="{{techName}}" data-toggle="tooltip" title="{{name}}">
-								<i class="db-icon db-icon-{{techName}}"></i>
-							</label>
-							{{/each}}
-						</div>
-						<div class="btn-group select-many filter-group filter-card-type">
-							{{#each filter.cardTypes}}
-							<label class="btn btn-default" data-card-type="{{techName}}" data-toggle="tooltip" title="{{name}}">
-								<i class="db-icon db-icon-{{techName}}"></i>
-							</label>
-							{{/each}}
-						</div>
-						<div class="btn-group select-many filter-group filter-quantity">
-							{{#for 1 5 1}}
-							<label class="btn btn-default" data-quantity="{{this}}" data-toggle="tooltip" title="{{loc 'card.quantity'}}: {{this}}">
-								<span>{{this}}</span>
-							</label>
-							{{/for}}
-						</div>
-						<label id="cardSetFilterTrigger" class="btn btn-default btn-standard filter-group">
-							<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.sets'}}
-						</label>
-						<label id="cardStatFilterTrigger" class="btn btn-default btn-standard filter-group">
-							<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.values'}}
-						</label>
-			
-						<select class="form-control sort-control filter-group">
-							<option value="default">{{loc 'core.defaultSorting'}}</option>
-							{{#each sortItems ~}}
-							<option value="{{value}},asc">{{label}}&nbsp;&#9650;</option>
-							<option value="{{value}},desc">{{label}}&nbsp;&#9660;</option>
-							{{/each}}
-						</select>
-						
-						<select class="form-control layout-control filter-group">
-							<option value="grid-image-only">{{loc 'core.viewAsImageOnly'}}</option>
-							<option value="grid-text-only">{{loc 'core.viewAsTextOnly'}}</option>
-						</select>
-					</div>
-			
-					<div class="form">
-						<div id="textFilter" class="input-group" style="margin-bottom: 10px;">
-							<input class="form-control" id="mainSearchInput" type="text" placeholder="{{loc 'core.nameOrTraitOrKeyword'}}" value="" />
-							<span class="input-group-btn">
-								<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
-							</span>
-						</div>
-					</div>
-			
-					<div class="card-search-results-container">			
-					</div>
+	<div class="row">	
+		<div class="col-xs-12 card-search-filter-container">		
+			<div class="form-inline">
+				<div class="btn-group select-many filter-group filter-sphere">
+					{{#each filter.spheres}}							
+					<label class="btn btn-default" data-sphere="{{techName}}" data-toggle="tooltip" title="{{name}}">
+						<i class="db-icon db-icon-{{techName}}"></i>
+					</label>
+					{{/each}}
+				</div>
+				<div class="btn-group select-many filter-group filter-card-type">
+					{{#each filter.cardTypes}}
+					<label class="btn btn-default" data-card-type="{{techName}}" data-toggle="tooltip" title="{{name}}">
+						<i class="db-icon db-icon-{{techName}}"></i>
+					</label>
+					{{/each}}
+				</div>
+				<div class="btn-group select-many filter-group filter-quantity">
+					{{#for 1 5 1}}
+					<label class="btn btn-default" data-quantity="{{this}}" data-toggle="tooltip" title="{{loc 'card.quantity'}}: {{this}}">
+						<span>{{this}}</span>
+					</label>
+					{{/for}}
+				</div>
+				<label id="cardSetFilterTrigger" class="btn btn-default btn-standard filter-group">
+					<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.sets'}}
+				</label>
+				<label id="cardStatFilterTrigger" class="btn btn-default btn-standard filter-group">
+					<span class="glyphicon glyphicon-filter"></span>&nbsp;{{loc 'core.values'}}
+				</label>
+	
+				<select class="form-control sort-control filter-group">
+					<option value="default">{{loc 'core.defaultSorting'}}</option>
+					{{#each sortItems ~}}
+					<option value="{{value}},asc">{{label}}&nbsp;&#9650;</option>
+					<option value="{{value}},desc">{{label}}&nbsp;&#9660;</option>
+					{{/each}}
+				</select>
+				
+				<select class="form-control layout-control filter-group">
+					<option value="grid-image-only">{{loc 'core.viewAsImageOnly'}}</option>
+					<option value="grid-text-only">{{loc 'core.viewAsTextOnly'}}</option>
+				</select>
+			</div>
+	
+			<div class="form">
+				<div id="textFilter" class="input-group" style="margin-bottom: 10px;">
+					<input class="form-control" id="mainSearchInput" type="text" placeholder="{{loc 'core.nameOrTraitOrKeyword'}}" value="" />
+					<span class="input-group-btn">
+						<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
+					</span>
 				</div>
 			</div>
-
+	
+			<div class="card-search-results-view-ctr"></div>
 		</div>
 	</div>
+
 </div>

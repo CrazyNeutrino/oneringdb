@@ -1,7 +1,5 @@
 var ordb = ordb || {};
 
-ordb.app = ordb.app || {};
-
 ordb.static = ordb.static || {};
 ordb.static.timezone = jstz.determine().name();
 ordb.static.format = {
@@ -1163,8 +1161,222 @@ ordb.deck = ordb.deck || {};
 })(ordb.deck);
 
 //
-// ???
+// app
 //
-(function(_ordb) {
+ordb.app = ordb.app || {};
+(function(_app) {
+	
+	var currentView;
+	var userDeckListView;
+	var cardSearchView;
 
-})(ordb);
+	_app.gotoView = function(view, options) {
+		options = options || {};
+		
+		if (currentView) {
+			currentView.remove();
+		}
+		currentView = view;
+		
+		$('.content').empty().append(currentView.render().el);
+		if (options.navigate == true) {
+			ordb.router.navigate('deck');
+		}
+		
+		$('html,body').scrollTop(0);
+		ga('set', 'page', ordb.static.root + options.route);
+		ga('send', 'pageview');
+	};
+	
+	_app.gotoUserDeckListView = function(options) {
+		options = options || {};
+		
+		if (userDeckListView && currentView instanceof ordb.deck.UserDeckEditView) {
+			userDeckListView.delegateEvents();
+		} else {
+			userDeckListView = new ordb.deck.UserDeckListView();
+		}
+		userDeckListView.messages = options.messages;
+		_app.gotoView(userDeckListView, {
+			route: 'deck',
+			navigate: options.navigate
+		});
+	};
+	
+	_app.gotoUserDeckEditView = function(options) {
+		options = options || {};
+
+		var deckOptions = {};
+		if (options.deckIdWithName) {
+			var deckId = /^\w+/.exec(options.deckIdWithName)[0];
+			if (/^\d+$/.test(deckId)) {
+				deckId = parseInt(deckId);
+			}
+			
+			deckOptions = {
+				deckId: deckId,
+				deck: userDeckListView ? userDeckListView.decks.findWhere({
+					id: deckId
+				}) : undefined
+			};
+		}
+
+		_app.gotoView(new ordb.deck.UserDeckEditView(deckOptions), {
+			route: 'deck/edit/' + deckOptions.deckId
+		});
+	};
+	
+	_app.gotoUserDeckImportView = function() {
+		_app.gotoView(new ordb.deck.UserDeckImportView(), {
+			route: 'deck/import'
+		});
+	};
+	
+	_app.gotoCardSearchView = function(options) {
+		options = options || {};
+		
+		if (cardSearchView && currentView instanceof ordb.card.CardView) {
+			cardSearchView.delegateEvents();
+		} else {
+			cardSearchView = new ordb.card.CardSearchView({
+				queryString: options.queryString
+			});
+		}
+		
+		_app.gotoView(cardSearchView, {
+			route: 'card/search'
+		});
+	};
+	
+	_app.gotoCardView = function() {	
+		var setNumber = parseInt(setNumber);
+		var cardNumber = parseInt(cardNumber);
+		var card = ordb.dict.findCardByNumber(setNumber, cardNumber);
+		var url = ordb.ui.toCardRelativeUrl(card);
+		if (_.isUndefined(url)) {
+			url = setNumber + '/' + cardNumber;
+		}
+		_app.gotoView(new ordb.card.CardView({
+			setNumber: setNumber,
+			cardNumber: cardNumber
+		}), {
+			route: 'card/' + url
+		});
+	};
+	
+})(ordb.app);
+
+
+$(function() {
+	
+	$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+		options.url = ordb.static.restPath + options.url + '?language=' + ordb.static.language;
+		if (options.data) {
+			options.data = options.data.replace(/%5B%5D/g, '');
+		}
+	});
+
+	var Router = Backbone.Router.extend({
+		routes: {
+			'deck': 'viewDecks',
+			'deck/edit': 'editDeck',
+			'deck/edit/:id': 'editDeck',
+			'deck/import': 'importDeck',
+			'card/:setNumber/:cardNumber': 'viewCard',
+			'card/search(?:queryString)': 'searchCards'
+		}
+	});
+	
+//	ordb.app.userDeckListView = new ordb.deck.UserDeckListView();
+
+//	var changeView = function(view, route) {
+//		if (ordb.app.view) {
+//			ordb.app.view.remove();
+//		}
+//		ordb.app.view = view;
+//		$('.content').empty().append(view.render().el);
+//		
+//		$('html,body').scrollTop(0);
+//		ga('set', 'page', ordb.static.root + route);
+//		ga('send', 'pageview');
+//	};
+
+	ordb.router = new Router();
+	ordb.router.on('route:viewDecks', function() {
+		ordb.app.gotoUserDeckListView();
+//		var view;
+//		if (ordb.app.view instanceof ordb.deck.UserDeckEditView) {
+//			ordb.app.userDeckListView.delegateEvents();
+//		} else {
+//			ordb.app.userDeckListView = new ordb.deck.UserDeckListView();
+//		}
+//		changeView(ordb.app.userDeckListView, 'deck');
+	}).on('route:editDeck', function(deckIdWithName) {
+		ordb.app.gotoUserDeckEditView({
+			deckIdWithName: deckIdWithName
+		});
+//		var options = {};
+//
+//		if (deckIdWithName) {
+//			var deckId = /^\w+/.exec(deckIdWithName)[0];
+//			if (/^\d+$/.test(deckId)) {
+//				deckId = parseInt(deckId);
+//			}
+//			options = {
+//				deckId: deckId,
+//				deck: ordb.app.userDeckListView ? ordb.app.userDeckListView.decks.findWhere({
+//					id: deckId
+//				}) : undefined
+//			};
+//		}
+//
+//		changeView(new ordb.deck.UserDeckEditView(options), 'deck/edit/' + options.deckId);
+	}).on('route:importDeck', function() {
+//		changeView(new ordb.deck.UserDeckImportView(), 'deck/import');
+		ordb.app.gotoUserDeckImportView();
+	}).on('route:searchCards', function(queryString) {
+//		var view;
+//		if (ordb.app.cardSearchView && ordb.app.view instanceof ordb.card.CardView) {
+//			ordb.app.cardSearchView.delegateEvents();
+//		} else {
+//			ordb.app.cardSearchView = new ordb.card.CardSearchView({
+//				queryString: queryString
+//			});
+//		}
+//		changeView(ordb.app.cardSearchView, 'card/search');
+		ordb.app.gotoCardSearchView({
+			queryString: queryString
+		});
+	}).on('route:viewCard', function(setNumber, cardNumber) {
+//		var setNumber = parseInt(setNumber);
+//		var cardNumber = parseInt(cardNumber);
+//		var card = ordb.dict.findCardByNumber(setNumber, cardNumber);
+//		var url = ordb.ui.toCardRelativeUrl(card);
+//		if (_.isUndefined(url)) {
+//			url = setNumber + '/' + cardNumber;
+//		}
+//		changeView(new ordb.card.CardView({
+//			setNumber: setNumber,
+//			cardNumber: cardNumber
+//		}), 'card/' + url);
+		ordb.app.gotoCardView({
+			setNumber: setNumber,
+			cardNumber: cardNumber
+		});
+	});
+
+	// register partials
+	Handlebars.registerPartial({
+		'pagination': Handlebars.templates['pagination'],
+		'card-text-content': Handlebars.templates['card-text-content'],
+		'common-ul-tree': Handlebars.templates['common-ul-tree'],
+		'deck-actions': Handlebars.templates['deck-actions']
+	});
+
+	ordb.static.root = '/' + ordb.static.language + '/';
+
+	Backbone.history.start({
+		pushState: true,
+		root: ordb.static.root
+	});
+});
